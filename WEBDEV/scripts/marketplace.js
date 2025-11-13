@@ -3,7 +3,8 @@
 // ============================
 const ONE_TIME_RESET_KEY = 'slsu_reset_done';
 if (!localStorage.getItem(ONE_TIME_RESET_KEY)) {
-  ['slsu_products','slsu_cart','slsu_my_ids','slsu_orders'].forEach(k => localStorage.removeItem(k));
+  ['slsu_products','slsu_cart','slsu_my_ids','slsu_orders','slsu_businesses','slsu_my_biz_ids']
+    .forEach(k => localStorage.removeItem(k));
   localStorage.setItem(ONE_TIME_RESET_KEY, '1');
 }
 
@@ -15,6 +16,8 @@ const LS = {
   keyCart: 'slsu_cart',
   keyMy: 'slsu_my_ids',
   keyOrders: 'slsu_orders',
+  keyBiz: 'slsu_businesses',
+  keyMyBiz: 'slsu_my_biz_ids',
   read(key, fallback){ try{ return JSON.parse(localStorage.getItem(key)) ?? fallback }catch{ return fallback }},
   write(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
 };
@@ -37,6 +40,8 @@ const myListingsBody = document.getElementById('myListingsBody');
 const myListingsEmpty = document.getElementById('myListingsEmpty');
 const myOrdersBody = document.getElementById('myOrdersBody');
 const myOrdersEmpty = document.getElementById('myOrdersEmpty');
+const myBizBody = document.getElementById('myBizBody');
+const myBizEmpty = document.getElementById('myBizEmpty');
 
 // ============================
 // Router-like navigation
@@ -46,17 +51,17 @@ const route = (r)=>{
   const active = document.querySelector(`.nav__links a[data-route="${r}"]`); 
   if(active) active.classList.add('active');
 
-  document.getElementById('browseSection').style.display = r==='browse' ? 'block' : 'none';
-  document.getElementById('sellSection').style.display   = r==='sell'   ? 'block' : 'none';
-  document.getElementById('mySection').style.display     = r==='my'     ? 'block' : 'none';
+  document.getElementById('browseSection').style.display   = r==='browse'   ? 'block' : 'none';
+  document.getElementById('sellSection').style.display     = r==='sell'     ? 'block' : 'none';
+  document.getElementById('businessSection').style.display = r==='business' ? 'block' : 'none';
+  document.getElementById('mySection').style.display       = r==='my'       ? 'block' : 'none';
 
   if(r==='browse') renderListings();
-  if(r==='my') { renderMyListings(); renderMyOrders(); }
+  if(r==='my') { renderMyListings(); renderMyOrders(); renderMyBusinesses(); }
 
   history.replaceState(null, '', `#${r}`);
 };
 
-// Top nav events
 document.getElementById('navLinks')?.addEventListener('click', (e)=>{
   const a = e.target.closest('a[data-route]'); 
   if(!a) return;
@@ -89,22 +94,19 @@ function renderListings(){
   const all = LS.read(LS.keyProducts, []);
   let items = all.slice();
 
-  // quick tab
   if(state.tabView !== 'all'){
     const map = { books: 'Books', uniforms:'Uniforms', electronics:'Electronics' };
     items = items.filter(i=> i.category === map[state.tabView]);
   }
-  // search
   if(state.q){
     const q = state.q.toLowerCase();
     items = items.filter(i=> `${i.title} ${i.category} ${i.description}`.toLowerCase().includes(q));
   }
   if(state.cat){ items = items.filter(i=> i.category === state.cat); }
 
-  // sort
   if(state.sort==='price_asc') items.sort((a,b)=> a.price - b.price);
   else if(state.sort==='price_desc') items.sort((a,b)=> b.price - a.price);
-  else items.sort((a,b)=> a.id < b.id ? 1 : -1); // pseudo-latest
+  else items.sort((a,b)=> a.id < b.id ? 1 : -1);
 
   listingsEl.innerHTML = items.map(cardTemplate).join('');
   emptyListingsEl.style.display = items.length? 'none' : 'block';
@@ -112,7 +114,7 @@ function renderListings(){
 function cardTemplate(item){
   return `
   <article class="card" data-id="${item.id}">
-    <img class="card__img" src="${item.image || 'https://dummyimage.com/800x600/d1d5db/111827.png&text=No+Photo'}" alt="${item.title}"/>
+    <img class="card__img" src="${item.image || 'https://dummyimage.com/800x600/0f1620/111827.png&text=No+Photo'}" alt="${item.title}"/>
     <div class="card__body">
       <div class="badge">${item.category} • ${item.condition}</div>
       <h3 style="font-size:1.05rem;">${escapeHtml(item.title)}</h3>
@@ -153,7 +155,7 @@ function renderCart(){
     const item = products.find(p=>p.id===row.id);
     const price = item ? item.price*row.qty : 0; total += price;
     return `<div style="display:grid; grid-template-columns:64px 1fr auto; gap:.7rem; align-items:center;">
-      <img src="${item?.image || 'https://dummyimage.com/800x600/d1d5db/111827.png&text=No+Photo'}" style="width:64px; height:64px; object-fit:cover; border-radius:10px;"/>
+      <img src="${item?.image || 'https://dummyimage.com/800x600/0f1620/111827.png&text=No+Photo'}" style="width:64px; height:64px; object-fit:cover; border-radius:10px;"/>
       <div>
         <div style="font-weight:700;">${escapeHtml(item?.title || 'Deleted item')}</div>
         <div class="badge">x${row.qty} • ${fmt.format(item?.price || 0)}</div>
@@ -210,11 +212,55 @@ document.getElementById('sellForm').addEventListener('submit', (e)=>{
   e.target.reset();
   toast('Listing published');
   route('my');
+  selectMyTab('listings');
 });
 
 // ============================
-// My listings & orders
+// Business form (NEW)
 // ============================
+document.getElementById('bizForm').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const biz = {
+    id: uid(),
+    name: f.get('name').trim(),
+    category: f.get('category'),
+    description: (f.get('description')||'').trim(),
+    logo: (f.get('logo')||'').trim(),
+    contact: (f.get('contact')||'').trim(),
+    location: (f.get('location')||'').trim(),
+    website: (f.get('website')||'').trim(),
+    owner: 'You',
+    created: new Date().toISOString()
+  };
+  const all = LS.read(LS.keyBiz, []);
+  LS.write(LS.keyBiz, [biz, ...all]);
+  const mine = LS.read(LS.keyMyBiz, []);
+  LS.write(LS.keyMyBiz, [biz.id, ...mine]);
+  e.target.reset();
+  toast('Business published');
+  route('my');
+  selectMyTab('biz');
+});
+
+// ============================
+// My dashboard views
+// ============================
+function selectMyTab(which){
+  const tabs = document.querySelectorAll('#myTabs .tab');
+  tabs.forEach(t => t.classList.remove('active'));
+  const hit = document.querySelector(`#myTabs .tab[data-tab="${which}"]`);
+  if(hit) hit.classList.add('active');
+
+  document.getElementById('myListings').style.display   = which==='listings' ? 'block' : 'none';
+  document.getElementById('myOrders').style.display     = which==='orders'   ? 'block' : 'none';
+  document.getElementById('myBusinesses').style.display = which==='biz'      ? 'block' : 'none';
+}
+document.getElementById('myTabs').addEventListener('click', (e)=>{
+  const t = e.target.closest('.tab'); if(!t) return;
+  selectMyTab(t.dataset.tab);
+});
+
 function renderMyListings(){
   const ids = new Set(LS.read(LS.keyMy, []));
   const all = LS.read(LS.keyProducts, []);
@@ -225,7 +271,7 @@ function renderMyListings(){
     <tr>
       <td>
         <div style="display:flex; align-items:center; gap:.6rem;">
-          <img src="${item.image || 'https://dummyimage.com/120x90/d1d5db/111827.png&text=No+Photo'}" style="width:56px; height:56px; object-fit:cover; border-radius:8px;"/>
+          <img src="${item.image || 'https://dummyimage.com/120x90/0f1620/111827.png&text=No+Photo'}" style="width:56px; height:56px; object-fit:cover; border-radius:8px;"/>
           <div>
             <div style="font-weight:700;">${escapeHtml(item.title)}</div>
             <div class="badge">${item.condition}</div>
@@ -273,6 +319,47 @@ function renderMyOrders(){
     </tr>`).join('');
 }
 
+function renderMyBusinesses(){
+  const ids = new Set(LS.read(LS.keyMyBiz, []));
+  const all = LS.read(LS.keyBiz, []);
+  const mine = all.filter(x=> ids.has(x.id));
+  if(!mine.length){ myBizBody.innerHTML=''; myBizEmpty.style.display='block'; return; }
+  myBizEmpty.style.display='none';
+  myBizBody.innerHTML = mine.map(b=>`
+    <tr>
+      <td>
+        <div style="display:flex; align-items:center; gap:.6rem;">
+          <img src="${b.logo || 'https://dummyimage.com/120x90/0f1620/111827.png&text=Logo'}" style="width:56px; height:56px; object-fit:cover; border-radius:8px;"/>
+          <div><div style="font-weight:700;">${escapeHtml(b.name)}</div></div>
+        </div>
+      </td>
+      <td>${b.category}</td>
+      <td>${escapeHtml(b.contact || '')}</td>
+      <td>${escapeHtml(b.location || '')}</td>
+      <td>
+        <div class="toolbar">
+          <button class="btn btn-outline" onclick='editBusiness("${b.id}")'><i class="ri-edit-2-line"></i></button>
+          <button class="btn" onclick='deleteBusiness("${b.id}")'><i class="ri-delete-bin-6-line"></i></button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+window.deleteBusiness = (id)=>{
+  if(!confirm('Delete this business?')) return;
+  const mine = new Set(LS.read(LS.keyMyBiz, [])); mine.delete(id); LS.write(LS.keyMyBiz, Array.from(mine));
+  const all = LS.read(LS.keyBiz, []).filter(x=> x.id !== id); LS.write(LS.keyBiz, all);
+  toast('Business deleted'); renderMyBusinesses();
+}
+window.editBusiness = (id)=>{
+  const all = LS.read(LS.keyBiz, []);
+  const b = all.find(x=> x.id===id); if(!b) return;
+  const name = prompt('Business name', b.name); if(name===null) return;
+  const desc = prompt('Description', b.description) ?? b.description;
+  const contact = prompt('Contact', b.contact) ?? b.contact;
+  b.name = name.trim(); b.description = (desc||'').trim(); b.contact = (contact||'').trim();
+  LS.write(LS.keyBiz, all); toast('Business updated'); renderMyBusinesses();
+}
+
 // ============================
 // Inquiry (message seller)
 // ============================
@@ -295,4 +382,3 @@ document.getElementById('year').textContent = new Date().getFullYear();
 updateCartBadge();
 route(location.hash?.slice(1) || 'browse');
 renderListings();
-
