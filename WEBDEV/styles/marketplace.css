@@ -1,6 +1,5 @@
-/* ==== Dark UI Components (matches screenshot vibe) ==== */
+/* ==== Dark UI Components (matches green/gray/black theme) ==== */
 
-/* Layout helpers */
 .grid{display:grid;gap:1.1rem}
 .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -20,7 +19,7 @@
 }
 .searchbar select option{color:#0b1218}
 
-/* Tabs (category chips) */
+/* Tabs */
 .tabs{display:flex;gap:.6rem;background:var(--surface-1);padding:.35rem;border-radius:999px;border:1px solid var(--stroke)}
 .tab{
   padding:.55rem .85rem;border-radius:999px;color:var(--muted);
@@ -90,39 +89,27 @@ tr:last-child td{border-bottom:none}
 .empty{text-align:center;color:var(--muted);padding:2rem 1rem}
 .empty i{font-size:2rem;display:block;margin-bottom:.4rem;color:var(--accent)}
 
+/* ---------- High-contrast dropdowns on dark theme ---------- */
 :root { color-scheme: dark; }
-
-/* Inputs/selects text color */
 .searchbar select,
 .form select {
-  color: #e8eef5;                 /* light text */
+  color: #e8eef5;
   background-color: var(--surface-2);
   border-color: var(--stroke);
 }
-
-/* Opened dropdown menu + options */
 .searchbar select option,
 .form select option {
-  color: #e8eef5 !important;      /* force readable text */
-  background-color: #0f1620 !important;  /* dark menu background */
+  color: #e8eef5 !important;
+  background-color: #0f1620 !important;
 }
-
-/* Disabled options look dim but readable */
 .searchbar select option:disabled,
 .form select option:disabled {
   color: #8a94a7 !important;
 }
-
-/* Focus ring for accessibility */
 .searchbar select:focus,
 .form select:focus {
   outline: none;
   border-color: rgba(34,197,94,.65);
   box-shadow: 0 0 0 3px rgba(34,197,94,.18);
 }
-
-/* Optional: darker placeholder in the search input */
-.searchbar input::placeholder {
-  color: #98a2b3;
-  opacity: .95;
-}
+.searchbar input::placeholder { color: #98a2b3; opacity: .95; }
