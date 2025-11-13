@@ -1,224 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="styles.css" />
-    <title>SLSU Fitness Website</title>
-  </head>
-  <body>
-    <nav>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SLSU Marketplace</title>
+
+  <!-- Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css" rel="stylesheet" />
+
+  <!-- Base + Marketplace styles -->
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/marketplace.css" />
+</head>
+<body>
+  <!-- NAV -->
+  <nav>
+    <div class="nav__inner">
       <div class="nav__logo">
-        <a href="#"><img src="assets/logo.png" alt="logo" /></a>
+        <img src="assets/logo.png" alt="SLSU" onerror="this.style.display='none'" />
+        <span class="site-title">SLSU <span class="accent">Marketplace</span></span>
       </div>
-      <ul class="nav__links">
-        <li class="link"><a href="#">Home</a></li>
-        <li class="link"><a href="#">Program</a></li>
-        <li class="link"><a href="#">Service</a></li>
-        <li class="link"><a href="#">About</a></li>
-        <li class="link"><a href="#">Community</a></li>
-      </ul>
-      <button class="btn">Join Now</button>
-    </nav>
 
-    <header class="section__container header__container">
-      <div class="header__content">
-        <span class="bg__blur"></span>
-        <span class="bg__blur header__blur"></span>
-        <h4>BEST FITNESS IN THE TOWN</h4>
-        <h1><span>MAKE</span> YOUR BODY SHAPE</h1>
-        <p>
-          Unleash your potential and embark on a journey towards a stronger,
-          fitter, and more confident you. Sign up for 'Make Your Body Shape' now
-          and witness the incredible transformation your body is capable of!
-        </p>
-        <button class="btn">Get Started</button>
-      </div>
-      <div class="header__image">
-        <img src="assets/header.png" alt="header" />
-      </div>
-    </header>
+      <!-- Nav links are injected here -->
+      <div id="linksMount"></div>
 
-    <section class="section__container explore__container">
-      <div class="explore__header">
-        <h2 class="section__header">EXPLORE OUR PROGRAM</h2>
-        <div class="explore__nav">
-          <span><i class="ri-arrow-left-line"></i></span>
-          <span><i class="ri-arrow-right-line"></i></span>
-        </div>
+      <div class="toolbar">
+        <button class="btn btn-outline" id="openCart">
+          <i class="ri-shopping-cart-2-line"></i><span id="cartCount">0</span>
+        </button>
       </div>
-      <div class="explore__grid">
-        <div class="explore__card">
-          <span><i class="ri-boxing-fill"></i></span>
-          <h4>Strength</h4>
-          <p>
-            Embrace the essence of strength as we delve into its various
-            dimensions physical, mental, and emotional.
-          </p>
-          <a href="#">Join Now <i class="ri-arrow-right-line"></i></a>
-        </div>
-        <div class="explore__card">
-          <span><i class="ri-heart-pulse-fill"></i></span>
-          <h4>Physical Fitness</h4>
-          <p>
-            It encompasses a range of activities that improve health, strength,
-            flexibility, and overall well-being.
-          </p>
-          <a href="#">Join Now <i class="ri-arrow-right-line"></i></a>
-        </div>
-        <div class="explore__card">
-          <span><i class="ri-run-line"></i></span>
-          <h4>Fat Lose</h4>
-          <p>
-            Through a combination of workout routines and expert guidance, we'll
-            empower you to reach your goals.
-          </p>
-          <a href="#">Join Now <i class="ri-arrow-right-line"></i></a>
-        </div>
-        <div class="explore__card">
-          <span><i class="ri-shopping-basket-fill"></i></span>
-          <h4>Weight Gain</h4>
-          <p>
-            Designed for individuals, our program offers an effective approach
-            to gaining weight in a sustainable manner.
-          </p>
-          <a href="#">Join Now <i class="ri-arrow-right-line"></i></a>
-        </div>
-      </div>
-    </section>
-
-    <section class="section__container class__container">
-      <div class="class__image">
-        <span class="bg__blur"></span>
-        <img src="assets/class-1.jpg" alt="class" class="class__img-1" />
-        <img src="assets/class-2.jpg" alt="class" class="class__img-2" />
-      </div>
-      <div class="class__content">
-        <h2 class="section__header">THE CLASS YOU WILL GET HERE</h2>
-        <p>
-          Led by our team of expert and motivational instructors, "The Class You
-          Will Get Here" is a high-energy, results-driven session that combines
-          a perfect blend of cardio, strength training, and functional
-          exercises. Each class is carefully curated to keep you engaged and
-          challenged, ensuring you never hit a plateau in your fitness
-          endeavors.
-        </p>
-        <button class="btn">Book A Class</button>
-      </div>
-    </section>
-
-    <section class="section__container join__container">
-      <h2 class="section__header">WHY JOIN US ?</h2>
-      <p class="section__subheader">
-        Our diverse membership base creates a friendly and supportive
-        atmosphere, where you can make friends and stay motivated.
-      </p>
-      <div class="join__image">
-        <img src="assets/join.jpg" alt="Join" />
-        <div class="join__grid">
-          <div class="join__card">
-            <span><i class="ri-user-star-fill"></i></span>
-            <div class="join__card__content">
-              <h4>Personal Trainer</h4>
-              <p>Unlock your potential with our expert Personal Trainers.</p>
-            </div>
-          </div>
-          <div class="join__card">
-            <span><i class="ri-vidicon-fill"></i></span>
-            <div class="join__card__content">
-              <h4>Practice Sessions</h4>
-              <p>Elevate your fitness with practice sessions.</p>
-            </div>
-          </div>
-          <div class="join__card">
-            <span><i class="ri-building-line"></i></span>
-            <div class="join__card__content">
-              <h4>Good Management</h4>
-              <p>Supportive management, for your fitness success.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="review">
-      <div class="section__container review__container">
-        <span><i class="ri-double-quotes-r"></i></span>
-        <div class="review__content">
-          <h4>MEMBER REVIEW</h4>
-          <p>
-            What truly sets this gym apart is their expert team of trainers. The
-            trainers are knowledgeable, approachable, and genuinely invested in
-            helping members achieve their fitness goals. They take the time to
-            understand individual needs and create personalized workout plans,
-            ensuring maximum results and safety.
-          </p>
-          <div class="review__rating">
-            <span><i class="ri-star-fill"></i></span>
-            <span><i class="ri-star-fill"></i></span>
-            <span><i class="ri-star-fill"></i></span>
-            <span><i class="ri-star-fill"></i></span>
-            <span><i class="ri-star-half-fill"></i></span>
-          </div>
-          <div class="review__footer">
-            <div class="review__member">
-              <img src="assets/member.jpg" alt="member" />
-              <div class="review__member__details">
-                <h4>Jerome "Pogi" Yanga</h4>
-                <p>Software Developer</p>
-              </div>
-            </div>
-            <div class="review__nav">
-              <span><i class="ri-arrow-left-line"></i></span>
-              <span><i class="ri-arrow-right-line"></i></span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <footer class="section__container footer__container">
-      <span class="bg__blur"></span>
-      <span class="bg__blur footer__blur"></span>
-      <div class="footer__col">
-        <div class="footer__logo"><img src="assets/logo.png" alt="logo" /></div>
-        <p>
-          Take the first step towards a healthier, stronger you with our
-          unbeatable pricing plans. Let's sweat, achieve, and conquer together!
-        </p>
-        <div class="footer__socials">
-          <a href="#"><i class="ri-facebook-fill"></i></a>
-          <a href="#"><i class="ri-instagram-line"></i></a>
-          <a href="#"><i class="ri-twitter-fill"></i></a>
-        </div>
-      </div>
-      <div class="footer__col">
-        <h4>Company</h4>
-        <a href="#">Business</a>
-        <a href="#">Franchise</a>
-        <a href="#">Partnership</a>
-        <a href="#">Network</a>
-      </div>
-      <div class="footer__col">
-        <h4>About Us</h4>
-        <a href="#">Blogs</a>
-        <a href="#">Security</a>
-        <a href="#">Careers</a>
-      </div>
-      <div class="footer__col">
-        <h4>Contact</h4>
-        <a href="#">Contact Us</a>
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms & Conditions</a>
-        <a href="#">BMI Calculator</a>
-      </div>
-    </footer>
-    <div class="footer__bar">
-      Copyright © 2023 Web Design Mastery. All rights reserved.
     </div>
-  </body>
+  </nav>
+
+  <!-- HERO / SEARCH -->
+  <header class="section__container">
+    <h1 class="section__header">Buy & Sell within SLSU</h1>
+    <p class="section__subheader">Campus-only marketplace for students and staff.</p>
+    <div class="searchbar" style="margin-top:1rem;">
+      <input type="text" id="q" placeholder="Search items (e.g., calculator, uniform, laptop)" />
+      <select id="cat">
+        <option value="">All categories</option>
+        <option>Books</option>
+        <option>Uniforms</option>
+        <option>Electronics</option>
+        <option>Sports & Fitness</option>
+        <option>Dorm & Furniture</option>
+        <option>Tickets</option>
+        <option>Others</option>
+      </select>
+      <select id="sort">
+        <option value="latest">Latest</option>
+        <option value="price_asc">Price: Low → High</option>
+        <option value="price_desc">Price: High → Low</option>
+      </select>
+      <button class="btn" id="runSearch"><i class="ri-search-line"></i> Search</button>
+    </div>
+  </header>
+
+  <!-- LISTINGS -->
+  <section class="section__container" id="browseSection">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:.6rem;">
+      <h2 class="section__header" style="font-size:1.4rem;">Marketplace Listings</h2>
+      <div class="tabs" id="viewTabs" role="tablist">
+        <div class="tab active" data-view="all">All</div>
+        <div class="tab" data-view="books">Books</div>
+        <div class="tab" data-view="uniforms">Uniforms</div>
+        <div class="tab" data-view="electronics">Electronics</div>
+      </div>
+    </div>
+    <div class="grid grid-3" id="listings"></div>
+    <div class="empty" id="emptyListings" style="display:none;">
+      <i class="ri-store-2-line"></i>
+      No items match your filters yet.
+    </div>
+  </section>
+
+  <!-- SELL FORM -->
+  <section class="section__container" id="sellSection" style="display:none;">
+    <h2 class="section__header">List an item for sale</h2>
+    <p class="section__subheader" style="margin-bottom:1rem;">Create a listing visible to SLSU buyers.</p>
+    <form id="sellForm" class="form">
+      <div class="grid grid-2">
+        <div class="input">
+          <label>Item title</label>
+          <input required name="title" placeholder="e.g., CASIO fx-991ES calculator" />
+        </div>
+        <div class="input">
+          <label>Price (PHP)</label>
+          <input required name="price" type="number" min="0" step="0.01" placeholder="e.g., 750" />
+        </div>
+      </div>
+      <div class="grid grid-2">
+        <div class="input">
+          <label>Category</label>
+          <select name="category" required>
+            <option value="Books">Books</option>
+            <option value="Uniforms">Uniforms</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Sports & Fitness">Sports & Fitness</option>
+            <option value="Dorm & Furniture">Dorm & Furniture</option>
+            <option value="Tickets">Tickets</option>
+            <option value="Others">Others</option>
+          </select>
+        </div>
+        <div class="input">
+          <label>Condition</label>
+          <select name="condition" required>
+            <option>New</option>
+            <option>Like New</option>
+            <option>Good</option>
+            <option>Fair</option>
+          </select>
+        </div>
+      </div>
+      <div class="input">
+        <label>Description</label>
+        <textarea name="description" rows="4" placeholder="Key details, usage, what's included, defects..."></textarea>
+      </div>
+      <div class="grid grid-2">
+        <div class="input">
+          <label>Photo URL</label>
+          <input name="image" placeholder="Paste https:// image link (or leave blank for placeholder)" />
+        </div>
+        <div class="input">
+          <label>Contact (SLSU email/phone)</label>
+          <input required name="contact" placeholder="e.g., juan@slsu.edu.ph or 09xx" />
+        </div>
+      </div>
+      <div class="toolbar">
+        <button class="btn" type="submit"><i class="ri-upload-2-line"></i> Publish Listing</button>
+        <button class="btn btn-outline" type="reset"><i class="ri-eraser-line"></i> Reset</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section class="section__container" id="mySection" style="display:none;">
+    <h2 class="section__header">My Seller Dashboard</h2>
+    <p class="section__subheader" style="margin-bottom:1rem;">Manage your listings & see inquiries (saved in your browser).</p>
+
+    <div class="tabs" id="myTabs" role="tablist" style="margin-bottom:1rem;">
+      <div class="tab active" data-tab="listings">My Listings</div>
+      <div class="tab" data-tab="orders">Orders / Messages</div>
+    </div>
+
+    <div id="myListings">
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th><th>Price</th><th>Category</th><th>Status</th><th style="width:140px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="myListingsBody"></tbody>
+      </table>
+      <div class="empty" id="myListingsEmpty" style="display:none;">
+        <i class="ri-box-3-line"></i> You haven't posted anything yet.
+      </div>
+    </div>
+
+    <div id="myOrders" style="display:none;">
+      <table>
+        <thead>
+          <tr><th>Buyer</th><th>Item</th><th>Message</th><th>Date</th></tr>
+        </thead>
+        <tbody id="myOrdersBody"></tbody>
+      </table>
+      <div class="empty" id="myOrdersEmpty" style="display:none;">
+        <i class="ri-chat-3-line"></i> No inquiries yet.
+      </div>
+    </div>
+  </section>
+
+  <!-- CART PANEL -->
+  <aside class="panel" id="cartPanel" aria-hidden="true">
+    <div class="panel__header">
+      <div class="panel__title"><i class="ri-shopping-cart-2-line"></i> Your Cart</div>
+      <button class="btn btn-outline" id="closeCart"><i class="ri-close-line"></i></button>
+    </div>
+    <div class="panel__body" id="cartBody"></div>
+    <div style="padding:1rem; border-top:1px solid rgba(2,6,23,.06); display:grid; gap:.6rem;">
+      <div style="display:flex; align-items:center; justify-content:space-between; font-weight:800;">
+        <span>Total</span><span id="cartTotal">₱0.00</span>
+      </div>
+      <button class="btn" id="checkoutBtn"><i class="ri-bank-card-line"></i> Checkout</button>
+    </div>
+  </aside>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- FOOTER -->
+  <footer class="section__container">
+    <div class="footer__bar">© <span id="year"></span> SLSU Marketplace.</div>
+  </footer>
+
+  <!-- Load nav partial; it will load marketplace.js afterward -->
+  <script src="scripts/links-loader.js" defer></script>
+</body>
 </html>
