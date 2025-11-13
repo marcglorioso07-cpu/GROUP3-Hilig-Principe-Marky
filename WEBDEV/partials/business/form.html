@@ -1,0 +1,51 @@
+<form id="bizForm" class="form">
+  <div class="grid grid-2">
+    <div class="input">
+      <label>Business name</label>
+      <input required name="name" placeholder="e.g., Green Arc Snacks" />
+    </div>
+    <div class="input">
+      <label>Category</label>
+      <select name="category" required>
+        <option value="Food & Drinks">Food & Drinks</option>
+        <option value="Merch & Printing">Merch & Printing</option>
+        <option value="Services">Services</option>
+        <option value="Tech & Repairs">Tech & Repairs</option>
+        <option value="Clothes & Uniforms">Clothes & Uniforms</option>
+        <option value="Others">Others</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="input">
+    <label>Description</label>
+    <textarea name="description" rows="4" placeholder="What do you offer? Any promos, hours, order method..."></textarea>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="input">
+      <label>Logo / Banner URL</label>
+      <input name="logo" placeholder="https://your-image" />
+    </div>
+    <div class="input">
+      <label>Contact (email/phone)</label>
+      <input required name="contact" placeholder="e.g., greenarc@slsu.edu.ph / 09xx" />
+    </div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="input">
+      <label>Location</label>
+      <input name="location" placeholder="e.g., Gate 2, near bookstore" />
+    </div>
+    <div class="input">
+      <label>Website / Link (optional)</label>
+      <input name="website" placeholder="e.g., https://linktr.ee/greenarc" />
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn" type="submit"><i class="ri-building-2-line"></i> Publish Business</button>
+    <button class="btn btn-outline" type="reset"><i class="ri-eraser-line"></i> Reset</button>
+  </div>
+</form>
