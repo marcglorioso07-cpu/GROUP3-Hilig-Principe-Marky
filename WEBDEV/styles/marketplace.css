@@ -1,0 +1,128 @@
+/* ==== Dark UI Components (matches screenshot vibe) ==== */
+
+/* Layout helpers */
+.grid{display:grid;gap:1.1rem}
+.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.grid-3{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:640px){.grid-3,.grid-2{grid-template-columns:1fr}}
+
+/* Search bar */
+.searchbar{
+  display:grid;grid-template-columns:1.2fr .9fr .9fr auto;gap:.7rem;
+  background:var(--surface-1);
+  padding:.9rem;border:1px solid var(--stroke);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-1);
+}
+.searchbar input,.searchbar select{
+  width:100%;padding:.9rem 1rem;border:1px solid var(--stroke);
+  border-radius:var(--radius-md);background:var(--surface-2);color:var(--text)
+}
+.searchbar select option{color:#0b1218}
+
+/* Tabs (category chips) */
+.tabs{display:flex;gap:.6rem;background:var(--surface-1);padding:.35rem;border-radius:999px;border:1px solid var(--stroke)}
+.tab{
+  padding:.55rem .85rem;border-radius:999px;color:var(--muted);
+  font-weight:600;cursor:pointer;border:1px solid transparent
+}
+.tab.active{
+  background:#ecf2f6;color:#0b1218;border-color:#e2e8f0;
+  box-shadow:0 6px 18px rgba(11,18,24,.20)
+}
+.tab:hover{color:var(--text)}
+
+/* Cards */
+.card{
+  background:var(--surface-2);border:1px solid var(--stroke);border-radius:20px;
+  overflow:hidden;box-shadow:0 14px 30px rgba(2,6,23,.35);display:flex;flex-direction:column
+}
+.card__img{
+  aspect-ratio:4/3;background:#0e141b;object-fit:cover;
+  filter:saturate(1) contrast(1.05);
+}
+.card__body{padding:1rem;display:grid;gap:.55rem}
+.price{font-weight:800;color:#e8eef5}
+.badge{
+  display:inline-flex;align-items:center;gap:.35rem;
+  background:linear-gradient(180deg,rgba(36,199,96,.18),rgba(36,199,96,.10));
+  color:#b7ffce;border:1px solid rgba(36,199,96,.25);
+  border-radius:12px;padding:.35rem .6rem;font-size:.78rem;font-weight:700;
+}
+
+/* Panel (cart) */
+.panel{
+  position:fixed;top:0;right:-480px;width:420px;max-width:92vw;height:100dvh;
+  background:var(--surface-2);border-left:1px solid var(--stroke);transition:right .25s;
+  z-index:60;display:flex;flex-direction:column;box-shadow:-12px 0 30px rgba(0,0,0,.45)
+}
+.panel.open{right:0}
+.panel__header{padding:1rem;border-bottom:1px solid var(--stroke);display:flex;align-items:center;justify-content:space-between;background:var(--surface-1)}
+.panel__title{font-size:1.05rem;font-weight:800;color:var(--text)}
+.panel__body{padding:1rem;overflow:auto;display:grid;gap:1rem}
+.panel .badge{color:#d1fae5}
+
+/* Tables (dashboard) */
+table{width:100%;border-collapse:collapse;background:var(--surface-2);border-radius:16px;overflow:hidden;border:1px solid var(--stroke)}
+th,td{padding:.8rem .7rem;border-bottom:1px solid var(--stroke);text-align:left}
+th{color:#c9d2de;background:var(--surface-1)}
+tr:last-child td{border-bottom:none}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
+  background:#0e1912;color:#baf7d0;border:1px solid rgba(36,199,96,.35);
+  padding:.85rem 1rem;border-radius:12px;box-shadow:0 10px 24px rgba(0,0,0,.35);
+  z-index:70;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s
+}
+.toast.show{opacity:1;transform:translate(-50%,-6px)}
+
+/* Forms */
+.form{display:grid;gap:.9rem}
+.input{display:grid;gap:.35rem}
+.input label{font-size:.9rem;color:#c9d2de;font-weight:600}
+.input input,.input textarea,.input select{
+  padding:.95rem 1rem;border:1px solid var(--stroke);border-radius:14px;
+  width:100%;resize:vertical;background:var(--surface-3);color:var(--text)
+}
+
+/* Empty states */
+.empty{text-align:center;color:var(--muted);padding:2rem 1rem}
+.empty i{font-size:2rem;display:block;margin-bottom:.4rem;color:var(--accent)}
+
+:root { color-scheme: dark; }
+
+/* Inputs/selects text color */
+.searchbar select,
+.form select {
+  color: #e8eef5;                 /* light text */
+  background-color: var(--surface-2);
+  border-color: var(--stroke);
+}
+
+/* Opened dropdown menu + options */
+.searchbar select option,
+.form select option {
+  color: #e8eef5 !important;      /* force readable text */
+  background-color: #0f1620 !important;  /* dark menu background */
+}
+
+/* Disabled options look dim but readable */
+.searchbar select option:disabled,
+.form select option:disabled {
+  color: #8a94a7 !important;
+}
+
+/* Focus ring for accessibility */
+.searchbar select:focus,
+.form select:focus {
+  outline: none;
+  border-color: rgba(34,197,94,.65);
+  box-shadow: 0 0 0 3px rgba(34,197,94,.18);
+}
+
+/* Optional: darker placeholder in the search input */
+.searchbar input::placeholder {
+  color: #98a2b3;
+  opacity: .95;
+}
