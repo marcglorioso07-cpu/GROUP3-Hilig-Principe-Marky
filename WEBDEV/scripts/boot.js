@@ -1,16 +1,20 @@
-// Inject the nav links partial, THEN load marketplace.js so #navLinks exists.
+// boot.js — Load partials, THEN load the app
 (async () => {
-  const mount = document.getElementById('linksMount');
-  if (!mount) return;
-
-  try {
-    const res = await fetch('partials/nav-links.html', { cache: 'no-store' });
+  async function inject(selector, url) {
+    const mount = document.querySelector(selector);
+    if (!mount) return;
+    const res = await fetch(url, { cache: 'no-store' });
     mount.innerHTML = await res.text();
-  } catch (e) {
-    console.error('Failed to load nav links partial:', e);
   }
 
-  // After injection, load the main app script once
+  try {
+    await inject('#linksMount', 'partials/nav-links.html');             // top tabs
+    await inject('#businessSection', 'partials/business/form.html');    // business form
+  } catch (err) {
+    console.error('Boot failed to load partials:', err);
+  }
+
+  // Load main app AFTER partials exist
   if (!document.querySelector('script[data-app="marketplace"]')) {
     const s = document.createElement('script');
     s.src = 'scripts/marketplace.js';
@@ -19,3 +23,4 @@
     document.body.appendChild(s);
   }
 })();
+
