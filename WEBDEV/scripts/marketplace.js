@@ -30,6 +30,8 @@ const toast = (msg) => { const el = document.getElementById('toast'); el.textCon
 // ============================
 let state = { q: '', cat: '', sort: 'latest', tabView: 'all' };
 
+const hero = document.getElementById('heroHeader');          // <- NEW: hero reference
+
 const listingsEl = document.getElementById('listings');
 const emptyListingsEl = document.getElementById('emptyListings');
 const cartPanel = document.getElementById('cartPanel');
@@ -47,14 +49,19 @@ const myBizEmpty = document.getElementById('myBizEmpty');
 // Router-like navigation
 // ============================
 const route = (r)=>{
+  // highlight nav
   document.querySelectorAll('.nav__links a').forEach(a=> a.classList.remove('active'));
   const active = document.querySelector(`.nav__links a[data-route="${r}"]`); 
   if(active) active.classList.add('active');
 
+  // sections
   document.getElementById('browseSection').style.display   = r==='browse'   ? 'block' : 'none';
   document.getElementById('sellSection').style.display     = r==='sell'     ? 'block' : 'none';
   document.getElementById('businessSection').style.display = r==='business' ? 'block' : 'none';
   document.getElementById('mySection').style.display       = r==='my'       ? 'block' : 'none';
+
+  // show hero only on Browse
+  if (hero) hero.style.display = (r === 'browse') ? 'block' : 'none';
 
   if(r==='browse') renderListings();
   if(r==='my') { renderMyListings(); renderMyOrders(); renderMyBusinesses(); }
@@ -62,6 +69,7 @@ const route = (r)=>{
   history.replaceState(null, '', `#${r}`);
 };
 
+// Top nav events (delegated)
 document.getElementById('navLinks')?.addEventListener('click', (e)=>{
   const a = e.target.closest('a[data-route]'); 
   if(!a) return;
@@ -94,19 +102,22 @@ function renderListings(){
   const all = LS.read(LS.keyProducts, []);
   let items = all.slice();
 
+  // quick tab
   if(state.tabView !== 'all'){
     const map = { books: 'Books', uniforms:'Uniforms', electronics:'Electronics' };
     items = items.filter(i=> i.category === map[state.tabView]);
   }
+  // search
   if(state.q){
     const q = state.q.toLowerCase();
     items = items.filter(i=> `${i.title} ${i.category} ${i.description}`.toLowerCase().includes(q));
   }
   if(state.cat){ items = items.filter(i=> i.category === state.cat); }
 
+  // sort
   if(state.sort==='price_asc') items.sort((a,b)=> a.price - b.price);
   else if(state.sort==='price_desc') items.sort((a,b)=> b.price - a.price);
-  else items.sort((a,b)=> a.id < b.id ? 1 : -1);
+  else items.sort((a,b)=> a.id < b.id ? 1 : -1); // pseudo-latest
 
   listingsEl.innerHTML = items.map(cardTemplate).join('');
   emptyListingsEl.style.display = items.length? 'none' : 'block';
@@ -216,7 +227,7 @@ document.getElementById('sellForm').addEventListener('submit', (e)=>{
 });
 
 // ============================
-// Business form (NEW)
+// Business form (Create a business)
 // ============================
 document.getElementById('bizForm').addEventListener('submit', (e)=>{
   e.preventDefault();
