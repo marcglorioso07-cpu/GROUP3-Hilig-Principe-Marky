@@ -1,6 +1,4 @@
-// ============================
-// One-time reset (auto-clears any old demo data once)
-// ============================
+// ----- one-time cleanup of any old demo data -----
 const ONE_TIME_RESET_KEY = 'slsu_reset_done';
 if (!localStorage.getItem(ONE_TIME_RESET_KEY)) {
   ['slsu_products','slsu_cart','slsu_my_ids','slsu_orders','slsu_businesses','slsu_my_biz_ids']
@@ -8,9 +6,7 @@ if (!localStorage.getItem(ONE_TIME_RESET_KEY)) {
   localStorage.setItem(ONE_TIME_RESET_KEY, '1');
 }
 
-// ============================
-// Utilities & Storage Layer
-// ============================
+// ----- storage helpers -----
 const LS = {
   keyProducts: 'slsu_products',
   keyCart: 'slsu_cart',
@@ -21,16 +17,16 @@ const LS = {
   read(key, fallback){ try{ return JSON.parse(localStorage.getItem(key)) ?? fallback }catch{ return fallback }},
   write(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
 };
+
+// ----- utilities -----
 const fmt = new Intl.NumberFormat('en-PH', { style:'currency', currency:'PHP' });
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2)));
 const toast = (msg) => { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(()=> el.classList.remove('show'), 1800); };
 
-// ============================
-// State & DOM
-// ============================
+// ----- state & DOM -----
 let state = { q: '', cat: '', sort: 'latest', tabView: 'all' };
 
-const hero = document.getElementById('heroHeader');          // <- NEW: hero reference
+const hero = document.getElementById('heroHeader');
 
 const listingsEl = document.getElementById('listings');
 const emptyListingsEl = document.getElementById('emptyListings');
@@ -45,41 +41,40 @@ const myOrdersEmpty = document.getElementById('myOrdersEmpty');
 const myBizBody = document.getElementById('myBizBody');
 const myBizEmpty = document.getElementById('myBizEmpty');
 
-// ============================
-// Router-like navigation
-// ============================
-const route = (r)=>{
-  // highlight nav
+// ----- routing -----
+function route(r){
   document.querySelectorAll('.nav__links a').forEach(a=> a.classList.remove('active'));
-  const active = document.querySelector(`.nav__links a[data-route="${r}"]`); 
-  if(active) active.classList.add('active');
+  document.querySelector(`.nav__links a[data-route="${r}"]`)?.classList.add('active');
 
-  // sections
   document.getElementById('browseSection').style.display   = r==='browse'   ? 'block' : 'none';
   document.getElementById('sellSection').style.display     = r==='sell'     ? 'block' : 'none';
   document.getElementById('businessSection').style.display = r==='business' ? 'block' : 'none';
   document.getElementById('mySection').style.display       = r==='my'       ? 'block' : 'none';
 
-  // show hero only on Browse
+  // HERO only on Browse
   if (hero) hero.style.display = (r === 'browse') ? 'block' : 'none';
 
   if(r==='browse') renderListings();
   if(r==='my') { renderMyListings(); renderMyOrders(); renderMyBusinesses(); }
 
   history.replaceState(null, '', `#${r}`);
-};
+}
 
-// Top nav events (delegated)
+// hashchange safety (back/forward/manual typing)
+window.addEventListener('hashchange', ()=>{
+  const r = location.hash.slice(1) || 'browse';
+  route(r);
+});
+
+// top nav click
 document.getElementById('navLinks')?.addEventListener('click', (e)=>{
-  const a = e.target.closest('a[data-route]'); 
+  const a = e.target.closest('a[data-route]');
   if(!a) return;
   e.preventDefault();
   route(a.dataset.route);
 });
 
-// ============================
-// Filters
-// ============================
+// ----- filters -----
 document.getElementById('runSearch').addEventListener('click', ()=>{
   state.q = document.getElementById('q').value.trim();
   state.cat = document.getElementById('cat').value;
@@ -95,29 +90,24 @@ document.getElementById('viewTabs').addEventListener('click', (e)=>{
   renderListings();
 });
 
-// ============================
-// Render Listings
-// ============================
+// ----- render listings -----
 function renderListings(){
   const all = LS.read(LS.keyProducts, []);
   let items = all.slice();
 
-  // quick tab
   if(state.tabView !== 'all'){
     const map = { books: 'Books', uniforms:'Uniforms', electronics:'Electronics' };
     items = items.filter(i=> i.category === map[state.tabView]);
   }
-  // search
   if(state.q){
     const q = state.q.toLowerCase();
     items = items.filter(i=> `${i.title} ${i.category} ${i.description}`.toLowerCase().includes(q));
   }
   if(state.cat){ items = items.filter(i=> i.category === state.cat); }
 
-  // sort
   if(state.sort==='price_asc') items.sort((a,b)=> a.price - b.price);
   else if(state.sort==='price_desc') items.sort((a,b)=> b.price - a.price);
-  else items.sort((a,b)=> a.id < b.id ? 1 : -1); // pseudo-latest
+  else items.sort((a,b)=> a.id < b.id ? 1 : -1);
 
   listingsEl.innerHTML = items.map(cardTemplate).join('');
   emptyListingsEl.style.display = items.length? 'none' : 'block';
@@ -141,9 +131,7 @@ function cardTemplate(item){
 }
 function escapeHtml(s){ return s?.replace(/[&<>\"']/g, (c)=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
 
-// ============================
-// Cart
-// ============================
+// ----- cart -----
 function getCart(){ return LS.read(LS.keyCart, []); }
 function setCart(v){ LS.write(LS.keyCart, v); updateCartBadge(); }
 function updateCartBadge(){ const c = getCart().reduce((n, r)=> n + r.qty, 0); cartCount.textContent = c; }
@@ -184,9 +172,7 @@ window.decQty = (id)=>{ const c=getCart(); const r=c.find(x=>x.id===id); if(!r) 
 window.incQty = (id)=>{ const c=getCart(); const r=c.find(x=>x.id===id); if(!r) return; r.qty+=1; setCart(c); renderCart(); }
 window.removeFromCart = (id)=>{ setCart(getCart().filter(x=>x.id!==id)); renderCart(); }
 
-// ============================
-// Checkout (creates orders/messages)
-// ============================
+// ----- checkout -> creates "orders" -----
 document.getElementById('checkoutBtn').addEventListener('click', ()=>{
   const cart = getCart(); if(!cart.length) return toast('Cart empty');
   const products = LS.read(LS.keyProducts, []);
@@ -199,9 +185,7 @@ document.getElementById('checkoutBtn').addEventListener('click', ()=>{
   setCart([]); renderCart(); toast('Checkout complete! Sellers will contact you.');
 });
 
-// ============================
-// Sell form
-// ============================
+// ----- sell form -----
 document.getElementById('sellForm').addEventListener('submit', (e)=>{
   e.preventDefault();
   const f = new FormData(e.target);
@@ -226,9 +210,7 @@ document.getElementById('sellForm').addEventListener('submit', (e)=>{
   selectMyTab('listings');
 });
 
-// ============================
-// Business form (Create a business)
-// ============================
+// ----- business form -----
 document.getElementById('bizForm').addEventListener('submit', (e)=>{
   e.preventDefault();
   const f = new FormData(e.target);
@@ -254,14 +236,11 @@ document.getElementById('bizForm').addEventListener('submit', (e)=>{
   selectMyTab('biz');
 });
 
-// ============================
-// My dashboard views
-// ============================
+// ----- dashboard tabs -----
 function selectMyTab(which){
   const tabs = document.querySelectorAll('#myTabs .tab');
   tabs.forEach(t => t.classList.remove('active'));
-  const hit = document.querySelector(`#myTabs .tab[data-tab="${which}"]`);
-  if(hit) hit.classList.add('active');
+  document.querySelector(`#myTabs .tab[data-tab="${which}"]`)?.classList.add('active');
 
   document.getElementById('myListings').style.display   = which==='listings' ? 'block' : 'none';
   document.getElementById('myOrders').style.display     = which==='orders'   ? 'block' : 'none';
@@ -272,6 +251,7 @@ document.getElementById('myTabs').addEventListener('click', (e)=>{
   selectMyTab(t.dataset.tab);
 });
 
+// ----- render "my" data -----
 function renderMyListings(){
   const ids = new Set(LS.read(LS.keyMy, []));
   const all = LS.read(LS.keyProducts, []);
@@ -312,7 +292,7 @@ window.editListing = (id)=>{
   const title = prompt('Title', item.title); if(title===null) return;
   const price = parseFloat(prompt('Price (PHP)', item.price))||item.price;
   const desc = prompt('Description', item.description) ?? item.description;
-  item.title = title.trim(); item.price = price; item.description = desc.trim();
+  item.title = title.trim(); item.price = price; item.description = (desc||'').trim();
   LS.write(LS.keyProducts, all); toast('Listing updated'); renderMyListings(); renderListings();
 }
 
@@ -371,9 +351,7 @@ window.editBusiness = (id)=>{
   LS.write(LS.keyBiz, all); toast('Business updated'); renderMyBusinesses();
 }
 
-// ============================
-// Inquiry (message seller)
-// ============================
+// ----- inquiry -----
 window.openInquiry = (id)=>{
   const item = LS.read(LS.keyProducts, []).find(p=>p.id===id); if(!item) return;
   const note = prompt(`Send a message to seller (contact: ${item.contact})`, 'Hi! Is this still available?');
@@ -384,12 +362,12 @@ window.openInquiry = (id)=>{
   toast('Message sent to seller');
 }
 
-// ============================
-// Panel + init
-// ============================
+// ----- panel + init -----
 document.getElementById('openCart').addEventListener('click', ()=>{ cartPanel.classList.add('open'); renderCart(); });
 document.getElementById('closeCart').addEventListener('click', ()=> cartPanel.classList.remove('open'));
 document.getElementById('year').textContent = new Date().getFullYear();
 updateCartBadge();
-route(location.hash?.slice(1) || 'browse');
+
+// initial route
+route(location.hash.slice(1) || 'browse');
 renderListings();
