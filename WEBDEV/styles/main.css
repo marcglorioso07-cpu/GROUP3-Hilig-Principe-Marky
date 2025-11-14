@@ -1,4 +1,3 @@
-/* ==== Dark Base for SLSU Marketplace (Green/Gray/Black) ==== */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap");
 
 :root{
@@ -28,12 +27,10 @@ body{
               var(--bg);
 }
 
-/* Sections */
 .section__container{max-width:var(--max-width);margin:auto;padding:2.2rem 1rem}
 .section__header{font-size:2rem;font-weight:700;margin-bottom:.6rem;color:var(--text)}
 .section__subheader{color:var(--muted)}
 
-/* Links / Buttons */
 a{color:inherit;text-decoration:none}
 img{max-width:100%;display:block}
 
@@ -49,7 +46,6 @@ img{max-width:100%;display:block}
 }
 .btn-outline:hover{background:rgba(34,197,94,.08)}
 
-/* Nav (pill tabs) */
 nav{
   position:sticky;top:0;z-index:50;
   background:rgba(11,15,20,.55);
@@ -64,15 +60,7 @@ nav{
 .nav__logo img{width:40px;height:40px;border-radius:10px;object-fit:cover}
 .site-title .accent{color:var(--accent)}
 .nav__links{display:flex;gap:.5rem;list-style:none;background:var(--surface-1);padding:.4rem;border-radius:999px;border:1px solid var(--stroke)}
-.nav__links a{
-  color:var(--muted);padding:.55rem .9rem;border-radius:999px;font-weight:600
-}
-.nav__links a.active,.nav__links a:hover{
-  background:#ecf2f6;color:#0b1218;
-}
+.nav__links a{color:var(--muted);padding:.55rem .9rem;border-radius:999px;font-weight:600}
+.nav__links a.active,.nav__links a:hover{background:#ecf2f6;color:#0b1218}
 
-/* Footer */
-.footer__bar{
-  text-align:center;font-size:.9rem;color:var(--muted);
-  padding:1.2rem;border-top:1px solid var(--stroke)
-}
+.footer__bar{text-align:center;font-size:.9rem;color:var(--muted);padding:1.2rem;border-top:1px solid var(--stroke)}
