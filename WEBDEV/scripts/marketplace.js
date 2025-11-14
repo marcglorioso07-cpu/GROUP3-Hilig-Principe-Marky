@@ -1,80 +1,103 @@
-// ============================
-// One-time reset (auto-clears any old demo data once)
-// ============================
+/* scripts/marketplace.js
+ * SLSU Marketplace — single-file app logic
+ * - Route drives body[data-route] so hero shows ONLY on Browse
+ * - LocalStorage “DB” (products, cart, orders, businesses, ownership ids)
+ */
+
+/* ---------- one-time cleanup for any old demo data (safe to keep) ---------- */
 const ONE_TIME_RESET_KEY = 'slsu_reset_done';
 if (!localStorage.getItem(ONE_TIME_RESET_KEY)) {
-  ['slsu_products','slsu_cart','slsu_my_ids','slsu_orders'].forEach(k => localStorage.removeItem(k));
+  ['slsu_products','slsu_cart','slsu_my_ids','slsu_orders','slsu_businesses','slsu_my_biz_ids']
+    .forEach(k => localStorage.removeItem(k));
   localStorage.setItem(ONE_TIME_RESET_KEY, '1');
 }
 
-// ============================
-// Utilities & Storage Layer
-// ============================
+/* -------------------------------- storage -------------------------------- */
 const LS = {
   keyProducts: 'slsu_products',
   keyCart: 'slsu_cart',
   keyMy: 'slsu_my_ids',
   keyOrders: 'slsu_orders',
+  keyBiz: 'slsu_businesses',
+  keyMyBiz: 'slsu_my_biz_ids',
   read(key, fallback){ try{ return JSON.parse(localStorage.getItem(key)) ?? fallback }catch{ return fallback }},
   write(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
 };
+
+/* ------------------------------- utilities -------------------------------- */
 const fmt = new Intl.NumberFormat('en-PH', { style:'currency', currency:'PHP' });
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2)));
+const escapeHtml = (s) => s?.replace(/[&<>\"']/g, (c)=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const toast = (msg) => { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(()=> el.classList.remove('show'), 1800); };
 
-// ============================
-// State & DOM
-// ============================
+/* --------------------------------- state ---------------------------------- */
 let state = { q: '', cat: '', sort: 'latest', tabView: 'all' };
 
+/* ------------------------------ DOM shortcuts ----------------------------- */
 const listingsEl = document.getElementById('listings');
 const emptyListingsEl = document.getElementById('emptyListings');
+
 const cartPanel = document.getElementById('cartPanel');
 const cartBody = document.getElementById('cartBody');
 const cartTotal = document.getElementById('cartTotal');
 const cartCount = document.getElementById('cartCount');
+
 const myListingsBody = document.getElementById('myListingsBody');
 const myListingsEmpty = document.getElementById('myListingsEmpty');
 const myOrdersBody = document.getElementById('myOrdersBody');
 const myOrdersEmpty = document.getElementById('myOrdersEmpty');
+const myBizBody = document.getElementById('myBizBody');
+const myBizEmpty = document.getElementById('myBizEmpty');
 
-// ============================
-// Router-like navigation
-// ============================
-const route = (r)=>{
+/* --------------------------------- routing --------------------------------
+   IMPORTANT: hero visibility is CSS-driven by body[data-route].
+   We DO NOT toggle #heroHeader from JS anymore. */
+function route(r){
+  // reflect route on <body> for CSS to use (controls hero)
+  document.body.dataset.route = r;
+
+  // nav active highlight
   document.querySelectorAll('.nav__links a').forEach(a=> a.classList.remove('active'));
-  const active = document.querySelector(`.nav__links a[data-route="${r}"]`); 
-  if(active) active.classList.add('active');
+  document.querySelector(`.nav__links a[data-route="${r}"]`)?.classList.add('active');
 
-  document.getElementById('browseSection').style.display = r==='browse' ? 'block' : 'none';
-  document.getElementById('sellSection').style.display   = r==='sell'   ? 'block' : 'none';
-  document.getElementById('mySection').style.display     = r==='my'     ? 'block' : 'none';
+  // section visibility
+  document.getElementById('browseSection').style.display   = r==='browse'   ? 'block' : 'none';
+  document.getElementById('sellSection').style.display     = r==='sell'     ? 'block' : 'none';
+  document.getElementById('businessSection').style.display = r==='business' ? 'block' : 'none';
+  document.getElementById('mySection').style.display       = r==='my'       ? 'block' : 'none';
 
+  // route-specific renders
   if(r==='browse') renderListings();
-  if(r==='my') { renderMyListings(); renderMyOrders(); }
+  if(r==='my') { renderMyListings(); renderMyOrders(); renderMyBusinesses(); }
 
+  // update hash (no navigation)
   history.replaceState(null, '', `#${r}`);
-};
+}
 
-// Top nav events
-document.getElementById('navLinks')?.addEventListener('click', (e)=>{
-  const a = e.target.closest('a[data-route]'); 
-  if(!a) return;
+// respond to manual hash changes/back-forward
+window.addEventListener('hashchange', ()=>{
+  const r = location.hash.slice(1) || 'browse';
+  route(r);
+});
+
+// top nav clicks
+document.getElementById('linksMount')?.addEventListener('click', (e)=>{
+  const a = e.target.closest('a[data-route]'); if(!a) return;
   e.preventDefault();
   route(a.dataset.route);
 });
 
-// ============================
-// Filters
-// ============================
-document.getElementById('runSearch').addEventListener('click', ()=>{
+/* ------------------------------- search bar ------------------------------- */
+document.getElementById('runSearch')?.addEventListener('click', ()=>{
   state.q = document.getElementById('q').value.trim();
   state.cat = document.getElementById('cat').value;
   state.sort = document.getElementById('sort').value;
   renderListings();
 });
-document.getElementById('q').addEventListener('keydown', (e)=>{ if(e.key==='Enter') document.getElementById('runSearch').click(); });
-document.getElementById('viewTabs').addEventListener('click', (e)=>{
+document.getElementById('q')?.addEventListener('keydown', (e)=>{ if(e.key==='Enter') document.getElementById('runSearch').click(); });
+
+/* ----------------------------- browse tabs bar ---------------------------- */
+document.getElementById('viewTabs')?.addEventListener('click', (e)=>{
   const t = e.target.closest('.tab'); if(!t) return;
   document.querySelectorAll('#viewTabs .tab').forEach(x=>x.classList.remove('active'));
   t.classList.add('active');
@@ -82,37 +105,37 @@ document.getElementById('viewTabs').addEventListener('click', (e)=>{
   renderListings();
 });
 
-// ============================
-// Render Listings
-// ============================
+/* ---------------------------- listings rendering -------------------------- */
 function renderListings(){
   const all = LS.read(LS.keyProducts, []);
   let items = all.slice();
 
-  // quick tab
+  // tab filtering
   if(state.tabView !== 'all'){
     const map = { books: 'Books', uniforms:'Uniforms', electronics:'Electronics' };
     items = items.filter(i=> i.category === map[state.tabView]);
   }
-  // search
+  // text filter
   if(state.q){
     const q = state.q.toLowerCase();
     items = items.filter(i=> `${i.title} ${i.category} ${i.description}`.toLowerCase().includes(q));
   }
+  // category filter
   if(state.cat){ items = items.filter(i=> i.category === state.cat); }
 
   // sort
   if(state.sort==='price_asc') items.sort((a,b)=> a.price - b.price);
   else if(state.sort==='price_desc') items.sort((a,b)=> b.price - a.price);
-  else items.sort((a,b)=> a.id < b.id ? 1 : -1); // pseudo-latest
+  else items.sort((a,b)=> a.id < b.id ? 1 : -1); // latest first by id
 
   listingsEl.innerHTML = items.map(cardTemplate).join('');
   emptyListingsEl.style.display = items.length? 'none' : 'block';
 }
+
 function cardTemplate(item){
   return `
   <article class="card" data-id="${item.id}">
-    <img class="card__img" src="${item.image || 'https://dummyimage.com/800x600/d1d5db/111827.png&text=No+Photo'}" alt="${item.title}"/>
+    <img class="card__img" src="${item.image || 'https://dummyimage.com/800x600/0f1620/111827.png&text=No+Photo'}" alt="${item.title}"/>
     <div class="card__body">
       <div class="badge">${item.category} • ${item.condition}</div>
       <h3 style="font-size:1.05rem;">${escapeHtml(item.title)}</h3>
@@ -126,14 +149,12 @@ function cardTemplate(item){
     </div>
   </article>`;
 }
-function escapeHtml(s){ return s?.replace(/[&<>\"']/g, (c)=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
 
-// ============================
-// Cart
-// ============================
+/* ---------------------------------- cart ---------------------------------- */
 function getCart(){ return LS.read(LS.keyCart, []); }
 function setCart(v){ LS.write(LS.keyCart, v); updateCartBadge(); }
 function updateCartBadge(){ const c = getCart().reduce((n, r)=> n + r.qty, 0); cartCount.textContent = c; }
+updateCartBadge();
 
 window.addToCart = function(id){
   const p = LS.read(LS.keyProducts, []).find(x=>x.id===id); if(!p) return;
@@ -153,7 +174,7 @@ function renderCart(){
     const item = products.find(p=>p.id===row.id);
     const price = item ? item.price*row.qty : 0; total += price;
     return `<div style="display:grid; grid-template-columns:64px 1fr auto; gap:.7rem; align-items:center;">
-      <img src="${item?.image || 'https://dummyimage.com/800x600/d1d5db/111827.png&text=No+Photo'}" style="width:64px; height:64px; object-fit:cover; border-radius:10px;"/>
+      <img src="${item?.image || 'https://dummyimage.com/800x600/0f1620/111827.png&text=No+Photo'}" style="width:64px; height:64px; object-fit:cover; border-radius:10px;"/>
       <div>
         <div style="font-weight:700;">${escapeHtml(item?.title || 'Deleted item')}</div>
         <div class="badge">x${row.qty} • ${fmt.format(item?.price || 0)}</div>
@@ -171,10 +192,10 @@ window.decQty = (id)=>{ const c=getCart(); const r=c.find(x=>x.id===id); if(!r) 
 window.incQty = (id)=>{ const c=getCart(); const r=c.find(x=>x.id===id); if(!r) return; r.qty+=1; setCart(c); renderCart(); }
 window.removeFromCart = (id)=>{ setCart(getCart().filter(x=>x.id!==id)); renderCart(); }
 
-// ============================
-// Checkout (creates orders/messages)
-// ============================
-document.getElementById('checkoutBtn').addEventListener('click', ()=>{
+document.getElementById('openCart')?.addEventListener('click', ()=>{ cartPanel.classList.add('open'); renderCart(); });
+document.getElementById('closeCart')?.addEventListener('click', ()=> cartPanel.classList.remove('open'));
+
+document.getElementById('checkoutBtn')?.addEventListener('click', ()=>{
   const cart = getCart(); if(!cart.length) return toast('Cart empty');
   const products = LS.read(LS.keyProducts, []);
   const orders = LS.read(LS.keyOrders, []);
@@ -186,10 +207,8 @@ document.getElementById('checkoutBtn').addEventListener('click', ()=>{
   setCart([]); renderCart(); toast('Checkout complete! Sellers will contact you.');
 });
 
-// ============================
-// Sell form
-// ============================
-document.getElementById('sellForm').addEventListener('submit', (e)=>{
+/* -------------------------------- sell form ------------------------------- */
+document.getElementById('sellForm')?.addEventListener('submit', (e)=>{
   e.preventDefault();
   const f = new FormData(e.target);
   const product = {
@@ -205,16 +224,60 @@ document.getElementById('sellForm').addEventListener('submit', (e)=>{
   };
   const all = LS.read(LS.keyProducts, []);
   LS.write(LS.keyProducts, [product, ...all]);
+
   const mine = LS.read(LS.keyMy, []);
   LS.write(LS.keyMy, [product.id, ...mine]);
+
   e.target.reset();
   toast('Listing published');
   route('my');
+  selectMyTab('listings');
 });
 
-// ============================
-// My listings & orders
-// ============================
+/* ----------------------------- business (create) -------------------------- */
+document.getElementById('bizForm')?.addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const biz = {
+    id: uid(),
+    name: f.get('name').trim(),
+    category: f.get('category'),
+    description: (f.get('description')||'').trim(),
+    logo: (f.get('logo')||'').trim(),
+    contact: (f.get('contact')||'').trim(),
+    location: (f.get('location')||'').trim(),
+    website: (f.get('website')||'').trim(),
+    owner: 'You',
+    created: new Date().toISOString()
+  };
+  const all = LS.read(LS.keyBiz, []);
+  LS.write(LS.keyBiz, [biz, ...all]);
+
+  const mine = LS.read(LS.keyMyBiz, []);
+  LS.write(LS.keyMyBiz, [biz.id, ...mine]);
+
+  e.target.reset();
+  toast('Business published');
+  route('my');
+  selectMyTab('biz');
+});
+
+/* ------------------------------- dashboard tabs --------------------------- */
+function selectMyTab(which){
+  const tabs = document.querySelectorAll('#myTabs .tab');
+  tabs.forEach(t => t.classList.remove('active'));
+  document.querySelector(`#myTabs .tab[data-tab="${which}"]`)?.classList.add('active');
+
+  document.getElementById('myListings').style.display   = which==='listings' ? 'block' : 'none';
+  document.getElementById('myOrders').style.display     = which==='orders'   ? 'block' : 'none';
+  document.getElementById('myBusinesses').style.display = which==='biz'      ? 'block' : 'none';
+}
+document.getElementById('myTabs')?.addEventListener('click', (e)=>{
+  const t = e.target.closest('.tab'); if(!t) return;
+  selectMyTab(t.dataset.tab);
+});
+
+/* -------------------------- dashboard: render data ------------------------ */
 function renderMyListings(){
   const ids = new Set(LS.read(LS.keyMy, []));
   const all = LS.read(LS.keyProducts, []);
@@ -225,7 +288,7 @@ function renderMyListings(){
     <tr>
       <td>
         <div style="display:flex; align-items:center; gap:.6rem;">
-          <img src="${item.image || 'https://dummyimage.com/120x90/d1d5db/111827.png&text=No+Photo'}" style="width:56px; height:56px; object-fit:cover; border-radius:8px;"/>
+          <img src="${item.image || 'https://dummyimage.com/120x90/0f1620/111827.png&text=No+Photo'}" style="width:56px; height:56px; object-fit:cover; border-radius:8px;"/>
           <div>
             <div style="font-weight:700;">${escapeHtml(item.title)}</div>
             <div class="badge">${item.condition}</div>
@@ -255,7 +318,7 @@ window.editListing = (id)=>{
   const title = prompt('Title', item.title); if(title===null) return;
   const price = parseFloat(prompt('Price (PHP)', item.price))||item.price;
   const desc = prompt('Description', item.description) ?? item.description;
-  item.title = title.trim(); item.price = price; item.description = desc.trim();
+  item.title = title.trim(); item.price = price; item.description = (desc||'').trim();
   LS.write(LS.keyProducts, all); toast('Listing updated'); renderMyListings(); renderListings();
 }
 
@@ -273,9 +336,48 @@ function renderMyOrders(){
     </tr>`).join('');
 }
 
-// ============================
-// Inquiry (message seller)
-// ============================
+function renderMyBusinesses(){
+  const ids = new Set(LS.read(LS.keyMyBiz, []));
+  const all = LS.read(LS.keyBiz, []);
+  const mine = all.filter(x=> ids.has(x.id));
+  if(!mine.length){ myBizBody.innerHTML=''; myBizEmpty.style.display='block'; return; }
+  myBizEmpty.style.display='none';
+  myBizBody.innerHTML = mine.map(b=>`
+    <tr>
+      <td>
+        <div style="display:flex; align-items:center; gap:.6rem;">
+          <img src="${b.logo || 'https://dummyimage.com/120x90/0f1620/111827.png&text=Logo'}" style="width:56px; height:56px; object-fit:cover; border-radius:8px;"/>
+          <div><div style="font-weight:700;">${escapeHtml(b.name)}</div></div>
+        </div>
+      </td>
+      <td>${b.category}</td>
+      <td>${escapeHtml(b.contact || '')}</td>
+      <td>${escapeHtml(b.location || '')}</td>
+      <td>
+        <div class="toolbar">
+          <button class="btn btn-outline" onclick='editBusiness("${b.id}")'><i class="ri-edit-2-line"></i></button>
+          <button class="btn" onclick='deleteBusiness("${b.id}")'><i class="ri-delete-bin-6-line"></i></button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+window.deleteBusiness = (id)=>{
+  if(!confirm('Delete this business?')) return;
+  const mine = new Set(LS.read(LS.keyMyBiz, [])); mine.delete(id); LS.write(LS.keyMyBiz, Array.from(mine));
+  const all = LS.read(LS.keyBiz, []).filter(x=> x.id !== id); LS.write(LS.keyBiz, all);
+  toast('Business deleted'); renderMyBusinesses();
+}
+window.editBusiness = (id)=>{
+  const all = LS.read(LS.keyBiz, []);
+  const b = all.find(x=> x.id===id); if(!b) return;
+  const name = prompt('Business name', b.name); if(name===null) return;
+  const desc = prompt('Description', b.description) ?? b.description;
+  const contact = prompt('Contact', b.contact) ?? b.contact;
+  b.name = name.trim(); b.description = (desc||'').trim(); b.contact = (contact||'').trim();
+  LS.write(LS.keyBiz, all); toast('Business updated'); renderMyBusinesses();
+}
+
+/* ----------------------------- buyer inquiry ----------------------------- */
 window.openInquiry = (id)=>{
   const item = LS.read(LS.keyProducts, []).find(p=>p.id===id); if(!item) return;
   const note = prompt(`Send a message to seller (contact: ${item.contact})`, 'Hi! Is this still available?');
@@ -284,15 +386,12 @@ window.openInquiry = (id)=>{
   orders.push({ id: uid(), productId: id, title: item.title, seller: item.seller||'Seller', contact: item.contact, qty: 1, price: item.price, date: new Date().toISOString(), buyer: 'You', message: note });
   LS.write(LS.keyOrders, orders);
   toast('Message sent to seller');
-}
+};
 
-// ============================
-// Panel + init
-// ============================
-document.getElementById('openCart').addEventListener('click', ()=>{ cartPanel.classList.add('open'); renderCart(); });
-document.getElementById('closeCart').addEventListener('click', ()=> cartPanel.classList.remove('open'));
-document.getElementById('year').textContent = new Date().getFullYear();
-updateCartBadge();
-route(location.hash?.slice(1) || 'browse');
+/* ------------------------------ footer year ------------------------------ */
+document.getElementById('year') && (document.getElementById('year').textContent = new Date().getFullYear());
+
+/* ------------------------------ initial route ----------------------------- */
+const initial = location.hash.slice(1) || 'browse';
+route(initial);
 renderListings();
-

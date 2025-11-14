@@ -1,14 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SLSU Marketplace</title>
+<!-- HERO (visibility controlled by CSS + body[data-route]) -->
+<header class="section__container" id="heroHeader">
+  <h1 class="section__header">Buy & Sell within SLSU</h1>
+  <p class="section__subheader">Campus-only marketplace for students and staff.</p>
+  <div class="searchbar" style="margin-top:1rem;">
+    <input type="text" id="q" placeholder="Search items (e.g., calculator, uniform, laptop)" />
+    <select id="cat">
+      <option value="">All categories</option>
+      <option>Books</option>
+      <option>Uniforms</option>
+      <option>Electronics</option>
+      <option>Sports & Fitness</option>
+      <option>Dorm & Furniture</option>
+      <option>Tickets</option>
+      <option>Others</option>
+    </select>
+    <select id="sort">
+      <option value="latest">Latest</option>
+      <option value="price_asc">Price: Low → High</option>
+      <option value="price_desc">Price: High → Low</option>
+    </select>
+    <button class="btn" id="runSearch"><i class="ri-search-line"></i> Search</button>
+  </div>
+</header>
 
-  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css" rel="stylesheet" />
-  <link rel="stylesheet" href="styles/main.css" />
-  <link rel="stylesheet" href="styles/marketplace.css" />
-</head>
 <body>
   <!-- NAV -->
   <nav>
