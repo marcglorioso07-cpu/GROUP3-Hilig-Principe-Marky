@@ -140,4 +140,75 @@
         <h2 class="section__header">My Seller Dashboard</h2>
         <p class="section__subheader" style="margin-bottom:1rem;">Manage your listings, inquiries, and businesses.</p>
 
-        <div class="tabs" id="myTabs" role="tablist" style="margin-bottom
+        <div class="tabs" id="myTabs" role="tablist" style="margin-bottom:1rem;">
+            <div class="tab active" data-tab="listings">My Listings</div>
+            <div class="tab" data-tab="orders">Orders / Messages</div>
+            <div class="tab" data-tab="biz">My Businesses</div>
+        </div>
+
+        <div id="myListings">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th><th>Price</th><th>Category</th><th>Status</th><th style="width:140px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="myListingsBody"></tbody>
+            </table>
+            <div class="empty" id="myListingsEmpty" style="display:none;">
+                <i class="ri-box-3-line"></i> You haven't posted anything yet.
+            </div>
+        </div>
+
+        <div id="myOrders" style="display:none;">
+            <table>
+                <thead>
+                    <tr><th>Buyer</th><th>Item</th><th>Message</th><th>Date</th></tr>
+                </thead>
+                <tbody id="myOrdersBody"></tbody>
+            </table>
+            <div class="empty" id="myOrdersEmpty" style="display:none;">
+                <i class="ri-chat-3-line"></i> No inquiries yet.
+            </div>
+        </div>
+
+        <div id="myBusinesses" style="display:none;">
+            <table>
+                <thead>
+                    <tr><th>Business</th><th>Category</th><th>Contact</th><th>Location</th><th style="width:120px;">Actions</th></tr>
+                </thead>
+                <tbody id="myBizBody"></tbody>
+            </table>
+            <div class="empty" id="myBizEmpty" style="display:none;">
+                <i class="ri-building-2-line"></i> You haven't registered a business yet.
+            </div>
+        </div>
+    </section>
+
+    <!-- CART -->
+    <aside class="panel" id="cartPanel" aria-hidden="true">
+        <div class="panel__header">
+            <div class="panel__title"><i class="ri-shopping-cart-2-line"></i> Your Cart</div>
+            <button class="btn btn-outline" id="closeCart"><i class="ri-close-line"></i></button>
+        </div>
+        <div class="panel__body" id="cartBody"></div>
+        <div style="padding:1rem; border-top:1px solid rgba(2,6,23,.06); display:grid; gap:.6rem;">
+            <div style="display:flex; align-items:center; justify-content:space-between; font-weight:800;">
+                <span>Total</span><span id="cartTotal">₱0.00</span>
+            </div>
+            <button class="btn" id="checkoutBtn"><i class="ri-bank-card-line"></i> Checkout</button>
+        </div>
+    </aside>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <!-- FOOTER -->
+    <footer class="section__container">
+        <div class="footer__bar">© <span id="year"></span> SLSU Marketplace.</div>
+    </footer>
+
+    <!-- Boot: loads partials, then marketplace.js -->
+    <script src="scripts/boot.js" defer></script>
+</body>
+</html>
