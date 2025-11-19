@@ -1,17 +1,15 @@
-/* ==== Dark Base for SLSU Marketplace (Green/Gray/Black) ==== */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap");
 
 :root{
-  /* palette */
-  --accent: #22c55e;           /* green */
-  --accent-2: #16a34a;         /* darker green */
-  --bg: #0b0f14;               /* page background (blackish) */
-  --surface-1: #0f1620;        /* navbar / blocks */
-  --surface-2: #151b24;        /* cards / panels */
-  --surface-3: #0b131b;        /* deeper panel */
-  --stroke: rgba(148,163,184,.15); /* subtle borders */
-  --text: #e5e7eb;             /* white-ish */
-  --muted: #98a2b3;            /* gray text */
+  --accent: #22c55e;
+  --accent-2: #16a34a;
+  --bg: #0b0f14;
+  --surface-1: #0f1620;
+  --surface-2: #151b24;
+  --surface-3: #0b131b;
+  --stroke: rgba(148,163,184,.15);
+  --text: #e5e7eb;
+  --muted: #98a2b3;
 
   --max-width: 1200px;
   --radius-lg: 16px;
@@ -29,12 +27,10 @@ body{
               var(--bg);
 }
 
-/* Sections */
 .section__container{max-width:var(--max-width);margin:auto;padding:2.2rem 1rem}
 .section__header{font-size:2rem;font-weight:700;margin-bottom:.6rem;color:var(--text)}
 .section__subheader{color:var(--muted)}
 
-/* Links / Buttons */
 a{color:inherit;text-decoration:none}
 img{max-width:100%;display:block}
 
@@ -50,7 +46,6 @@ img{max-width:100%;display:block}
 }
 .btn-outline:hover{background:rgba(34,197,94,.08)}
 
-/* Nav (pill tabs like screenshot) */
 nav{
   position:sticky;top:0;z-index:50;
   background:rgba(11,15,20,.55);
@@ -65,13 +60,8 @@ nav{
 .nav__logo img{width:40px;height:40px;border-radius:10px;object-fit:cover}
 .site-title .accent{color:var(--accent)}
 .nav__links{display:flex;gap:.5rem;list-style:none;background:var(--surface-1);padding:.4rem;border-radius:999px;border:1px solid var(--stroke)}
-.nav__links a{
-  color:var(--muted);padding:.55rem .9rem;border-radius:999px;font-weight:600
-}
-.nav__links a.active,.nav__links a:hover{
-  color:var(--text);background:#ecf2f6; /* light pill like screenshot */
-  color:#0b1218;
-}
+.nav__links a{color:var(--muted);padding:.55rem .9rem;border-radius:999px;font-weight:600}
+.nav__links a.active,.nav__links a:hover{background:#ecf2f6;color:#0b1218}
 
 /* Footer */
 .footer__bar{

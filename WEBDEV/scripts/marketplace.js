@@ -4,7 +4,7 @@
  * - LocalStorage “DB” (products, cart, orders, businesses, ownership ids)
  */
 
-/* ---------- one-time cleanup for any old demo data (safe to keep) ---------- */
+// ----- one-time cleanup of any old demo data -----
 const ONE_TIME_RESET_KEY = 'slsu_reset_done';
 if (!localStorage.getItem(ONE_TIME_RESET_KEY)) {
   ['slsu_products','slsu_cart','slsu_my_ids','slsu_orders','slsu_businesses','slsu_my_biz_ids']
@@ -12,7 +12,7 @@ if (!localStorage.getItem(ONE_TIME_RESET_KEY)) {
   localStorage.setItem(ONE_TIME_RESET_KEY, '1');
 }
 
-/* -------------------------------- storage -------------------------------- */
+// ----- storage helpers -----
 const LS = {
   keyProducts: 'slsu_products',
   keyCart: 'slsu_cart',
@@ -24,16 +24,15 @@ const LS = {
   write(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
 };
 
-/* ------------------------------- utilities -------------------------------- */
+// ----- utilities -----
 const fmt = new Intl.NumberFormat('en-PH', { style:'currency', currency:'PHP' });
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2)));
 const escapeHtml = (s) => s?.replace(/[&<>\"']/g, (c)=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const toast = (msg) => { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(()=> el.classList.remove('show'), 1800); };
 
-/* --------------------------------- state ---------------------------------- */
+// ----- state & DOM -----
 let state = { q: '', cat: '', sort: 'latest', tabView: 'all' };
 
-/* ------------------------------ DOM shortcuts ----------------------------- */
 const listingsEl = document.getElementById('listings');
 const emptyListingsEl = document.getElementById('emptyListings');
 
@@ -49,9 +48,7 @@ const myOrdersEmpty = document.getElementById('myOrdersEmpty');
 const myBizBody = document.getElementById('myBizBody');
 const myBizEmpty = document.getElementById('myBizEmpty');
 
-/* --------------------------------- routing --------------------------------
-   IMPORTANT: hero visibility is CSS-driven by body[data-route].
-   We DO NOT toggle #heroHeader from JS anymore. */
+// ----- routing -----
 function route(r){
   // reflect route on <body> for CSS to use (controls hero)
   document.body.dataset.route = r;
@@ -61,10 +58,10 @@ function route(r){
   document.querySelector(`.nav__links a[data-route="${r}"]`)?.classList.add('active');
 
   // section visibility
-  document.getElementById('browseSection').style.display   = r==='browse'   ? 'block' : 'none';
-  document.getElementById('sellSection').style.display     = r==='sell'     ? 'block' : 'none';
+  document.getElementById('browseSection').style.display   = r==='browse'   ? 'block' : 'none';
+  document.getElementById('sellSection').style.display     = r==='sell'     ? 'block' : 'none';
   document.getElementById('businessSection').style.display = r==='business' ? 'block' : 'none';
-  document.getElementById('mySection').style.display       = r==='my'       ? 'block' : 'none';
+  document.getElementById('mySection').style.display       = r==='my'       ? 'block' : 'none';
 
   // route-specific renders
   if(r==='browse') renderListings();
@@ -74,7 +71,7 @@ function route(r){
   history.replaceState(null, '', `#${r}`);
 }
 
-// respond to manual hash changes/back-forward
+// respond to hash changes/back-forward
 window.addEventListener('hashchange', ()=>{
   const r = location.hash.slice(1) || 'browse';
   route(r);
@@ -87,7 +84,7 @@ document.getElementById('linksMount')?.addEventListener('click', (e)=>{
   route(a.dataset.route);
 });
 
-/* ------------------------------- search bar ------------------------------- */
+// ----- filters -----
 document.getElementById('runSearch')?.addEventListener('click', ()=>{
   state.q = document.getElementById('q').value.trim();
   state.cat = document.getElementById('cat').value;
@@ -105,7 +102,7 @@ document.getElementById('viewTabs')?.addEventListener('click', (e)=>{
   renderListings();
 });
 
-/* ---------------------------- listings rendering -------------------------- */
+// ----- render listings -----
 function renderListings(){
   const all = LS.read(LS.keyProducts, []);
   let items = all.slice();
@@ -123,7 +120,6 @@ function renderListings(){
   // category filter
   if(state.cat){ items = items.filter(i=> i.category === state.cat); }
 
-  // sort
   if(state.sort==='price_asc') items.sort((a,b)=> a.price - b.price);
   else if(state.sort==='price_desc') items.sort((a,b)=> b.price - a.price);
   else items.sort((a,b)=> a.id < b.id ? 1 : -1); // latest first by id
@@ -150,7 +146,7 @@ function cardTemplate(item){
   </article>`;
 }
 
-/* ---------------------------------- cart ---------------------------------- */
+// ----- cart -----
 function getCart(){ return LS.read(LS.keyCart, []); }
 function setCart(v){ LS.write(LS.keyCart, v); updateCartBadge(); }
 function updateCartBadge(){ const c = getCart().reduce((n, r)=> n + r.qty, 0); cartCount.textContent = c; }
@@ -192,9 +188,7 @@ window.decQty = (id)=>{ const c=getCart(); const r=c.find(x=>x.id===id); if(!r) 
 window.incQty = (id)=>{ const c=getCart(); const r=c.find(x=>x.id===id); if(!r) return; r.qty+=1; setCart(c); renderCart(); }
 window.removeFromCart = (id)=>{ setCart(getCart().filter(x=>x.id!==id)); renderCart(); }
 
-document.getElementById('openCart')?.addEventListener('click', ()=>{ cartPanel.classList.add('open'); renderCart(); });
-document.getElementById('closeCart')?.addEventListener('click', ()=> cartPanel.classList.remove('open'));
-
+// ----- checkout -> creates "orders" -----
 document.getElementById('checkoutBtn')?.addEventListener('click', ()=>{
   const cart = getCart(); if(!cart.length) return toast('Cart empty');
   const products = LS.read(LS.keyProducts, []);
@@ -207,7 +201,7 @@ document.getElementById('checkoutBtn')?.addEventListener('click', ()=>{
   setCart([]); renderCart(); toast('Checkout complete! Sellers will contact you.');
 });
 
-/* -------------------------------- sell form ------------------------------- */
+// ----- sell form -----
 document.getElementById('sellForm')?.addEventListener('submit', (e)=>{
   e.preventDefault();
   const f = new FormData(e.target);
@@ -234,7 +228,7 @@ document.getElementById('sellForm')?.addEventListener('submit', (e)=>{
   selectMyTab('listings');
 });
 
-/* ----------------------------- business (create) -------------------------- */
+// ----- business form -----
 document.getElementById('bizForm')?.addEventListener('submit', (e)=>{
   e.preventDefault();
   const f = new FormData(e.target);
@@ -262,22 +256,22 @@ document.getElementById('bizForm')?.addEventListener('submit', (e)=>{
   selectMyTab('biz');
 });
 
-/* ------------------------------- dashboard tabs --------------------------- */
+// ----- dashboard tabs -----
 function selectMyTab(which){
   const tabs = document.querySelectorAll('#myTabs .tab');
   tabs.forEach(t => t.classList.remove('active'));
   document.querySelector(`#myTabs .tab[data-tab="${which}"]`)?.classList.add('active');
 
-  document.getElementById('myListings').style.display   = which==='listings' ? 'block' : 'none';
-  document.getElementById('myOrders').style.display     = which==='orders'   ? 'block' : 'none';
-  document.getElementById('myBusinesses').style.display = which==='biz'      ? 'block' : 'none';
+  document.getElementById('myListings').style.display   = which==='listings' ? 'block' : 'none';
+  document.getElementById('myOrders').style.display     = which==='orders'   ? 'block' : 'none';
+  document.getElementById('myBusinesses').style.display = which==='biz'      ? 'block' : 'none';
 }
 document.getElementById('myTabs')?.addEventListener('click', (e)=>{
   const t = e.target.closest('.tab'); if(!t) return;
   selectMyTab(t.dataset.tab);
 });
 
-/* -------------------------- dashboard: render data ------------------------ */
+// ----- render "my" data -----
 function renderMyListings(){
   const ids = new Set(LS.read(LS.keyMy, []));
   const all = LS.read(LS.keyProducts, []);
@@ -377,7 +371,7 @@ window.editBusiness = (id)=>{
   LS.write(LS.keyBiz, all); toast('Business updated'); renderMyBusinesses();
 }
 
-/* ----------------------------- buyer inquiry ----------------------------- */
+// ----- inquiry -----
 window.openInquiry = (id)=>{
   const item = LS.read(LS.keyProducts, []).find(p=>p.id===id); if(!item) return;
   const note = prompt(`Send a message to seller (contact: ${item.contact})`, 'Hi! Is this still available?');
@@ -388,10 +382,12 @@ window.openInquiry = (id)=>{
   toast('Message sent to seller');
 };
 
-/* ------------------------------ footer year ------------------------------ */
+// ----- panel + init -----
+document.getElementById('openCart')?.addEventListener('click', ()=>{ cartPanel.classList.add('open'); renderCart(); });
+document.getElementById('closeCart')?.addEventListener('click', ()=> cartPanel.classList.remove('open'));
 document.getElementById('year') && (document.getElementById('year').textContent = new Date().getFullYear());
+updateCartBadge();
 
-/* ------------------------------ initial route ----------------------------- */
-const initial = location.hash.slice(1) || 'browse';
-route(initial);
+// initial route
+route(location.hash.slice(1) || 'browse');
 renderListings();

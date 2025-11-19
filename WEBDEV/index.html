@@ -45,8 +45,8 @@
     </div>
   </nav>
 
-  <!-- HERO / SEARCH -->
-  <header class="section__container">
+  <!-- HERO (hidden by default; only shows on Browse) -->
+  <header class="section__container" id="heroHeader" style="display:none;">
     <h1 class="section__header">Buy & Sell within SLSU</h1>
     <p class="section__subheader">Campus-only marketplace for students and staff.</p>
     <div class="searchbar" style="margin-top:1rem;">
@@ -88,7 +88,7 @@
     </div>
   </section>
 
-  <!-- SELL FORM -->
+  <!-- SELL -->
   <section class="section__container" id="sellSection" style="display:none;">
     <h2 class="section__header">List an item for sale</h2>
     <p class="section__subheader" style="margin-bottom:1rem;">Create a listing visible to SLSU buyers.</p>
@@ -147,10 +147,10 @@
     </form>
   </section>
 
-  <!-- BUSINESS (empty mount; form injected from partials/business/form.html) -->
+  <!-- BUSINESS (partial injected here) -->
   <section class="section__container" id="businessSection" style="display:none;"></section>
 
-  <!-- DASHBOARD -->
+  <!-- MY -->
   <section class="section__container" id="mySection" style="display:none;">
     <h2 class="section__header">My Seller Dashboard</h2>
     <p class="section__subheader" style="margin-bottom:1rem;">Manage your listings, inquiries, and businesses.</p>
@@ -200,7 +200,7 @@
     </div>
   </section>
 
-  <!-- CART PANEL -->
+  <!-- CART -->
   <aside class="panel" id="cartPanel" aria-hidden="true">
     <div class="panel__header">
       <div class="panel__title"><i class="ri-shopping-cart-2-line"></i> Your Cart</div>
