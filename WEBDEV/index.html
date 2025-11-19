@@ -1,229 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- HERO (visibility controlled by CSS + body[data-route]) -->
-<header class="section__container" id="heroHeader">
-  <h1 class="section__header">Buy & Sell within SLSU</h1>
-  <p class="section__subheader">Campus-only marketplace for students and staff.</p>
-  <div class="searchbar" style="margin-top:1rem;">
-    <input type="text" id="q" placeholder="Search items (e.g., calculator, uniform, laptop)" />
-    <select id="cat">
-      <option value="">All categories</option>
-      <option>Books</option>
-      <option>Uniforms</option>
-      <option>Electronics</option>
-      <option>Sports & Fitness</option>
-      <option>Dorm & Furniture</option>
-      <option>Tickets</option>
-      <option>Others</option>
-    </select>
-    <select id="sort">
-      <option value="latest">Latest</option>
-      <option value="price_asc">Price: Low → High</option>
-      <option value="price_desc">Price: High → Low</option>
-    </select>
-    <button class="btn" id="runSearch"><i class="ri-search-line"></i> Search</button>
-  </div>
-</header>
-
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLSU Marketplace</title>
+    <!-- CSS imports -->
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/marketplace.css">
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
+</head>
 <body>
-  <!-- NAV -->
-  <nav>
-    <div class="nav__inner">
-      <div class="nav__logo">
-        <img src="assets/logo.png" alt="SLSU" onerror="this.style.display='none'" />
-        <span class="site-title">SLSU <span class="accent">Marketplace</span></span>
-      </div>
+    <!-- NAV -->
+    <nav>
+        <div class="nav__inner">
+            <div class="nav__logo">
+                <img src="assets/logo.png" alt="SLSU" onerror="this.style.display='none'" />
+                <span class="site-title">SLSU <span class="accent">Marketplace</span></span>
+            </div>
 
-      <!-- injected tabs -->
-      <div id="linksMount"></div>
+            <!-- injected tabs (nav-links.html) -->
+            <div id="linksMount"></div>
 
-      <div class="toolbar">
-        <button class="btn btn-outline" id="openCart">
-          <i class="ri-shopping-cart-2-line"></i><span id="cartCount">0</span>
-        </button>
-      </div>
-    </div>
-  </nav>
-
-  <!-- HERO (hidden by default; only shows on Browse) -->
-  <header class="section__container" id="heroHeader" style="display:none;">
-    <h1 class="section__header">Buy & Sell within SLSU</h1>
-    <p class="section__subheader">Campus-only marketplace for students and staff.</p>
-    <div class="searchbar" style="margin-top:1rem;">
-      <input type="text" id="q" placeholder="Search items (e.g., calculator, uniform, laptop)" />
-      <select id="cat">
-        <option value="">All categories</option>
-        <option>Books</option>
-        <option>Uniforms</option>
-        <option>Electronics</option>
-        <option>Sports & Fitness</option>
-        <option>Dorm & Furniture</option>
-        <option>Tickets</option>
-        <option>Others</option>
-      </select>
-      <select id="sort">
-        <option value="latest">Latest</option>
-        <option value="price_asc">Price: Low → High</option>
-        <option value="price_desc">Price: High → Low</option>
-      </select>
-      <button class="btn" id="runSearch"><i class="ri-search-line"></i> Search</button>
-    </div>
-  </header>
-
-  <!-- LISTINGS -->
-  <section class="section__container" id="browseSection">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:.6rem;">
-      <h2 class="section__header" style="font-size:1.4rem;">Marketplace Listings</h2>
-      <div class="tabs" id="viewTabs" role="tablist">
-        <div class="tab active" data-view="all">All</div>
-        <div class="tab" data-view="books">Books</div>
-        <div class="tab" data-view="uniforms">Uniforms</div>
-        <div class="tab" data-view="electronics">Electronics</div>
-      </div>
-    </div>
-    <div class="grid grid-3" id="listings"></div>
-    <div class="empty" id="emptyListings" style="display:none;">
-      <i class="ri-store-2-line"></i>
-      No items match your filters yet.
-    </div>
-  </section>
-
-  <!-- SELL -->
-  <section class="section__container" id="sellSection" style="display:none;">
-    <h2 class="section__header">List an item for sale</h2>
-    <p class="section__subheader" style="margin-bottom:1rem;">Create a listing visible to SLSU buyers.</p>
-    <form id="sellForm" class="form">
-      <div class="grid grid-2">
-        <div class="input">
-          <label>Item title</label>
-          <input required name="title" placeholder="e.g., CASIO fx-991ES calculator" />
+            <div class="toolbar">
+                <button class="btn btn-outline" id="openCart">
+                    <i class="ri-shopping-cart-2-line"></i><span id="cartCount">0</span>
+                </button>
+            </div>
         </div>
-        <div class="input">
-          <label>Price (PHP)</label>
-          <input required name="price" type="number" min="0" step="0.01" placeholder="e.g., 750" />
+    </nav>
+
+    <!-- HERO (Visibility controlled by CSS via body[data-route="browse"]) -->
+    <header class="section__container" id="heroHeader">
+        <h1 class="section__header">Buy & Sell within SLSU</h1>
+        <p class="section__subheader">Campus-only marketplace for students and staff.</p>
+        <div class="searchbar" style="margin-top:1rem;">
+            <input type="text" id="q" placeholder="Search items (e.g., calculator, uniform, laptop)" />
+            <select id="cat">
+                <option value="">All categories</option>
+                <option>Books</option>
+                <option>Uniforms</option>
+                <option>Electronics</option>
+                <option>Sports & Fitness</option>
+                <option>Dorm & Furniture</option>
+                <option>Tickets</option>
+                <option>Others</option>
+            </select>
+            <select id="sort">
+                <option value="latest">Latest</option>
+                <option value="price_asc">Price: Low → High</option>
+                <option value="price_desc">Price: High → Low</option>
+            </select>
+            <button class="btn" id="runSearch"><i class="ri-search-line"></i> Search</button>
         </div>
-      </div>
-      <div class="grid grid-2">
-        <div class="input">
-          <label>Category</label>
-          <select name="category" required>
-            <option value="Books">Books</option>
-            <option value="Uniforms">Uniforms</option>
-            <option value="Electronics">Electronics</option>
-            <option value="Sports & Fitness">Sports & Fitness</option>
-            <option value="Dorm & Furniture">Dorm & Furniture</option>
-            <option value="Tickets">Tickets</option>
-            <option value="Others">Others</option>
-          </select>
+    </header>
+
+    <!-- LISTINGS -->
+    <section class="section__container" id="browseSection">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:.6rem;">
+            <h2 class="section__header" style="font-size:1.4rem;">Marketplace Listings</h2>
+            <div class="tabs" id="viewTabs" role="tablist">
+                <div class="tab active" data-view="all">All</div>
+                <div class="tab" data-view="books">Books</div>
+                <div class="tab" data-view="uniforms">Uniforms</div>
+                <div class="tab" data-view="electronics">Electronics</div>
+            </div>
         </div>
-        <div class="input">
-          <label>Condition</label>
-          <select name="condition" required>
-            <option>New</option>
-            <option>Like New</option>
-            <option>Good</option>
-            <option>Fair</option>
-          </select>
+        <div class="grid grid-3" id="listings"></div>
+        <div class="empty" id="emptyListings" style="display:none;">
+            <i class="ri-store-2-line"></i>
+            No items match your filters yet.
         </div>
-      </div>
-      <div class="input">
-        <label>Description</label>
-        <textarea name="description" rows="4" placeholder="Key details, usage, what's included, defects..."></textarea>
-      </div>
-      <div class="grid grid-2">
-        <div class="input">
-          <label>Photo URL</label>
-          <input name="image" placeholder="Paste https:// image link (or leave blank for placeholder)" />
-        </div>
-        <div class="input">
-          <label>Contact (SLSU email/phone)</label>
-          <input required name="contact" placeholder="e.g., juan@slsu.edu.ph or 09xx" />
-        </div>
-      </div>
-      <div class="toolbar">
-        <button class="btn" type="submit"><i class="ri-upload-2-line"></i> Publish Listing</button>
-        <button class="btn btn-outline" type="reset"><i class="ri-eraser-line"></i> Reset</button>
-      </div>
-    </form>
-  </section>
+    </section>
 
-  <!-- BUSINESS (partial injected here) -->
-  <section class="section__container" id="businessSection" style="display:none;"></section>
+    <!-- SELL -->
+    <section class="section__container" id="sellSection" style="display:none;">
+        <h2 class="section__header">List an item for sale</h2>
+        <p class="section__subheader" style="margin-bottom:1rem;">Create a listing visible to SLSU buyers.</p>
+        <form id="sellForm" class="form">
+            <div class="grid grid-2">
+                <div class="input">
+                    <label>Item title</label>
+                    <input required name="title" placeholder="e.g., CASIO fx-991ES calculator" />
+                </div>
+                <div class="input">
+                    <label>Price (PHP)</label>
+                    <input required name="price" type="number" min="0" step="0.01" placeholder="e.g., 750" />
+                </div>
+            </div>
+            <div class="grid grid-2">
+                <div class="input">
+                    <label>Category</label>
+                    <select name="category" required>
+                        <option value="Books">Books</option>
+                        <option value="Uniforms">Uniforms</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Sports & Fitness">Sports & Fitness</option>
+                        <option value="Dorm & Furniture">Dorm & Furniture</option>
+                        <option value="Tickets">Tickets</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+                <div class="input">
+                    <label>Condition</label>
+                    <select name="condition" required>
+                        <option>New</option>
+                        <option>Like New</option>
+                        <option>Good</option>
+                        <option>Fair</option>
+                    </select>
+                </div>
+            </div>
+            <div class="input">
+                <label>Description</label>
+                <textarea name="description" rows="4" placeholder="Key details, usage, what's included, defects..."></textarea>
+            </div>
+            <div class="grid grid-2">
+                <div class="input">
+                    <label>Photo URL</label>
+                    <input name="image" placeholder="Paste https:// image link (or leave blank for placeholder)" />
+                </div>
+                <div class="input">
+                    <label>Contact (SLSU email/phone)</label>
+                    <input required name="contact" placeholder="e.g., juan@slsu.edu.ph or 09xx" />
+                </div>
+            </div>
+            <div class="toolbar">
+                <button class="btn" type="submit"><i class="ri-upload-2-line"></i> Publish Listing</button>
+                <button class="btn btn-outline" type="reset"><i class="ri-eraser-line"></i> Reset</button>
+            </div>
+        </form>
+    </section>
 
-  <!-- MY -->
-  <section class="section__container" id="mySection" style="display:none;">
-    <h2 class="section__header">My Seller Dashboard</h2>
-    <p class="section__subheader" style="margin-bottom:1rem;">Manage your listings, inquiries, and businesses.</p>
+    <!-- BUSINESS (partial injected here) -->
+    <section class="section__container" id="businessSection" style="display:none;"></section>
 
-    <div class="tabs" id="myTabs" role="tablist" style="margin-bottom:1rem;">
-      <div class="tab active" data-tab="listings">My Listings</div>
-      <div class="tab" data-tab="orders">Orders / Messages</div>
-      <div class="tab" data-tab="biz">My Businesses</div>
-    </div>
+    <!-- MY -->
+    <section class="section__container" id="mySection" style="display:none;">
+        <h2 class="section__header">My Seller Dashboard</h2>
+        <p class="section__subheader" style="margin-bottom:1rem;">Manage your listings, inquiries, and businesses.</p>
 
-    <div id="myListings">
-      <table>
-        <thead>
-          <tr>
-            <th>Item</th><th>Price</th><th>Category</th><th>Status</th><th style="width:140px;">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="myListingsBody"></tbody>
-      </table>
-      <div class="empty" id="myListingsEmpty" style="display:none;">
-        <i class="ri-box-3-line"></i> You haven't posted anything yet.
-      </div>
-    </div>
-
-    <div id="myOrders" style="display:none;">
-      <table>
-        <thead>
-          <tr><th>Buyer</th><th>Item</th><th>Message</th><th>Date</th></tr>
-        </thead>
-        <tbody id="myOrdersBody"></tbody>
-      </table>
-      <div class="empty" id="myOrdersEmpty" style="display:none;">
-        <i class="ri-chat-3-line"></i> No inquiries yet.
-      </div>
-    </div>
-
-    <div id="myBusinesses" style="display:none;">
-      <table>
-        <thead>
-          <tr><th>Business</th><th>Category</th><th>Contact</th><th>Location</th><th style="width:120px;">Actions</th></tr>
-        </thead>
-        <tbody id="myBizBody"></tbody>
-      </table>
-      <div class="empty" id="myBizEmpty" style="display:none;">
-        <i class="ri-building-2-line"></i> You haven't registered a business yet.
-      </div>
-    </div>
-  </section>
-
-  <!-- CART -->
-  <aside class="panel" id="cartPanel" aria-hidden="true">
-    <div class="panel__header">
-      <div class="panel__title"><i class="ri-shopping-cart-2-line"></i> Your Cart</div>
-      <button class="btn btn-outline" id="closeCart"><i class="ri-close-line"></i></button>
-    </div>
-    <div class="panel__body" id="cartBody"></div>
-    <div style="padding:1rem; border-top:1px solid rgba(2,6,23,.06); display:grid; gap:.6rem;">
-      <div style="display:flex; align-items:center; justify-content:space-between; font-weight:800;">
-        <span>Total</span><span id="cartTotal">₱0.00</span>
-      </div>
-      <button class="btn" id="checkoutBtn"><i class="ri-bank-card-line"></i> Checkout</button>
-    </div>
-  </aside>
-
-  <!-- TOAST -->
-  <div class="toast" id="toast"></div>
-
-  <!-- FOOTER -->
-  <footer class="section__container">
-    <div class="footer__bar">© <span id="year"></span> SLSU Marketplace.</div>
-  </footer>
-
-  <!-- Boot: loads partials, then marketplace.js -->
-  <script src="scripts/boot.js" defer></script>
-</body>
-</html>
+        <div class="tabs" id="myTabs" role="tablist" style="margin-bottom

@@ -5,14 +5,14 @@
 @media (max-width:640px){.grid-3,.grid-2{grid-template-columns:1fr}}
 
 .searchbar{
-  display:grid;grid-template-columns:1.2fr .9fr .9fr auto;gap:.7rem;
-  background:var(--surface-1);
-  padding:.9rem;border:1px solid var(--stroke);border-radius:var(--radius-lg);
-  box-shadow:var(--shadow-1);
+  display:grid;grid-template-columns:1.2fr .9fr .9fr auto;gap:.7rem;
+  background:var(--surface-1);
+  padding:.9rem;border:1px solid var(--stroke);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-1);
 }
 .searchbar input,.searchbar select{
-  width:100%;padding:.9rem 1rem;border:1px solid var(--stroke);
-  border-radius:var(--radius-md);background:var(--surface-2);color:var(--text)
+  width:100%;padding:.9rem 1rem;border:1px solid var(--stroke);
+  border-radius:var(--radius-md);background:var(--surface-2);color:var(--text)
 }
 .searchbar select option{color:#e5e7eb;background:#0f1620}
 
