@@ -1,15 +1,30 @@
 <form id="bizForm" class="form">
+  <!-- Business Type Selection -->
+  <div class="input" style="margin-bottom:1rem; background:var(--surface-2); padding:1rem; border-radius:12px; border:1px solid var(--stroke);">
+    <label style="color:var(--accent); font-weight:700;">Step 1: What kind of business is this?</label>
+    <div style="display:flex; gap:1.5rem; margin-top:0.5rem;">
+      <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; color:var(--text);">
+        <input type="radio" name="type" value="Menu" checked style="width:auto;" /> 
+        <span><i class="ri-restaurant-line"></i> Food Menu / Retail</span>
+      </label>
+      <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; color:var(--text);">
+        <input type="radio" name="type" value="Service" style="width:auto;" /> 
+        <span><i class="ri-service-line"></i> Service Provider</span>
+      </label>
+    </div>
+  </div>
+
   <div class="grid grid-2">
     <div class="input">
-      <label>Business name</label>
-      <input required name="name" placeholder="e.g., Green Arc Snacks" />
+      <label>Business Name</label>
+      <input required name="name" placeholder="e.g., Green Table or John's Repair" />
     </div>
     <div class="input">
       <label>Category</label>
       <select name="category" required>
         <option value="Food & Drinks">Food & Drinks</option>
-        <option value="Merch & Printing">Merch & Printing</option>
         <option value="Services">Services</option>
+        <option value="Merch & Printing">Merch & Printing</option>
         <option value="Tech & Repairs">Tech & Repairs</option>
         <option value="Clothes & Uniforms">Clothes & Uniforms</option>
         <option value="Others">Others</option>
@@ -17,19 +32,39 @@
     </div>
   </div>
 
+  <!-- New Owner Details -->
+  <div class="grid grid-2">
+    <div class="input">
+      <label>Owner Name</label>
+      <input required name="ownerName" placeholder="Your full name" />
+    </div>
+    <div class="input">
+      <label>Owner Age</label>
+      <input required name="ownerAge" type="number" placeholder="e.g., 21" />
+    </div>
+  </div>
+
   <div class="input">
-    <label>Description</label>
-    <textarea name="description" rows="4" placeholder="What do you offer? Hours, promos, how to order..."></textarea>
+    <label>Business Description</label>
+    <textarea name="description" rows="4" placeholder="Describe your menu, your services, and your story..."></textarea>
   </div>
 
   <div class="grid grid-2">
     <div class="input">
-      <label>Logo / Banner URL</label>
-      <input name="logo" placeholder="https://your-image" />
+      <label>Logo / Banner</label>
+      <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.3rem;">
+        <label for="bizFile" class="btn" style="padding:0.6rem 1rem; width:auto;">
+          <i class="ri-camera-fill"></i> Take Photo
+        </label>
+        <span id="bizFileStatus" style="font-size:0.8rem; color:var(--muted); font-style:italic;">No file chosen</span>
+      </div>
+      <input type="file" id="bizFile" accept="image/*" capture="environment" style="display:none;" />
+      <input name="logo" id="bizLogoInput" placeholder="Or paste image URL here..." />
     </div>
+
     <div class="input">
       <label>Contact (email/phone)</label>
-      <input required name="contact" placeholder="e.g., greenarc@slsu.edu.ph / 09xx" />
+      <input required name="contact" placeholder="e.g., 09xx or FB link" />
     </div>
   </div>
 
@@ -44,8 +79,24 @@
     </div>
   </div>
 
-  <div class="toolbar">
-    <button class="btn" type="submit"><i class="ri-building-2-line"></i> Publish Business</button>
+  <!-- NEW: 4-SLOT MENU BUILDER -->
+  <div class="input" style="margin-top:2rem; padding-top:2rem; border-top:1px dashed var(--stroke);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <div>
+            <label style="font-size:1.2rem; color:var(--text); margin-bottom:0.2rem;">Initial Menu Setup</label>
+            <p style="color:var(--muted); font-size:0.9rem;">Showcase your top 4 items.</p>
+        </div>
+        <button type="button" class="btn" id="toggleMenuBtn" onclick="toggleMenuBuilder()">
+            <i class="ri-layout-grid-line"></i> Create Menu
+        </button>
+    </div>
+    
+    <!-- The 4-Card Grid (Hidden by Default) -->
+    <div id="menuBuilderGrid" class="grid grid-4" style="display:none; gap:1rem;"></div>
+  </div>
+
+  <div class="toolbar" style="margin-top:2rem;">
+    <button class="btn" type="submit"><i class="ri-building-2-line"></i> Create Business</button>
     <button class="btn btn-outline" type="reset"><i class="ri-eraser-line"></i> Reset</button>
   </div>
 </form>
