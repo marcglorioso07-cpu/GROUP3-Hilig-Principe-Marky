@@ -3,218 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SLSU Lucena Marketplace</title>
+    <title>Login - SLSU Marketplace</title>
     <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/marketplace.css">
+    <link rel="stylesheet" href="styles/login.css">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
 </head>
 <body>
-    <!-- NAV -->
-    <nav>
-        <div class="nav__inner">
-            <div class="nav__logo">
-                <img src="assets/logo.png" alt="SLSU" onerror="this.style.display='none'" />
-                <span class="site-title">SLSU <span class="accent">Lucena Marketplace</span></span>
-            </div>
-            <div id="linksMount"></div>
-            <div class="toolbar">
-                <button class="btn btn-outline" id="openCart">
-                    <i class="ri-shopping-cart-2-line"></i><span id="cartCount">0</span>
-                </button>
-            </div>
-        </div>
-    </nav>
 
-    <!-- HERO (Restored Banner Style) -->
-    <header class="section__container" id="heroHeader">
-        <div class="hero-banner">
-            <h1>Buy & Sell within SLSU</h1>
-            <!-- Simplified Search Bar (Matches 'Previous' Look) -->
-            <div class="searchbar">
-                <input type="text" id="q" placeholder="Search items..." />
-                <button class="btn" id="runSearch"><i class="ri-search-line"></i> Search</button>
-            </div>
-        </div>
-    </header>
+    <!-- School Background -->
+    <div class="school-bg"></div>
+    <div class="gradient-overlay"></div>
 
-    <!-- BROWSE LAYOUT -->
-    <section class="section__container" id="browseSection">
-        
-        <!-- 1. Categories Icons Row -->
-        <div class="category-scroll-container">
-            <div id="categoryIcons" class="category-row">
-                <!-- Injected by JS -->
-            </div>
-        </div>
+    <!-- Header Logo Only -->
+    <div style="position:fixed; top:20px; left:20px; z-index:10;">
+        <img src="assets/logo.png" style="width:50px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.5);" onerror="this.style.display='none'"/>
+    </div>
 
-        <div class="browse-layout-grid">
-            <!-- LEFT MAIN COLUMN -->
-            <div class="browse-main">
+    <div class="login-wrapper">
+        <div class="login-card">
+            <h1 style="text-align:center; margin-bottom:0.5rem;">Login</h1>
+            <p class="subtitle" style="text-align:center;">Welcome back to SLSU Marketplace</p>
+
+            <form id="loginForm">
+                <div class="input-group">
+                    <i class="ri-mail-line icon"></i>
+                    <input type="email" placeholder="Student Email" required />
+                </div>
                 
-                <!-- 2. Featured Businesses (The Squares) -->
-                <div class="section-flex-header">
-                    <h2 class="section-title">Featured Businesses</h2>
-                    <button class="btn-link" onclick="viewAllBiz()">View All <i class="ri-arrow-right-line"></i></button>
-                </div>
-                <div id="featuredBizRow" class="featured-biz-row">
-                    <!-- Injected by JS -->
+                <div class="input-group">
+                    <i class="ri-lock-2-line icon"></i>
+                    <input type="password" placeholder="Password" required />
                 </div>
 
-                <!-- 3. Fresh Listings Feed -->
-                <h2 class="section-title" style="margin-top:2rem; margin-bottom:1rem;">Fresh Listings</h2>
-                <div class="grid grid-3" id="listings"></div>
-                <div class="empty" id="emptyListings" style="display:none;">
-                    <i class="ri-store-2-line"></i> No items match your filters yet.
+                <div class="actions">
+                    <label class="remember">
+                        <input type="checkbox"> <span>Remember me</span>
+                    </label>
+                    <a href="#">Forgot Password?</a>
                 </div>
-            </div>
 
-            <!-- RIGHT SIDEBAR COLUMN -->
-            <aside class="browse-sidebar">
-                <div class="sidebar-header">
-                    <h3>Active Shops</h3>
-                    <span style="font-size:0.8rem; color:var(--accent);">Live Now</span>
-                </div>
-                <!-- 4. Active Business List -->
-                <div id="activeBizList" class="ranked-list">
-                    <!-- Injected by JS -->
-                </div>
-            </aside>
-        </div>
-    </section>
+                <button type="submit" class="btn-login">
+                    Login
+                </button>
+            </form>
 
-    <!-- BUSINESS DETAIL PAGE -->
-    <section class="section__container" id="businessPage" style="display:none;">
-        <button class="btn btn-outline" onclick="route('browse')" style="margin-bottom:1rem;">
-            <i class="ri-arrow-left-line"></i> Back to Marketplace
-        </button>
-        <div id="bizHeader" style="background:var(--surface-2); padding:2rem; border-radius:20px; border:1px solid var(--stroke); margin-bottom:2rem; display:flex; gap:1.5rem; flex-wrap:wrap;"></div>
-        <h3 class="section__header" id="bizItemsTitle" style="font-size:1.5rem;">Menu & Services</h3>
-        <div class="grid grid-3" id="bizItemsGrid"></div>
-        <div class="empty" id="bizItemsEmpty" style="display:none;">
-            <i class="ri-file-list-3-line"></i> This business hasn't listed any items yet.
+            <div class="footer-text">
+                Don't have an account? <a href="#">Register here</a>
+            </div>
         </div>
-    </section>
+    </div>
 
-    <!-- SELL FORM -->
-    <section class="section__container" id="sellSection" style="display:none;">
-        <h2 class="section__header">List an item / Add to Menu</h2>
-        <form id="sellForm" class="form">
-            <input type="hidden" name="businessId" id="linkToBizId" value="" />
-            <div id="bizLinkNotice" style="background:rgba(34,197,94,.1); color:#86efac; padding:0.8rem; border-radius:8px; display:none; margin-bottom:1rem;">
-                <i class="ri-link"></i> Adding this item to your business: <b id="bizLinkName"></b>
-            </div>
-            <div class="grid grid-2">
-                <div class="input">
-                    <label>Item Title</label>
-                    <input required name="title" placeholder="e.g., Cheese Burger" />
-                </div>
-                <div class="input">
-                    <label>Price (PHP)</label>
-                    <input required name="price" type="number" min="0" step="0.01" />
-                </div>
-            </div>
-            <div class="grid grid-2">
-                <div class="input">
-                    <label>Category</label>
-                    <select name="category" required>
-                        <option value="Food & Drinks">Food & Drinks</option>
-                        <option value="Services">Services</option>
-                        <option value="Merch & Printing">Merch & Printing</option>
-                        <option value="Books">Books</option>
-                        <option value="Uniforms">Uniforms</option>
-                        <option value="Electronics">Electronics</option>
-                        <option value="Others">Others</option>
-                    </select>
-                </div>
-                <div class="input">
-                    <label>Condition</label>
-                    <select name="condition" required>
-                        <option>New / Fresh</option>
-                        <option>Service</option>
-                        <option>Like New</option>
-                        <option>Good</option>
-                    </select>
-                </div>
-            </div>
-            <div class="input">
-                <label>Description</label>
-                <textarea name="description" rows="4"></textarea>
-            </div>
-            <div class="grid grid-2">
-                <div class="input">
-                    <label>Photo</label>
-                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.3rem;">
-                        <label for="sellFile" class="btn" style="padding:0.6rem 1rem; width:auto;">
-                            <i class="ri-camera-fill"></i> Take Photo
-                        </label>
-                        <span id="sellFileStatus" style="font-size:0.8rem; color:var(--muted); font-style:italic;">No file chosen</span>
-                    </div>
-                    <input type="file" id="sellFile" accept="image/*" capture="environment" style="display:none;" />
-                    <input name="image" id="sellImageInput" placeholder="Or paste image URL..." />
-                </div>
-                <div class="input">
-                    <label>Contact</label>
-                    <input required name="contact" />
-                </div>
-            </div>
-            <div class="toolbar">
-                <button class="btn" type="submit"><i class="ri-upload-2-line"></i> Publish</button>
-            </div>
-        </form>
-    </section>
-
-    <!-- BUSINESS CREATION -->
-    <section class="section__container" id="businessSection" style="display:none;"></section>
-
-    <!-- MY DASHBOARD -->
-    <section class="section__container" id="mySection" style="display:none;">
-        <h2 class="section__header">My Dashboard</h2>
-        <div class="tabs" id="myTabs" role="tablist" style="margin-bottom:1rem;">
-            <div class="tab active" data-tab="listings">My Items</div>
-            <div class="tab" data-tab="orders">Orders</div>
-            <div class="tab" data-tab="biz">My Businesses</div>
-        </div>
-        <div id="myListings">
-            <table style="margin-bottom:1rem;"><tbody id="myListingsBody"></tbody></table>
-            <div class="empty" id="myListingsEmpty" style="display:none;">No items yet.</div>
-        </div>
-        <div id="myOrders" style="display:none;">
-            <table><tbody id="myOrdersBody"></tbody></table>
-            <div class="empty" id="myOrdersEmpty" style="display:none;">No orders yet.</div>
-        </div>
-        <div id="myBusinesses" style="display:none;">
-            <table style="margin-bottom:1rem;"><tbody id="myBizBody"></tbody></table>
-            <div class="empty" id="myBizEmpty" style="display:none;">No businesses yet.</div>
-        </div>
-    </section>
-
-    <!-- CART -->
-    <aside class="panel" id="cartPanel">
-        <div class="panel__header">
-            <div class="panel__title">Cart</div>
-            <button class="btn btn-outline" id="closeCart"><i class="ri-close-line"></i></button>
-        </div>
-        <div class="panel__body" id="cartBody"></div>
-        <div style="padding:1rem; border-top:1px solid var(--stroke);">
-            <div style="display:flex; justify-content:space-between; font-weight:800; margin-bottom:1rem;">
-                <span>Total</span><span id="cartTotal">₱0.00</span>
-            </div>
-            <button class="btn" id="checkoutBtn" style="width:100%">Checkout</button>
-        </div>
-    </aside>
-
-    <!-- OWNER PROFILE MODAL -->
-    <dialog id="ownerModal" class="modal">
-        <div class="modal__content">
-            <div style="display:flex; justify-content:space-between; align-items:start;">
-                <h2 style="font-size:1.5rem; margin-bottom:1rem;">Owner Profile</h2>
-                <button class="btn btn-outline" onclick="document.getElementById('ownerModal').close()" style="padding:0.4rem;"><i class="ri-close-line"></i></button>
-            </div>
-            <div id="ownerInfo"></div>
-        </div>
-    </dialog>
-
-    <div class="toast" id="toast"></div>
-    <script src="scripts/boot.js" defer></script>
+    <script src="scripts/login.js"></script>
 </body>
 </html>
