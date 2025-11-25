@@ -3,10 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- AUTH CHECK -->
-    <script>
-        if(!localStorage.getItem('slsu_token')) { window.location.href = 'login.html'; }
-    </script>
     <title>SLSU Marketplace</title>
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/marketplace.css">
@@ -21,79 +17,54 @@
                 <span class="site-title">SLSU <span class="accent">Marketplace</span></span>
             </div>
             
-            <div style="flex:1;"></div> 
-            
-            <div class="toolbar" style="display:flex; gap:1rem; align-items:center;">
-                <button class="btn btn-outline" onclick="route('browse')">Browse</button>
-                <button class="btn btn-outline" onclick="route('my')">My Dashboard</button>
+            <div id="linksMount"></div>
 
-                <!-- Cart Button -->
+            <div class="toolbar">
                 <button class="btn btn-outline" id="openCart" style="padding:0.5rem 0.8rem;">
-                    <i class="ri-shopping-cart-2-line"></i><span id="cartCount">0</span>
+                    <i class="ri-shopping-cart-2-line"></i> <span id="cartCount" style="font-size:0.9rem;">0</span>
                 </button>
-
-                <!-- PROFILE DROPDOWN -->
-                <div class="profile-dropdown">
-                    <button class="profile-btn" onclick="toggleProfileMenu()">
-                        <div class="avatar">U</div>
-                    </button>
-                    <!-- The Dropdown Menu -->
-                    <div class="dropdown-menu" id="profileMenu">
-                        <div class="menu-header">
-                            <span class="user-name">User Student</span>
-                            <span class="user-role">Student ID: 12345</span>
-                        </div>
-                        <hr style="border-color:var(--stroke); margin:0.5rem 0;">
-                        <a href="#my" onclick="route('my'); toggleProfileMenu();"><i class="ri-dashboard-line"></i> My Dashboard</a>
-                        <a href="#sell" onclick="route('sell'); toggleProfileMenu();"><i class="ri-add-circle-line"></i> Sell an Item</a>
-                        <a href="#business" onclick="route('business'); toggleProfileMenu();"><i class="ri-store-2-line"></i> Create a Business</a>
-                        <hr style="border-color:var(--stroke); margin:0.5rem 0;">
-                        <a href="#" onclick="logout()" style="color:#ef4444;"><i class="ri-logout-box-r-line"></i> Logout</a>
-                    </div>
-                </div>
             </div>
         </div>
     </nav>
 
     <!-- HERO -->
     <header class="section__container" id="heroHeader">
-        <div class="hero-banner">
-            <h1>Buy & Sell within SLSU</h1>
-            <div class="searchbar">
-                <input type="text" id="q" placeholder="Search items..." />
-                <button class="btn" id="runSearch"><i class="ri-search-line"></i> Search</button>
-            </div>
+        <h1 class="section__header">Buy & Sell within SLSU</h1>
+        <p class="section__subheader">Campus-only marketplace for students and staff.</p>
+        <div class="searchbar" style="margin-top:1rem;">
+            <input type="text" id="q" placeholder="Search items..." />
+            <select id="cat">
+                <option value="">All categories</option>
+                <option>Food & Drinks</option>
+                <option>Services</option>
+                <option>Books</option>
+                <option>Uniforms</option>
+                <option>Electronics</option>
+                <option>Others</option>
+            </select>
+            <select id="sort">
+                <option value="latest">Latest</option>
+                <option value="price_asc">Price: Low → High</option>
+                <option value="price_desc">Price: High → Low</option>
+            </select>
+            <button class="btn" id="runSearch"><i class="ri-search-line"></i> Search</button>
         </div>
     </header>
 
-    <!-- BROWSE LAYOUT -->
+    <!-- BROWSE LISTINGS -->
     <section class="section__container" id="browseSection">
-        <div class="category-scroll-container">
-            <div id="categoryIcons" class="category-row"></div>
-        </div>
-
-        <div class="browse-layout-grid">
-            <div class="browse-main">
-                <div class="section-flex-header">
-                    <h2 class="section-title">Active Shops</h2>
-                    <button class="btn-link" onclick="viewAllBiz()">View All <i class="ri-arrow-right-line"></i></button>
-                </div>
-                <div id="featuredBizRow" class="featured-biz-row"></div>
-
-                <h2 class="section-title" style="margin-top:2rem; margin-bottom:1rem;">Fresh Listings</h2>
-                <div class="grid grid-3" id="listings"></div>
-                <div class="empty" id="emptyListings" style="display:none;">
-                    <i class="ri-store-2-line"></i> No items match your filters yet.
-                </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:.6rem;">
+            <h2 class="section__header" style="font-size:1.4rem;">Marketplace</h2>
+            <div class="tabs" id="viewTabs" role="tablist">
+                <div class="tab active" data-view="all">All Items</div>
+                <div class="tab" data-view="businesses">Businesses</div>
+                <div class="tab" data-view="books">Books</div>
+                <div class="tab" data-view="electronics">Electronics</div>
             </div>
-
-            <aside class="browse-sidebar">
-                <div class="sidebar-header">
-                    <h3>Top Rated</h3>
-                    <span style="font-size:0.8rem; color:var(--accent);">Live Now</span>
-                </div>
-                <div id="activeBizList" class="ranked-list"></div>
-            </aside>
+        </div>
+        <div class="grid grid-3" id="listings"></div>
+        <div class="empty" id="emptyListings" style="display:none;">
+            <i class="ri-store-2-line"></i> No items match your filters yet.
         </div>
     </section>
 
@@ -113,6 +84,7 @@
     <!-- SELL FORM -->
     <section class="section__container" id="sellSection" style="display:none;">
         <h2 class="section__header">List an item / Add to Menu</h2>
+        <p class="section__subheader" style="margin-bottom:1rem;">Create a listing or add a product to your business.</p>
         <form id="sellForm" class="form">
             <input type="hidden" name="businessId" id="linkToBizId" value="" />
             <div id="bizLinkNotice" style="background:rgba(34,197,94,.1); color:#86efac; padding:0.8rem; border-radius:8px; display:none; margin-bottom:1rem;">
@@ -120,12 +92,12 @@
             </div>
             <div class="grid grid-2">
                 <div class="input">
-                    <label>Item Title</label>
-                    <input required name="title" placeholder="e.g., Cheese Burger" />
+                    <label>Item Title / Service Name</label>
+                    <input required name="title" placeholder="e.g., Cheese Burger or Laptop Repair" />
                 </div>
                 <div class="input">
                     <label>Price (PHP)</label>
-                    <input required name="price" type="number" min="0" step="0.01" />
+                    <input required name="price" type="number" min="0" step="0.01" placeholder="e.g., 50" />
                 </div>
             </div>
             <div class="grid grid-2">
@@ -148,12 +120,13 @@
                         <option>Service</option>
                         <option>Like New</option>
                         <option>Good</option>
+                        <option>Fair</option>
                     </select>
                 </div>
             </div>
             <div class="input">
                 <label>Description</label>
-                <textarea name="description" rows="4"></textarea>
+                <textarea name="description" rows="4" placeholder="Ingredients, details, or service inclusions..."></textarea>
             </div>
             <div class="grid grid-2">
                 <div class="input">
@@ -169,11 +142,12 @@
                 </div>
                 <div class="input">
                     <label>Contact</label>
-                    <input required name="contact" />
+                    <input required name="contact" placeholder="e.g., 09xx" />
                 </div>
             </div>
             <div class="toolbar">
                 <button class="btn" type="submit"><i class="ri-upload-2-line"></i> Publish</button>
+                <button class="btn btn-outline" type="reset"><i class="ri-eraser-line"></i> Reset</button>
             </div>
         </form>
     </section>
@@ -203,7 +177,35 @@
         </div>
     </section>
 
-    <!-- CART -->
+    <!-- OVERLAY (Backdrop) -->
+    <div id="overlay" class="overlay" aria-hidden="true"></div>
+
+    <!-- PROFILE SIDEBAR (Drawer) -->
+    <aside class="panel profile-panel" id="profilePanel" aria-hidden="true">
+        <div style="padding:1.5rem; border-bottom:1px solid var(--stroke); background:var(--surface-1);">
+             <div style="display:flex; justify-content:space-between; align-items:start;">
+                 <div style="width:50px; height:50px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:#000; font-weight:700; box-shadow:0 0 20px rgba(34,197,94,0.2);">U</div>
+                 <button class="btn btn-outline" id="closeProfile" style="padding:0.4rem; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center;"><i class="ri-close-line"></i></button>
+             </div>
+             <div style="margin-top:1rem;">
+                 <h2 style="font-size:1.2rem; font-weight:700;">User Student</h2>
+                 <p style="color:var(--muted); font-size:0.9rem;">Student ID: 12345</p>
+             </div>
+        </div>
+        <div class="panel__body" style="padding:1rem;">
+            <div style="display:grid; gap:0.5rem;">
+                <h4 style="font-size:0.8rem; text-transform:uppercase; color:var(--muted); margin-bottom:0.5rem; margin-top:0.5rem; padding-left:0.5rem;">Menu</h4>
+                <a href="#my" data-route="my" class="profile-link"><i class="ri-dashboard-line"></i> My Dashboard</a>
+                <a href="#sell" data-route="sell" class="profile-link"><i class="ri-add-circle-line"></i> Sell an Item</a>
+                <a href="#business" data-route="business" class="profile-link"><i class="ri-store-2-line"></i> Create a Business</a>
+                
+                <div style="border-top:1px solid var(--stroke); margin:0.5rem 0;"></div>
+                <a href="#" class="profile-link logout" onclick="alert('Logged out!')"><i class="ri-logout-box-line"></i> Logout</a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- CART SIDEBAR -->
     <aside class="panel" id="cartPanel">
         <div class="panel__header">
             <div class="panel__title">Cart</div>
@@ -218,34 +220,18 @@
         </div>
     </aside>
 
-    <!-- OWNER PROFILE MODAL -->
+    <!-- OWNER MODAL -->
     <dialog id="ownerModal" class="modal">
         <div class="modal__content">
             <div style="display:flex; justify-content:space-between; align-items:start;">
                 <h2 style="font-size:1.5rem; margin-bottom:1rem;">Owner Profile</h2>
-                <button class="btn btn-outline" onclick="document.getElementById('ownerModal').close()" style="padding:0.4rem;"><i class="ri-close-line"></i></button>
+                <button class="btn btn-outline" onclick="closeOwnerModal()" style="padding:0.4rem;"><i class="ri-close-line"></i></button>
             </div>
             <div id="ownerInfo"></div>
         </div>
     </dialog>
 
     <div class="toast" id="toast"></div>
-
-    <script>
-        function toggleProfileMenu() {
-            const menu = document.getElementById('profileMenu');
-            menu.classList.toggle('show');
-        }
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.profile-dropdown')) {
-                document.getElementById('profileMenu').classList.remove('show');
-            }
-        });
-        window.logout = () => {
-            localStorage.removeItem('slsu_token');
-            window.location.href = 'login.html';
-        }
-    </script>
     <script src="scripts/boot.js" defer></script>
 </body>
 </html>
