@@ -23,10 +23,9 @@
       </div>
 
       <div class="nav__center">
-        <button class="nav-pill active" onclick="route('browse')" data-route="browse">Browse</button>
-        <button class="nav-pill" onclick="route('sell')" data-route="sell">Sell Item</button>
-        <button class="nav-pill" onclick="route('business')" data-route="business">Create Business</button>
-        <button class="nav-pill" onclick="route('my')" data-route="my">Dashboard</button>
+        <button class="nav-pill active" onclick="route('browse')" data-route="browse">
+          Browse
+        </button>
       </div>
 
       <div class="nav__actions">
@@ -98,7 +97,8 @@
     <button class="btn btn-outline" onclick="route('browse')" style="margin-bottom:1rem;">
       <i class="ri-arrow-left-line"></i> Back
     </button>
-    <div id="bizHeader"></div> <h3 class="section__header" style="margin-top:2rem;">Menu & Services</h3>
+    <div id="bizHeader"></div>
+    <h3 class="section__header" style="margin-top:2rem;">Menu & Services</h3>
     <div class="grid grid-3" id="bizItemsGrid"></div>
   </section>
 
@@ -178,7 +178,7 @@
   </section>
 
   <section class="section__container" id="businessSection" style="display:none;">
-      </section>
+     </section>
 
   <section class="section__container" id="mySection" style="display:none;">
     <h2 class="section__header">My Dashboard</h2>
@@ -223,39 +223,43 @@
         </div>
         <div class="profile-sidebar__body">
             <div class="profile-sidebar__user">
-                <div class="profile-avatar-circle profile-avatar-letter">U</div>
+                <div class="profile-avatar-circle profile-avatar-letter">M</div>
                 <div>
-                    <div class="profile-display-name">Student User</div>
+                    <div class="profile-display-name">Marc</div>
                     <div class="profile-email">student@slsu.edu.ph</div>
                 </div>
             </div>
             
             <div class="profile-sidebar__section">
-                <div class="profile-sidebar__label">Menu</div>
-                <button class="profile-pill" onclick="route('my'); document.getElementById('profileOverlay').classList.remove('open')">
+                <div class="profile-sidebar__label">MENU</div>
+                <button class="profile-menu-link" onclick="route('my'); document.getElementById('profileOverlay').classList.remove('open')">
                     <i class="ri-dashboard-line"></i><span>Dashboard</span>
                 </button>
-                <button class="profile-pill" onclick="route('sell'); document.getElementById('profileOverlay').classList.remove('open')">
+                <button class="profile-menu-link" onclick="route('sell'); document.getElementById('profileOverlay').classList.remove('open')">
                     <i class="ri-add-circle-line"></i><span>Sell Item</span>
                 </button>
-                <button class="profile-pill" onclick="route('business'); document.getElementById('profileOverlay').classList.remove('open')">
+                <button class="profile-menu-link" onclick="route('business'); document.getElementById('profileOverlay').classList.remove('open')">
                     <i class="ri-store-2-line"></i><span>Create Business</span>
                 </button>
             </div>
             
             <div class="profile-sidebar__section">
-                <div class="profile-sidebar__label">Settings</div>
+                <div class="profile-sidebar__label">SETTINGS</div>
                 <div class="input">
                     <label>Display Name</label>
-                    <input id="displayNameInput" placeholder="Update name" style="background:var(--surface-2); border:1px solid var(--stroke); padding:0.5rem; color:white; width:100%; border-radius:8px;">
+                    <input id="displayNameInput" value="Marc" style="background:var(--surface-2); border:1px solid var(--stroke); padding:0.6rem; color:white; width:100%; border-radius:8px;">
                 </div>
-                <button class="btn" id="saveProfileBtn" style="width:100%; margin-top:0.5rem;">Save</button>
+                <button class="btn" id="saveProfileBtn" style="width:100%; margin-top:0.8rem;">Save</button>
             </div>
         </div>
+        
         <div class="profile-sidebar__footer">
              <button class="btn profile-logout-btn" id="profileLogoutBtn" onclick="logout()">
                 <i class="ri-logout-box-r-line"></i> Logout
             </button>
+             <div style="margin-top:1rem; font-size:0.7rem; color:var(--muted); word-break:break-all;">
+                 >>>>>> 2949ea96a7214fee... (Version ID)
+             </div>
         </div>
     </aside>
   </div>
@@ -263,7 +267,6 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    // Logout function
     function logout() {
         localStorage.removeItem('slsu_token');
         window.location.href = 'login.html';
