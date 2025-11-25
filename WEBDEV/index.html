@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- AUTH CHECK -->
+    <script>
+        if (!localStorage.getItem('slsu_token')) { window.location.href = 'login.html'; }
+    </script>
     <title>SLSU Marketplace</title>
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/marketplace.css">
@@ -17,54 +21,66 @@
                 <span class="site-title">SLSU <span class="accent">Marketplace</span></span>
             </div>
             
-            <div id="linksMount"></div>
+            <div style="flex:1;"></div> 
+            
+            <div class="toolbar" style="display:flex; gap:1rem; align-items:center;">
+                <button class="btn btn-outline" onclick="route('browse')">Browse</button>
+                <button class="btn btn-outline" onclick="route('my')">My Dashboard</button>
 
-            <div class="toolbar">
+                <!-- Cart Button -->
                 <button class="btn btn-outline" id="openCart" style="padding:0.5rem 0.8rem;">
-                    <i class="ri-shopping-cart-2-line"></i> <span id="cartCount" style="font-size:0.9rem;">0</span>
+                    <i class="ri-shopping-cart-2-line"></i><span id="cartCount">0</span>
                 </button>
+
+                <!-- PROFILE BUTTON (opens sidebar) -->
+                <div class="profile-dropdown">
+                    <button class="profile-btn" id="openProfile">
+                        <div class="avatar" id="navAvatar">U</div>
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
 
     <!-- HERO -->
     <header class="section__container" id="heroHeader">
-        <h1 class="section__header">Buy & Sell within SLSU</h1>
-        <p class="section__subheader">Campus-only marketplace for students and staff.</p>
-        <div class="searchbar" style="margin-top:1rem;">
-            <input type="text" id="q" placeholder="Search items..." />
-            <select id="cat">
-                <option value="">All categories</option>
-                <option>Food & Drinks</option>
-                <option>Services</option>
-                <option>Books</option>
-                <option>Uniforms</option>
-                <option>Electronics</option>
-                <option>Others</option>
-            </select>
-            <select id="sort">
-                <option value="latest">Latest</option>
-                <option value="price_asc">Price: Low → High</option>
-                <option value="price_desc">Price: High → Low</option>
-            </select>
-            <button class="btn" id="runSearch"><i class="ri-search-line"></i> Search</button>
+        <div class="hero-banner">
+            <h1>Buy & Sell within SLSU</h1>
+            <div class="searchbar">
+                <input type="text" id="q" placeholder="Search items..." />
+                <button class="btn" id="runSearch"><i class="ri-search-line"></i> Search</button>
+            </div>
         </div>
     </header>
 
-    <!-- BROWSE LISTINGS -->
+    <!-- BROWSE LAYOUT -->
     <section class="section__container" id="browseSection">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:.6rem;">
-            <h2 class="section__header" style="font-size:1.4rem;">Marketplace</h2>
-            <div class="tabs" id="viewTabs" role="tablist">
-                <div class="tab active" data-view="all">All Items</div>
-                <div class="tab" data-view="businesses">Businesses</div>
-                <div class="tab" data-view="books">Books</div>
-                <div class="tab" data-view="electronics">Electronics</div>
-            </div>
+        <div class="category-scroll-container">
+            <div id="categoryIcons" class="category-row"></div>
         </div>
-        <div class="grid grid-3" id="listings"></div>
-        <div class="empty" id="emptyListings" style="display:none;">
-            <i class="ri-store-2-line"></i> No items match your filters yet.
+
+        <div class="browse-layout-grid">
+            <div class="browse-main">
+                <div class="section-flex-header">
+                    <h2 class="section-title">Active Shops</h2>
+                    <button class="btn-link" onclick="viewAllBiz()">View All <i class="ri-arrow-right-line"></i></button>
+                </div>
+                <div id="featuredBizRow" class="featured-biz-row"></div>
+
+                <h2 class="section-title" style="margin-top:2rem; margin-bottom:1rem;">Fresh Listings</h2>
+                <div class="grid grid-3" id="listings"></div>
+                <div class="empty" id="emptyListings" style="display:none;">
+                    <i class="ri-store-2-line"></i> No items match your filters yet.
+                </div>
+            </div>
+
+            <aside class="browse-sidebar">
+                <div class="sidebar-header">
+                    <h3>Top Rated</h3>
+                    <span style="font-size:0.8rem; color:var(--accent);">Live Now</span>
+                </div>
+                <div id="activeBizList" class="ranked-list"></div>
+            </aside>
         </div>
     </section>
 
@@ -84,7 +100,6 @@
     <!-- SELL FORM -->
     <section class="section__container" id="sellSection" style="display:none;">
         <h2 class="section__header">List an item / Add to Menu</h2>
-        <p class="section__subheader" style="margin-bottom:1rem;">Create a listing or add a product to your business.</p>
         <form id="sellForm" class="form">
             <input type="hidden" name="businessId" id="linkToBizId" value="" />
             <div id="bizLinkNotice" style="background:rgba(34,197,94,.1); color:#86efac; padding:0.8rem; border-radius:8px; display:none; margin-bottom:1rem;">
@@ -92,12 +107,12 @@
             </div>
             <div class="grid grid-2">
                 <div class="input">
-                    <label>Item Title / Service Name</label>
-                    <input required name="title" placeholder="e.g., Cheese Burger or Laptop Repair" />
+                    <label>Item Title</label>
+                    <input required name="title" placeholder="e.g., Cheese Burger" />
                 </div>
                 <div class="input">
                     <label>Price (PHP)</label>
-                    <input required name="price" type="number" min="0" step="0.01" placeholder="e.g., 50" />
+                    <input required name="price" type="number" min="0" step="0.01" />
                 </div>
             </div>
             <div class="grid grid-2">
@@ -120,13 +135,12 @@
                         <option>Service</option>
                         <option>Like New</option>
                         <option>Good</option>
-                        <option>Fair</option>
                     </select>
                 </div>
             </div>
             <div class="input">
                 <label>Description</label>
-                <textarea name="description" rows="4" placeholder="Ingredients, details, or service inclusions..."></textarea>
+                <textarea name="description" rows="4"></textarea>
             </div>
             <div class="grid grid-2">
                 <div class="input">
@@ -142,12 +156,11 @@
                 </div>
                 <div class="input">
                     <label>Contact</label>
-                    <input required name="contact" placeholder="e.g., 09xx" />
+                    <input required name="contact" />
                 </div>
             </div>
             <div class="toolbar">
                 <button class="btn" type="submit"><i class="ri-upload-2-line"></i> Publish</button>
-                <button class="btn btn-outline" type="reset"><i class="ri-eraser-line"></i> Reset</button>
             </div>
         </form>
     </section>
@@ -177,41 +190,7 @@
         </div>
     </section>
 
-    <!-- OVERLAY (Backdrop) -->
-    <div id="overlay" class="overlay" aria-hidden="true"></div>
-
-    <!-- PROFILE SIDEBAR (Drawer) -->
-    <aside class="panel profile-panel" id="profilePanel" aria-hidden="true">
-        <div style="padding:1.5rem; border-bottom:1px solid var(--stroke); background:var(--surface-1);">
-             <div style="display:flex; justify-content:space-between; align-items:start;">
-                 <!-- This avatar is now updated dynamically via JS -->
-                 <div class="sidebar-avatar" style="width:60px; height:60px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:#000; font-weight:700; box-shadow:0 0 20px rgba(34,197,94,0.2); overflow:hidden;">
-                    U
-                 </div>
-                 <button class="btn btn-outline" id="closeProfile" style="padding:0.4rem; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center;"><i class="ri-close-line"></i></button>
-             </div>
-             <div style="margin-top:1rem;">
-                 <h2 id="sidebarName" style="font-size:1.2rem; font-weight:700;">User Student</h2>
-                 <p style="color:var(--muted); font-size:0.9rem;">Student ID: 12345</p>
-             </div>
-        </div>
-        <div class="panel__body" style="padding:1rem;">
-            <div style="display:grid; gap:0.5rem;">
-                <h4 style="font-size:0.8rem; text-transform:uppercase; color:var(--muted); margin-bottom:0.5rem; margin-top:0.5rem; padding-left:0.5rem;">Menu</h4>
-                <a href="#my" data-route="my" class="profile-link"><i class="ri-dashboard-line"></i> My Dashboard</a>
-                <a href="#sell" data-route="sell" class="profile-link"><i class="ri-add-circle-line"></i> Sell an Item</a>
-                <a href="#business" data-route="business" class="profile-link"><i class="ri-store-2-line"></i> Create a Business</a>
-                
-                <!-- NEW SETTINGS LINK -->
-                <a href="#" id="openSettingsBtn" class="profile-link"><i class="ri-settings-3-line"></i> Settings</a>
-
-                <div style="border-top:1px solid var(--stroke); margin:0.5rem 0;"></div>
-                <a href="#" class="profile-link logout" onclick="alert('Logged out!')"><i class="ri-logout-box-line"></i> Logout</a>
-            </div>
-        </div>
-    </aside>
-
-    <!-- CART SIDEBAR -->
+    <!-- CART -->
     <aside class="panel" id="cartPanel">
         <div class="panel__header">
             <div class="panel__title">Cart</div>
@@ -226,71 +205,252 @@
         </div>
     </aside>
 
-    <!-- OWNER MODAL -->
+    <!-- PROFILE SIDEBAR -->
+    <aside class="panel" id="profilePanel">
+        <div class="panel__header">
+            <div style="display:flex; align-items:center; gap:0.8rem;">
+                <div class="avatar avatar-lg" id="profileAvatar">U</div>
+                <div>
+                    <div id="profileName" style="font-weight:700;">SLSU Student</div>
+                    <div id="profileEmail" style="font-size:0.8rem; color:var(--muted);">Signed in</div>
+                </div>
+            </div>
+            <button class="btn btn-outline" id="closeProfile" style="padding:0.4rem 0.6rem;">
+                <i class="ri-close-line"></i>
+            </button>
+        </div>
+
+        <div class="panel__body">
+            <!-- Quick Links -->
+            <div class="profile-section">
+                <div class="profile-section-label">Quick links</div>
+                <div class="profile-link-list">
+                    <button class="profile-link" data-route="my">
+                        <i class="ri-dashboard-line"></i>
+                        <span>My Dashboard</span>
+                    </button>
+                    <button class="profile-link" data-route="sell">
+                        <i class="ri-add-circle-line"></i>
+                        <span>Sell an Item</span>
+                    </button>
+                    <button class="profile-link" data-route="business">
+                        <i class="ri-store-2-line"></i>
+                        <span>Create a Business</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Settings shortcuts -->
+            <div class="profile-section">
+                <div class="profile-section-label">Settings</div>
+                <div class="profile-link-list">
+                    <button class="profile-link" data-action="edit-profile">
+                        <i class="ri-user-settings-line"></i>
+                        <span>Edit profile</span>
+                    </button>
+                    <button class="profile-link" data-action="edit-username">
+                        <i class="ri-edit-2-line"></i>
+                        <span>Edit username</span>
+                    </button>
+                    <button class="profile-link" data-action="manage-google">
+                        <i class="ri-google-fill"></i>
+                        <span>Manage Google account</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Profile form -->
+            <div class="profile-section" id="profileEditSection">
+                <div class="profile-section-label">Profile details</div>
+                <form id="profileForm" class="profile-form">
+                    <div class="input">
+                        <label for="profileUsername">Display name / username</label>
+                        <input id="profileUsername" name="profileUsername" placeholder="e.g. juan.delacruz" />
+                    </div>
+
+                    <div class="input">
+                        <label>Profile picture</label>
+                        <div style="display:flex; align-items:center; gap:0.75rem;">
+                            <label for="profileAvatarFile" class="btn" style="padding:0.6rem 1rem; width:auto;">
+                                <i class="ri-camera-fill"></i> Upload photo
+                            </label>
+                            <span id="profileAvatarStatus" style="font-size:0.8rem; color:var(--muted); font-style:italic;">
+                                JPG/PNG, small file
+                            </span>
+                        </div>
+                        <input type="file" id="profileAvatarFile" accept="image/*" style="display:none;">
+                    </div>
+
+                    <div class="toolbar">
+                        <button class="btn" type="submit" style="width:100%;">
+                            <i class="ri-save-3-line"></i> Save profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="profile-section">
+                <button class="btn btn-outline" type="button" onclick="logout()" style="width:100%; color:#fca5a5; border-color:#b91c1c;">
+                    <i class="ri-logout-box-r-line"></i> Logout
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- OWNER PROFILE MODAL -->
     <dialog id="ownerModal" class="modal">
         <div class="modal__content">
             <div style="display:flex; justify-content:space-between; align-items:start;">
                 <h2 style="font-size:1.5rem; margin-bottom:1rem;">Owner Profile</h2>
-                <button class="btn btn-outline" onclick="closeOwnerModal()" style="padding:0.4rem;"><i class="ri-close-line"></i></button>
+                <button class="btn btn-outline" onclick="document.getElementById('ownerModal').close()" style="padding:0.4rem;"><i class="ri-close-line"></i></button>
             </div>
             <div id="ownerInfo"></div>
         </div>
     </dialog>
 
-    <!-- SETTINGS MODAL (New) -->
-    <dialog id="settingsModal" class="modal">
-        <div class="modal__content" style="max-width:500px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                <h2 style="font-size:1.5rem; font-weight:700;">Account Settings</h2>
-                <button class="btn btn-outline" onclick="closeSettingsModal()" style="padding:0.4rem;"><i class="ri-close-line"></i></button>
-            </div>
-            
-            <form id="settingsForm" class="form">
-                <!-- Google Connect Section -->
-                <div style="background:var(--surface-3); padding:1rem; border-radius:12px; margin-bottom:1rem; border:1px solid var(--stroke);">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <h4 style="font-weight:600; margin-bottom:0.2rem;">Google Account</h4>
-                            <p style="font-size:0.85rem; color:var(--muted);" id="googleStatusText">Not connected</p>
-                        </div>
-                        <button type="button" id="googleBtn" class="btn-google">
-                            <i class="ri-google-fill"></i> Connect
-                        </button>
-                    </div>
-                </div>
-
-                <div class="input">
-                    <label>Profile Picture</label>
-                    <div style="display:flex; align-items:center; gap:1rem;">
-                        <div id="settingsAvatarPreview" style="width:50px; height:50px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; overflow:hidden; color:#000; font-weight:700;">U</div>
-                        <div style="flex:1;">
-                            <label for="settingsFile" class="btn btn-outline" style="padding:0.5rem 1rem; font-size:0.9rem; width:auto; display:inline-flex;">
-                                <i class="ri-upload-cloud-2-line"></i> Upload New
-                            </label>
-                            <input type="file" id="settingsFile" accept="image/*" style="display:none;" />
-                            <input type="hidden" name="avatar" id="settingsAvatarInput" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="input">
-                    <label>Display Name</label>
-                    <input name="username" id="settingsName" placeholder="e.g. User Student" />
-                </div>
-
-                <div class="input">
-                    <label>Student ID / Bio</label>
-                    <input name="bio" id="settingsBio" placeholder="e.g. 12345 or Computer Engineering" />
-                </div>
-
-                <div class="toolbar" style="margin-top:1rem;">
-                    <button class="btn" type="submit" style="width:100%"><i class="ri-save-3-line"></i> Save Changes</button>
-                </div>
-            </form>
-        </div>
-    </dialog>
-
     <div class="toast" id="toast"></div>
+
+    <!-- PROFILE + LOGOUT SCRIPT -->
+    <script>
+        const PROFILE_KEY = 'slsu_profile';
+        const TOKEN_KEY = 'slsu_token';
+
+        function getProfile() {
+            try {
+                return JSON.parse(localStorage.getItem(PROFILE_KEY)) || null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function saveProfile(profile) {
+            localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+        }
+
+        function applyProfileUI() {
+            let profile = getProfile();
+
+            if (!profile) {
+                profile = {
+                    username: 'SLSU Student',
+                    email: '',
+                    provider: 'local',
+                    avatar: ''
+                };
+                saveProfile(profile);
+            }
+
+            const avatarSmall = document.getElementById('navAvatar');
+            const avatarLarge = document.getElementById('profileAvatar');
+            const nameEl = document.getElementById('profileName');
+            const emailEl = document.getElementById('profileEmail');
+            const usernameInput = document.getElementById('profileUsername');
+
+            if (nameEl) nameEl.textContent = profile.username || 'SLSU Student';
+            if (emailEl) {
+                emailEl.textContent = profile.email
+                    ? profile.email
+                    : (profile.provider ? profile.provider.toUpperCase() + ' account' : 'Signed in');
+            }
+            if (usernameInput) usernameInput.value = profile.username || '';
+
+            [avatarSmall, avatarLarge].forEach(el => {
+                if (!el) return;
+                if (profile.avatar) {
+                    el.style.backgroundImage = `url(${profile.avatar})`;
+                    el.style.backgroundSize = 'cover';
+                    el.style.backgroundPosition = 'center';
+                    el.textContent = '';
+                } else {
+                    el.style.backgroundImage = '';
+                    const initial = (profile.username || 'S').charAt(0).toUpperCase();
+                    el.textContent = initial;
+                }
+            });
+
+            // First-time users: open the profile sidebar automatically
+            if ((!profile.username || profile.username === 'SLSU Student') &&
+                document.getElementById('profilePanel')) {
+                document.getElementById('profilePanel').classList.add('open');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const profilePanel = document.getElementById('profilePanel');
+
+            document.getElementById('openProfile')?.addEventListener('click', () => {
+                profilePanel?.classList.add('open');
+            });
+
+            document.getElementById('closeProfile')?.addEventListener('click', () => {
+                profilePanel?.classList.remove('open');
+            });
+
+            // Quick links (Dashboard / Sell / Create Biz)
+            document.querySelectorAll('.profile-link[data-route]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const r = btn.dataset.route;
+                    if (typeof route === 'function') route(r);
+                    profilePanel?.classList.remove('open');
+                });
+            });
+
+            // Settings shortcuts
+            document.querySelectorAll('.profile-link[data-action]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const action = btn.dataset.action;
+                    if (action === 'edit-profile' || action === 'edit-username') {
+                        document.getElementById('profileForm')
+                            ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                    if (action === 'manage-google') {
+                        window.open('https://myaccount.google.com', '_blank');
+                    }
+                });
+            });
+
+            // Save profile form
+            const profileForm = document.getElementById('profileForm');
+            if (profileForm) {
+                profileForm.addEventListener('submit', e => {
+                    e.preventDefault();
+                    const profile = getProfile() || {};
+                    const username = document.getElementById('profileUsername').value.trim();
+                    if (username) profile.username = username;
+                    saveProfile(profile);
+                    applyProfileUI();
+                    if (typeof toast === 'function') toast('Profile updated');
+                });
+            }
+
+            // Avatar upload
+            const avatarFile = document.getElementById('profileAvatarFile');
+            if (avatarFile) {
+                avatarFile.addEventListener('change', e => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    document.getElementById('profileAvatarStatus').textContent = file.name;
+
+                    const reader = new FileReader();
+                    reader.onload = ev => {
+                        const profile = getProfile() || {};
+                        profile.avatar = ev.target.result;
+                        saveProfile(profile);
+                        applyProfileUI();
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            applyProfileUI();
+        });
+
+        window.logout = () => {
+            localStorage.removeItem(TOKEN_KEY);
+            window.location.href = 'login.html';
+        };
+    </script>
+
     <script src="scripts/boot.js" defer></script>
 </body>
 </html>
