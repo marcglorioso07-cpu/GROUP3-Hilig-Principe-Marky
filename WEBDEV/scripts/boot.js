@@ -1,18 +1,30 @@
-// boot.js — load partials first, then the app
+// scripts/boot.js — load partials first, then the app
 (async () => {
-  async function inject(selector, url) {
+  async function inject(selector, urls) {
     const mount = document.querySelector(selector);
-    if (!mount) return;
-    const res = await fetch(url, { cache: 'no-store' });
-    mount.innerHTML = await res.text();
+    if (!mount) return false;
+
+    for (const url of urls) {
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) continue;
+        mount.innerHTML = await res.text();
+        return true;
+      } catch (_) {}
+    }
+    return false;
   }
 
-  try {
-    await inject('#linksMount', 'partials/nav-links.html');
-    await inject('#businessSection', 'partials/business/form.html');
-  } catch (err) {
-    console.error('Boot failed to load partials:', err);
-  }
+  // Try common locations (use whichever exists in your project)
+  await inject('#linksMount', [
+    'partials/nav-links.html',
+    './nav-links.html'
+  ]);
+
+  await inject('#businessSection', [
+    'partials/business/form.html',
+    './form.html'
+  ]);
 
   // After partials are present, load the main app
   if (!document.querySelector('script[data-app="marketplace"]')) {
