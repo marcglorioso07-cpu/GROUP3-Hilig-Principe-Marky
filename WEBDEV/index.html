@@ -184,11 +184,14 @@
     <aside class="panel profile-panel" id="profilePanel" aria-hidden="true">
         <div style="padding:1.5rem; border-bottom:1px solid var(--stroke); background:var(--surface-1);">
              <div style="display:flex; justify-content:space-between; align-items:start;">
-                 <div style="width:50px; height:50px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:#000; font-weight:700; box-shadow:0 0 20px rgba(34,197,94,0.2);">U</div>
+                 <!-- This avatar is now updated dynamically via JS -->
+                 <div class="sidebar-avatar" style="width:60px; height:60px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:#000; font-weight:700; box-shadow:0 0 20px rgba(34,197,94,0.2); overflow:hidden;">
+                    U
+                 </div>
                  <button class="btn btn-outline" id="closeProfile" style="padding:0.4rem; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center;"><i class="ri-close-line"></i></button>
              </div>
              <div style="margin-top:1rem;">
-                 <h2 style="font-size:1.2rem; font-weight:700;">User Student</h2>
+                 <h2 id="sidebarName" style="font-size:1.2rem; font-weight:700;">User Student</h2>
                  <p style="color:var(--muted); font-size:0.9rem;">Student ID: 12345</p>
              </div>
         </div>
@@ -199,6 +202,9 @@
                 <a href="#sell" data-route="sell" class="profile-link"><i class="ri-add-circle-line"></i> Sell an Item</a>
                 <a href="#business" data-route="business" class="profile-link"><i class="ri-store-2-line"></i> Create a Business</a>
                 
+                <!-- NEW SETTINGS LINK -->
+                <a href="#" id="openSettingsBtn" class="profile-link"><i class="ri-settings-3-line"></i> Settings</a>
+
                 <div style="border-top:1px solid var(--stroke); margin:0.5rem 0;"></div>
                 <a href="#" class="profile-link logout" onclick="alert('Logged out!')"><i class="ri-logout-box-line"></i> Logout</a>
             </div>
@@ -228,6 +234,59 @@
                 <button class="btn btn-outline" onclick="closeOwnerModal()" style="padding:0.4rem;"><i class="ri-close-line"></i></button>
             </div>
             <div id="ownerInfo"></div>
+        </div>
+    </dialog>
+
+    <!-- SETTINGS MODAL (New) -->
+    <dialog id="settingsModal" class="modal">
+        <div class="modal__content" style="max-width:500px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <h2 style="font-size:1.5rem; font-weight:700;">Account Settings</h2>
+                <button class="btn btn-outline" onclick="closeSettingsModal()" style="padding:0.4rem;"><i class="ri-close-line"></i></button>
+            </div>
+            
+            <form id="settingsForm" class="form">
+                <!-- Google Connect Section -->
+                <div style="background:var(--surface-3); padding:1rem; border-radius:12px; margin-bottom:1rem; border:1px solid var(--stroke);">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <h4 style="font-weight:600; margin-bottom:0.2rem;">Google Account</h4>
+                            <p style="font-size:0.85rem; color:var(--muted);" id="googleStatusText">Not connected</p>
+                        </div>
+                        <button type="button" id="googleBtn" class="btn-google">
+                            <i class="ri-google-fill"></i> Connect
+                        </button>
+                    </div>
+                </div>
+
+                <div class="input">
+                    <label>Profile Picture</label>
+                    <div style="display:flex; align-items:center; gap:1rem;">
+                        <div id="settingsAvatarPreview" style="width:50px; height:50px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; overflow:hidden; color:#000; font-weight:700;">U</div>
+                        <div style="flex:1;">
+                            <label for="settingsFile" class="btn btn-outline" style="padding:0.5rem 1rem; font-size:0.9rem; width:auto; display:inline-flex;">
+                                <i class="ri-upload-cloud-2-line"></i> Upload New
+                            </label>
+                            <input type="file" id="settingsFile" accept="image/*" style="display:none;" />
+                            <input type="hidden" name="avatar" id="settingsAvatarInput" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input">
+                    <label>Display Name</label>
+                    <input name="username" id="settingsName" placeholder="e.g. User Student" />
+                </div>
+
+                <div class="input">
+                    <label>Student ID / Bio</label>
+                    <input name="bio" id="settingsBio" placeholder="e.g. 12345 or Computer Engineering" />
+                </div>
+
+                <div class="toolbar" style="margin-top:1rem;">
+                    <button class="btn" type="submit" style="width:100%"><i class="ri-save-3-line"></i> Save Changes</button>
+                </div>
+            </form>
         </div>
     </dialog>
 
