@@ -11,7 +11,6 @@
 <body>
 
     <!-- School Background -->
-    <!-- Make sure you have an image named 'school.jpg' in your assets folder -->
     <div class="school-bg"></div>
     <div class="gradient-overlay"></div>
 
@@ -26,6 +25,23 @@
             <h1 style="text-align:center; margin-bottom:0.5rem;">Login</h1>
             <p class="subtitle" style="text-align:center;">Welcome back to SLSU Marketplace</p>
 
+            <!-- Social login -->
+            <div class="social-login">
+                <button type="button" class="social-btn google" id="googleLogin">
+                    <i class="ri-google-fill"></i>
+                    <span>Continue with Google</span>
+                </button>
+                <button type="button" class="social-btn facebook" id="facebookLogin">
+                    <i class="ri-facebook-circle-fill"></i>
+                    <span>Continue with Facebook</span>
+                </button>
+            </div>
+
+            <div class="divider">
+                <span>or use your student account</span>
+            </div>
+
+            <!-- Email / password login -->
             <form id="loginForm">
                 <div class="input-group">
                     <i class="ri-mail-line icon"></i>
