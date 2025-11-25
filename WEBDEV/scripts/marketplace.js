@@ -115,14 +115,24 @@ window.previewSlotImage = (input, labelId) => {
 let state = { q:'', cat:'' };
 
 function route(r){
+<<<<<<< HEAD
   // update active nav link if present
   document.querySelectorAll('.nav__links a').forEach(a=> a.classList.remove('active'));
   document.querySelector(`.nav__links a[data-route="${r}"]`)?.classList.add('active');
+=======
+  // update active nav link pills
+  document.querySelectorAll('.nav-pill').forEach(a=> a.classList.remove('active'));
+  document.querySelector(`.nav-pill[data-route="${r}"]`)?.classList.add('active');
+>>>>>>> 2949ea96a7214fee093d3a6f88404ea5729afeb9
 
   // show/hide sections
   const show = (id, on) => { const el=document.getElementById(id); if(el) el.style.display = on ? 'block' : 'none'; };
 
+<<<<<<< HEAD
   // hero only on browse
+=======
+  // Hero only on browse
+>>>>>>> 2949ea96a7214fee093d3a6f88404ea5729afeb9
   show('heroHeader', r === 'browse');
 
   show('browseSection', r==='browse');
@@ -138,12 +148,18 @@ function route(r){
     renderListings();
   }
   if(r==='my') {
+<<<<<<< HEAD
     // These functions need to exist in your full project, 
     // but were not included in your upload. 
     // Ensure they exist or this part will error silently.
     if(typeof renderMyListings === 'function') renderMyListings();
     if(typeof renderMyOrders === 'function') renderMyOrders();
     if(typeof renderMyBusinesses === 'function') renderMyBusinesses();
+=======
+    // Basic dashboard render placeholders
+    const listBody = document.getElementById('myListingsBody');
+    if(listBody) listBody.innerHTML = '<tr><td style="padding:1rem; color:#94a3b8;">Loading items...</td></tr>';
+>>>>>>> 2949ea96a7214fee093d3a6f88404ea5729afeb9
   }
   if(r==='sell') {
     if(!window.isAddingToBiz) {
@@ -156,12 +172,17 @@ function route(r){
   }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
+<<<<<<< HEAD
   // Avoid errors if history API fails
   try { history.replaceState(null,'',`#${r}`); } catch(e){}
 }
 window.route = route;
 
 window.addEventListener('hashchange', ()=> route(location.hash.slice(1)||'browse'));
+=======
+}
+window.route = route;
+>>>>>>> 2949ea96a7214fee093d3a6f88404ea5729afeb9
 
 // ----- Categories -----
 const CATEGORIES = [
@@ -201,7 +222,11 @@ function renderFeatured() {
 
   const featured = biz.slice(0, 3);
   if(!featured.length) {
+<<<<<<< HEAD
     container.innerHTML = `<div style="grid-column:1/-1; color:var(--muted);">No businesses featured yet.</div>`;
+=======
+    container.innerHTML = `<div style="grid-column:1/-1; color:var(--muted); padding:1rem; border:1px dashed var(--stroke); border-radius:12px;">No businesses featured yet.</div>`;
+>>>>>>> 2949ea96a7214fee093d3a6f88404ea5729afeb9
     return;
   }
 
@@ -240,10 +265,13 @@ function renderActiveSidebar() {
   `).join('');
 }
 
+<<<<<<< HEAD
 window.viewAllBiz = () => {
   document.getElementById('activeBizList')?.scrollIntoView({ behavior:'smooth' });
 };
 
+=======
+>>>>>>> 2949ea96a7214fee093d3a6f88404ea5729afeb9
 // ----- Listings -----
 document.getElementById('runSearch')?.addEventListener('click', ()=>{
   state.q = document.getElementById('q')?.value.trim() || '';
@@ -256,12 +284,21 @@ function itemTemplate(i){
     <img class="card__img" src="${i.image || 'https://dummyimage.com/800x600/0f1620/111827.png&text=Item'}" />
     <div class="card__body">
       <div class="badge">${escapeHtml(i.category)} • ${escapeHtml(i.condition || 'New')}</div>
+<<<<<<< HEAD
       <h3 style="font-size:1.05rem;">${escapeHtml(i.title)}</h3>
       <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
         <div class="price">${fmt.format(i.price)}</div>
         <div style="display:flex; gap:0.5rem;">
           <button class="btn" onclick="addToCart('${i.id}')">Add</button>
         </div>
+=======
+      <h3>${escapeHtml(i.title)}</h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
+        <div class="price">${fmt.format(i.price)}</div>
+        <button class="btn" style="padding:0.4rem 0.8rem; font-size:0.9rem;" onclick="addToCart('${i.id}')">
+          <i class="ri-add-line"></i>
+        </button>
+>>>>>>> 2949ea96a7214fee093d3a6f88404ea5729afeb9
       </div>
     </div>
   </article>`;
@@ -292,5 +329,30 @@ function renderListings(){
   }
 }
 
+<<<<<<< HEAD
 // Initial Run
 renderListings();
+=======
+// ----- Sidebar Toggles (Cart & Profile) -----
+// These ensure the new sidebars work correctly
+const cartBtn = document.getElementById('openCart');
+const cartPanel = document.getElementById('cartPanel');
+const closeCart = document.getElementById('closeCart');
+
+if(cartBtn && cartPanel) {
+    cartBtn.addEventListener('click', () => cartPanel.classList.add('open'));
+    if(closeCart) closeCart.addEventListener('click', () => cartPanel.classList.remove('open'));
+}
+
+const profileBtn = document.getElementById('openProfile');
+const profileOverlay = document.getElementById('profileOverlay');
+const closeProfile = document.getElementById('closeProfileSidebar');
+
+if(profileBtn && profileOverlay) {
+    profileBtn.addEventListener('click', () => profileOverlay.classList.add('open'));
+    if(closeProfile) closeProfile.addEventListener('click', () => profileOverlay.classList.remove('open'));
+}
+
+// Init
+renderListings();
+>>>>>>> 2949ea96a7214fee093d3a6f88404ea5729afeb9
