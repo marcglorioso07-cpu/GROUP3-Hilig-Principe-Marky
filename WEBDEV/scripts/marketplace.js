@@ -46,67 +46,16 @@ const setupFileUpload = (fileId, textId, statusId) => {
 setupFileUpload('sellFile', 'sellImageInput', 'sellFileStatus');
 setupFileUpload('bizFile', 'bizLogoInput', 'bizFileStatus');
 
-// ----- Menu Builder -----
-window.toggleMenuBuilder = () => {
-  const grid = document.getElementById('menuBuilderGrid');
-  const btn = document.getElementById('toggleMenuBtn');
-  if(!grid || !btn) return;
-
-  if(grid.children.length === 0) initMenuGrid();
-
-  const isHidden = window.getComputedStyle(grid).display === 'none';
-  if (isHidden) {
-    grid.style.display = 'grid';
-    btn.innerHTML = '<i class="ri-eye-off-line"></i> Hide Menu Builder';
-    btn.classList.add('btn-outline');
-    setTimeout(() => grid.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
-  } else {
-    grid.style.display = 'none';
-    btn.innerHTML = '<i class="ri-layout-grid-line"></i> Create Menu';
-    btn.classList.remove('btn-outline');
-  }
-};
-
-window.initMenuGrid = () => {
-  const grid = document.getElementById('menuBuilderGrid');
-  if(!grid) return;
-  grid.innerHTML = '';
-
-  for(let i=1; i<=4; i++) {
-    const slotId = `slot_${i}`;
-    const div = document.createElement('div');
-    div.className = 'menu-slot-card';
-    div.innerHTML = `
-      <div class="slot-img-wrapper">
-        <input type="file" name="qm_file" id="file_${slotId}" accept="image/*"
-          onchange="previewSlotImage(this, 'prev_${slotId}')" />
-        <label for="file_${slotId}" id="prev_${slotId}">
-          <i class="ri-image-add-line"></i>
-          <span>Add Photo</span>
-        </label>
-      </div>
-      <div class="slot-body">
-        <input name="qm_name" placeholder="Item Name" class="slot-input-title" />
-        <textarea name="qm_desc" placeholder="Description..." class="slot-input-desc" rows="2"></textarea>
-        <div class="slot-price-row">
-          <span style="color:var(--accent); font-weight:bold;">₱</span>
-          <input name="qm_price" type="number" placeholder="0.00" class="slot-input-price" />
-        </div>
-      </div>
-    `;
-    grid.appendChild(div);
-  }
-};
-
-window.previewSlotImage = (input, labelId) => {
+// ----- Menu Builder Slot Preview -----
+window.previewSlot = (input, imgId) => {
   if (!(input.files && input.files[0])) return;
   const reader = new FileReader();
   reader.onload = e => {
-    const label = document.getElementById(labelId);
-    if(!label) return;
-    label.style.backgroundImage = `url(${e.target.result})`;
-    label.innerHTML = '';
-    label.style.border = 'none';
+    const img = document.getElementById(imgId);
+    if(img) {
+      img.src = e.target.result;
+      img.style.display = 'block';
+    }
   };
   reader.readAsDataURL(input.files[0]);
 };
@@ -115,24 +64,14 @@ window.previewSlotImage = (input, labelId) => {
 let state = { q:'', cat:'' };
 
 function route(r){
-<<<<<<< HEAD
-  // update active nav link if present
-  document.querySelectorAll('.nav__links a').forEach(a=> a.classList.remove('active'));
-  document.querySelector(`.nav__links a[data-route="${r}"]`)?.classList.add('active');
-=======
   // update active nav link pills
   document.querySelectorAll('.nav-pill').forEach(a=> a.classList.remove('active'));
   document.querySelector(`.nav-pill[data-route="${r}"]`)?.classList.add('active');
->>>>>>> 2949ea96a7214fee093d3a6f88404ea5729afeb9
 
   // show/hide sections
   const show = (id, on) => { const el=document.getElementById(id); if(el) el.style.display = on ? 'block' : 'none'; };
 
-<<<<<<< HEAD
-  // hero only on browse
-=======
   // Hero only on browse
->>>>>>> 2949ea96a7214fee093d3a6f88404ea5729afeb9
   show('heroHeader', r === 'browse');
 
   show('browseSection', r==='browse');
@@ -148,18 +87,9 @@ function route(r){
     renderListings();
   }
   if(r==='my') {
-<<<<<<< HEAD
-    // These functions need to exist in your full project, 
-    // but were not included in your upload. 
-    // Ensure they exist or this part will error silently.
-    if(typeof renderMyListings === 'function') renderMyListings();
-    if(typeof renderMyOrders === 'function') renderMyOrders();
-    if(typeof renderMyBusinesses === 'function') renderMyBusinesses();
-=======
     // Basic dashboard render placeholders
     const listBody = document.getElementById('myListingsBody');
     if(listBody) listBody.innerHTML = '<tr><td style="padding:1rem; color:#94a3b8;">Loading items...</td></tr>';
->>>>>>> 2949ea96a7214fee093d3a6f88404ea5729afeb9
   }
   if(r==='sell') {
     if(!window.isAddingToBiz) {
@@ -172,17 +102,8 @@ function route(r){
   }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
-<<<<<<< HEAD
-  // Avoid errors if history API fails
-  try { history.replaceState(null,'',`#${r}`); } catch(e){}
 }
 window.route = route;
-
-window.addEventListener('hashchange', ()=> route(location.hash.slice(1)||'browse'));
-=======
-}
-window.route = route;
->>>>>>> 2949ea96a7214fee093d3a6f88404ea5729afeb9
 
 // ----- Categories -----
 const CATEGORIES = [
@@ -222,11 +143,7 @@ function renderFeatured() {
 
   const featured = biz.slice(0, 3);
   if(!featured.length) {
-<<<<<<< HEAD
-    container.innerHTML = `<div style="grid-column:1/-1; color:var(--muted);">No businesses featured yet.</div>`;
-=======
     container.innerHTML = `<div style="grid-column:1/-1; color:var(--muted); padding:1rem; border:1px dashed var(--stroke); border-radius:12px;">No businesses featured yet.</div>`;
->>>>>>> 2949ea96a7214fee093d3a6f88404ea5729afeb9
     return;
   }
 
@@ -265,13 +182,6 @@ function renderActiveSidebar() {
   `).join('');
 }
 
-<<<<<<< HEAD
-window.viewAllBiz = () => {
-  document.getElementById('activeBizList')?.scrollIntoView({ behavior:'smooth' });
-};
-
-=======
->>>>>>> 2949ea96a7214fee093d3a6f88404ea5729afeb9
 // ----- Listings -----
 document.getElementById('runSearch')?.addEventListener('click', ()=>{
   state.q = document.getElementById('q')?.value.trim() || '';
@@ -284,21 +194,12 @@ function itemTemplate(i){
     <img class="card__img" src="${i.image || 'https://dummyimage.com/800x600/0f1620/111827.png&text=Item'}" />
     <div class="card__body">
       <div class="badge">${escapeHtml(i.category)} • ${escapeHtml(i.condition || 'New')}</div>
-<<<<<<< HEAD
-      <h3 style="font-size:1.05rem;">${escapeHtml(i.title)}</h3>
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
-        <div class="price">${fmt.format(i.price)}</div>
-        <div style="display:flex; gap:0.5rem;">
-          <button class="btn" onclick="addToCart('${i.id}')">Add</button>
-        </div>
-=======
       <h3>${escapeHtml(i.title)}</h3>
       <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
         <div class="price">${fmt.format(i.price)}</div>
         <button class="btn" style="padding:0.4rem 0.8rem; font-size:0.9rem;" onclick="addToCart('${i.id}')">
           <i class="ri-add-line"></i>
         </button>
->>>>>>> 2949ea96a7214fee093d3a6f88404ea5729afeb9
       </div>
     </div>
   </article>`;
@@ -329,12 +230,7 @@ function renderListings(){
   }
 }
 
-<<<<<<< HEAD
-// Initial Run
-renderListings();
-=======
 // ----- Sidebar Toggles (Cart & Profile) -----
-// These ensure the new sidebars work correctly
 const cartBtn = document.getElementById('openCart');
 const cartPanel = document.getElementById('cartPanel');
 const closeCart = document.getElementById('closeCart');
@@ -355,4 +251,3 @@ if(profileBtn && profileOverlay) {
 
 // Init
 renderListings();
->>>>>>> 2949ea96a7214fee093d3a6f88404ea5729afeb9
