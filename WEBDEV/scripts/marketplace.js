@@ -1,7 +1,7 @@
 /* scripts/marketplace.js */
 
 // ----- Setup -----
-const ONE_TIME_RESET_KEY = 'slsu_v10_layout'; 
+const ONE_TIME_RESET_KEY = 'slsu_v4_reset'; 
 if (!localStorage.getItem(ONE_TIME_RESET_KEY)) {
   localStorage.clear(); 
   localStorage.setItem(ONE_TIME_RESET_KEY, '1');
@@ -40,71 +40,36 @@ const setupFileUpload = (fileId, textId, statusId) => {
 setupFileUpload('sellFile', 'sellImageInput', 'sellFileStatus');
 setupFileUpload('bizFile', 'bizLogoInput', 'bizFileStatus');
 
-// ----- Menu Builder -----
-window.toggleMenuBuilder = () => {
-    const grid = document.getElementById('menuBuilderGrid');
-    const btn = document.getElementById('toggleMenuBtn');
-    if(grid.children.length === 0) initMenuGrid();
-    
-    const isHidden = window.getComputedStyle(grid).display === 'none';
-    if (isHidden) {
-        grid.style.display = 'grid';
-        btn.innerHTML = '<i class="ri-eye-off-line"></i> Hide Menu Builder';
-        btn.classList.add('btn-outline');
-        setTimeout(() => grid.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
-    } else {
-        grid.style.display = 'none';
-        btn.innerHTML = '<i class="ri-layout-grid-line"></i> Create Menu';
-        btn.classList.remove('btn-outline');
-    }
-};
+// ----- Menu Builder Logic -----
+window.addQuickRow = () => {
+    const container = document.getElementById('quickMenuContainer');
+    const emptyMsg = document.getElementById('quickMenuEmpty');
+    if(emptyMsg) emptyMsg.style.display = 'none';
 
-window.initMenuGrid = () => {
-    const grid = document.getElementById('menuBuilderGrid');
-    grid.innerHTML = ''; 
-    for(let i=1; i<=4; i++) {
-        const slotId = `slot_${i}`;
-        const div = document.createElement('div');
-        div.className = 'menu-slot-card';
-        div.innerHTML = `
-            <div class="slot-img-wrapper">
-                <input type="file" name="qm_file" id="file_${slotId}" accept="image/*" onchange="previewSlotImage(this, 'prev_${slotId}')" />
-                <label for="file_${slotId}" id="prev_${slotId}">
-                    <i class="ri-image-add-line"></i>
-                    <span>Add Photo</span>
-                </label>
-            </div>
-            <div class="slot-body">
-                <input name="qm_name" placeholder="Item Name" class="slot-input-title" />
-                <textarea name="qm_desc" placeholder="Description..." class="slot-input-desc" rows="2"></textarea>
-                <div class="slot-price-row">
-                    <span style="color:var(--accent); font-weight:bold;">₱</span>
-                    <input name="qm_price" type="number" placeholder="0.00" class="slot-input-price" />
-                </div>
-            </div>
-        `;
-        grid.appendChild(div);
-    }
-};
-window.previewSlotImage = (input, labelId) => {
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = e => {
-            const label = document.getElementById(labelId);
-            label.style.backgroundImage = `url(${e.target.result})`;
-            label.innerHTML = ''; label.style.border = 'none';
-        }
-        reader.readAsDataURL(input.files[0]);
-    }
+    const div = document.createElement('div');
+    div.className = 'quick-row';
+    div.innerHTML = `
+        <input name="qm_name" placeholder="Item / Service Name" required />
+        <input name="qm_price" type="number" placeholder="Price" required style="width:100px;" />
+        <button type="button" class="btn-icon" onclick="this.parentElement.remove()"><i class="ri-close-line"></i></button>
+    `;
+    container.appendChild(div);
 };
 
 // ----- State & Routing -----
-let state = { q:'', cat:'', sort:'latest' };
+let state = { q:'', cat:'', sort:'latest', tabView:'all' };
 
 function route(r){
     document.body.dataset.route = r;
-    document.querySelectorAll('.nav__links a').forEach(a=> a.classList.remove('active'));
-    document.querySelector(`.nav__links a[data-route="${r}"]`)?.classList.add('active');
+    // Highlight "Browse" only if on browse
+    const browseLink = document.querySelector('.nav__links a[data-route="browse"]');
+    if(browseLink) {
+        if(r === 'browse') browseLink.classList.add('active');
+        else browseLink.classList.remove('active');
+    }
+
+    // Panels Logic: Close profile sidebar and overlay on navigation
+    closePanels();
 
     document.getElementById('browseSection').style.display = r==='browse' ? 'block' : 'none';
     document.getElementById('businessPage').style.display = r==='business-page' ? 'block' : 'none';
@@ -112,12 +77,7 @@ function route(r){
     document.getElementById('businessSection').style.display = r==='business' ? 'block' : 'none';
     document.getElementById('mySection').style.display = r==='my' ? 'block' : 'none';
 
-    if(r==='browse') {
-        renderCategoryIcons();
-        renderFeatured();
-        renderActiveSidebar();
-        renderListings(); // Only listings
-    }
+    if(r==='browse') renderListings();
     if(r==='my') { renderMyListings(); renderMyOrders(); renderMyBusinesses(); }
     if(r==='sell') { 
         if(!window.isAddingToBiz) {
@@ -129,118 +89,136 @@ function route(r){
     history.replaceState(null,'',`#${r}`);
 }
 window.addEventListener('hashchange', ()=> route(location.hash.slice(1)||'browse'));
-document.getElementById('linksMount')?.addEventListener('click', e=>{
+
+// Global click handler for data-route links
+document.addEventListener('click', e => {
     const a = e.target.closest('a[data-route]'); 
-    if(a) { e.preventDefault(); route(a.dataset.route); }
+    if(a) { 
+        e.preventDefault(); 
+        route(a.dataset.route); 
+    }
 });
 
-// ----- 1. RENDER CATEGORY ICONS -----
-const CATEGORIES = [
-    { name:'All', icon:'ri-apps-line' },
-    { name:'Food & Drinks', icon:'ri-restaurant-line' },
-    { name:'Services', icon:'ri-service-line' },
-    { name:'Books', icon:'ri-book-open-line' },
-    { name:'Uniforms', icon:'ri-shirt-line' },
-    { name:'Electronics', icon:'ri-computer-line' },
-    { name:'Others', icon:'ri-more-line' }
-];
-
-function renderCategoryIcons() {
-    const container = document.getElementById('categoryIcons');
-    container.innerHTML = CATEGORIES.map(c => `
-        <div class="cat-icon-item ${state.cat === (c.name==='All'?'':c.name) ? 'active' : ''}" 
-             onclick="filterCategory('${c.name === 'All' ? '' : c.name}')">
-            <div class="cat-icon-box"><i class="${c.icon}"></i></div>
-            <span class="cat-label">${c.name}</span>
-        </div>
-    `).join('');
+// ----- PROFILE SIDEBAR & OVERLAY TRIGGERS -----
+function openProfile() {
+    document.getElementById('profilePanel').classList.add('open');
+    document.getElementById('overlay').classList.add('open');
+}
+function closePanels() {
+    document.getElementById('profilePanel')?.classList.remove('open');
+    document.getElementById('cartPanel')?.classList.remove('open'); // Close cart too if open
+    document.getElementById('overlay')?.classList.remove('open');
 }
 
-window.filterCategory = (catName) => {
-    state.cat = catName;
-    renderCategoryIcons(); // Re-render to update active state
-    renderListings();      // Filter the feed
-};
-
-// ----- 2. RENDER FEATURED (Squares) -----
-function renderFeatured() {
-    const biz = LS.read(LS.keyBiz);
-    const container = document.getElementById('featuredBizRow');
-    // Take first 3 for the squares
-    const featured = biz.slice(0, 3);
-    
-    if(featured.length === 0) {
-        container.innerHTML = `<div style="grid-column:1/-1; color:var(--muted);">No businesses featured yet.</div>`;
-        return;
+// Event Delegation for Nav Buttons
+document.addEventListener('click', e => {
+    // Open Profile
+    if(e.target.closest('#openProfile')) {
+        openProfile();
     }
-
-    container.innerHTML = featured.map(b => `
-        <div class="biz-square-card" onclick="openBusiness('${b.id}')">
-            <img class="biz-square-img" src="${b.logo || 'https://dummyimage.com/400x400/0f1620/111827.png&text=Biz'}" />
-            <div class="biz-square-overlay">
-                <div class="biz-square-name">${escapeHtml(b.name)}</div>
-                <div style="font-size:0.8rem; color:var(--accent);">${b.category}</div>
-            </div>
-        </div>
-    `).join('');
-}
-
-// ----- 3. RENDER ACTIVE SIDEBAR -----
-function renderActiveSidebar() {
-    const biz = LS.read(LS.keyBiz);
-    const container = document.getElementById('activeBizList');
-    // Simulate "Active" or "Hottest" by listing all businesses
-    // In a real app, this would filter by an 'active' status
-    
-    if(biz.length === 0) {
-        container.innerHTML = `<div style="color:var(--muted);">No active shops.</div>`;
-        return;
+    // Close Profile (X button)
+    if(e.target.closest('#closeProfile')) {
+        closePanels();
     }
+    // Close Overlay (Clicking outside)
+    if(e.target.id === 'overlay') {
+        closePanels();
+    }
+    // Open Cart
+    if(e.target.closest('#openCart')) {
+        document.getElementById('cartPanel').classList.add('open');
+        document.getElementById('overlay').classList.add('open');
+        renderCart();
+    }
+    // Close Cart
+    if(e.target.closest('#closeCart')) {
+        closePanels();
+    }
+});
 
-    container.innerHTML = biz.map((b, idx) => `
-        <div class="ranked-item" onclick="openBusiness('${b.id}')">
-            <div class="rank-num">${idx + 1}</div>
-            <img class="rank-img" src="${b.logo || 'https://dummyimage.com/100x150/0f1620/111827.png&text=Biz'}" />
-            <div class="rank-info">
-                <div class="rank-title">${escapeHtml(b.name)}</div>
-                <div class="rank-sub">${b.category}</div>
-            </div>
-            <div class="rank-status" title="Active"></div>
-        </div>
-    `).join('');
-}
 
-// ----- 4. RENDER MAIN LISTINGS FEED -----
+// ----- Browse Logic -----
+document.getElementById('runSearch')?.addEventListener('click', ()=>{
+    state.q = document.getElementById('q').value.trim();
+    state.cat = document.getElementById('cat').value;
+    state.sort = document.getElementById('sort').value;
+    renderListings();
+});
+document.getElementById('viewTabs')?.addEventListener('click', e=>{
+    const t = e.target.closest('.tab');
+    if(t){
+        document.querySelectorAll('#viewTabs .tab').forEach(x=>x.classList.remove('active'));
+        t.classList.add('active');
+        state.tabView = t.dataset.view;
+        renderListings();
+    }
+});
+
 function renderListings(){
     const listingsEl = document.getElementById('listings');
     listingsEl.innerHTML = '';
+    const q = state.q.toLowerCase();
     
-    let items = LS.read(LS.keyProducts);
-    // Only individual items (no biz menu items)
-    items = items.filter(i => !i.businessId);
+    // 1. Businesses
+    let bizHTML = '';
+    if(state.tabView === 'all' || state.tabView === 'businesses'){
+        let biz = LS.read(LS.keyBiz).slice();
+        if(q) biz = biz.filter(b => JSON.stringify(b).toLowerCase().includes(q));
+        if(state.cat) biz = biz.filter(b => b.category === state.cat);
+        
+        if(biz.length){
+             if(state.tabView === 'all') bizHTML += `<h3 class="grid-header"><i class="ri-store-2-line"></i> Featured Businesses</h3>`;
+             bizHTML += biz.map(b => `
+                <article class="card">
+                    <div style="position:relative;">
+                        <img class="card__img" src="${b.logo || 'https://dummyimage.com/800x600/0f1620/111827.png&text=Business'}" onclick="openBusiness('${b.id}')" style="cursor:pointer" />
+                        <div class="badge" style="position:absolute; top:10px; left:10px; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); border-color:rgba(255,255,255,0.2);">
+                            ${b.type === 'Service' ? '<i class="ri-service-line"></i> Service' : '<i class="ri-restaurant-line"></i> Menu'}
+                        </div>
+                    </div>
+                    <div class="card__body">
+                        <div style="display:flex; justify-content:space-between; align-items:start;">
+                             <div>
+                                <div class="badge" style="margin-bottom:0.4rem;">${b.category}</div>
+                                <h3 style="font-size:1.1rem; cursor:pointer;" onclick="openBusiness('${b.id}')">${escapeHtml(b.name)}</h3>
+                             </div>
+                             <button class="btn btn-outline" onclick="viewOwner('${b.id}')" title="View Owner" style="padding:0.4rem;"><i class="ri-user-3-line"></i></button>
+                        </div>
+                        <p style="color:var(--muted); font-size:0.9rem; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${escapeHtml(b.description)}</p>
+                        <div class="toolbar" style="margin-top:auto;">
+                             <button class="btn" style="width:100%" onclick="openBusiness('${b.id}')">
+                                ${b.type === 'Service' ? 'View Services' : 'View Menu'} <i class="ri-arrow-right-line"></i>
+                             </button>
+                        </div>
+                    </div>
+                </article>
+             `).join('');
+        }
+    }
 
-    // Apply Filters
-    if(state.q) {
-        const q = state.q.toLowerCase();
-        items = items.filter(i => i.title.toLowerCase().includes(q));
-    }
-    if(state.cat) {
-        items = items.filter(i => i.category === state.cat);
+    // 2. Products
+    let prodHTML = '';
+    if(state.tabView !== 'businesses'){
+        let items = LS.read(LS.keyProducts).slice();
+        const catMap = {books:'Books', electronics:'Electronics'};
+        if(catMap[state.tabView]) items = items.filter(i => i.category === catMap[state.tabView]);
+        
+        if(q) items = items.filter(i => JSON.stringify(i).toLowerCase().includes(q));
+        if(state.cat) items = items.filter(i => i.category === state.cat);
+
+        if(state.sort==='price_asc') items.sort((a,b)=>a.price-b.price);
+        else if(state.sort==='price_desc') items.sort((a,b)=>b.price-a.price);
+        else items.sort((a,b)=> a.id < b.id ? 1 : -1);
+
+        if(items.length){
+            if(state.tabView === 'all' && bizHTML) prodHTML += `<h3 class="grid-header" style="margin-top:2rem; border-top:1px solid var(--stroke); padding-top:1.5rem;"><i class="ri-shopping-bag-3-line"></i> Marketplace Items</h3>`;
+            prodHTML += items.map(itemTemplate).join('');
+        }
     }
 
-    if(items.length){
-        listingsEl.innerHTML = items.map(itemTemplate).join('');
-        document.getElementById('emptyListings').style.display = 'none';
-    } else {
-        document.getElementById('emptyListings').style.display = 'block';
-    }
+    listingsEl.innerHTML = bizHTML + prodHTML;
+    document.getElementById('emptyListings').style.display = (bizHTML || prodHTML) ? 'none' : 'block';
 }
-
-// ----- Search Handler -----
-document.getElementById('runSearch')?.addEventListener('click', ()=>{
-    state.q = document.getElementById('q').value.trim();
-    renderListings();
-});
 
 function itemTemplate(i){
     return `
@@ -260,12 +238,6 @@ function itemTemplate(i){
     </article>`;
 }
 
-window.viewAllBiz = () => {
-    // Just scrolls to sidebar for now, or could show a full list modal
-    document.getElementById('activeBizList').scrollIntoView({ behavior:'smooth' });
-}
-
-// ... (Rest of Business Logic: openBusiness, Create, etc. remains same) ...
 window.openBusiness = (id) => {
     const b = LS.read(LS.keyBiz).find(x => x.id === id);
     if(!b) return;
@@ -317,13 +289,19 @@ window.viewOwner = (id) => {
             <p>${escapeHtml(b.description)}</p>
         </div>
         <div style="margin-top:1.5rem; text-align:center;">
-             <button class="btn" style="width:100%" onclick="document.getElementById('ownerModal').close()">Close Profile</button>
+             <button class="btn" style="width:100%" onclick="closeOwnerModal()">Close Profile</button>
         </div>
     `;
     modal.style.display = "flex";
+    modal.showModal();
 };
+window.closeOwnerModal = () => {
+    document.getElementById('ownerModal').style.display = 'none';
+    document.getElementById('ownerModal').close(); 
+}
 
-document.getElementById('bizForm')?.addEventListener('submit', async e => {
+// ----- Create Business with Quick Menu -----
+document.getElementById('bizForm')?.addEventListener('submit', e => {
     e.preventDefault();
     const f = new FormData(e.target);
     const biz = {
@@ -340,45 +318,32 @@ document.getElementById('bizForm')?.addEventListener('submit', async e => {
         website: f.get('website') || '',
         owner: 'You'
     };
-    
     const allBiz = LS.read(LS.keyBiz);
     LS.write(LS.keyBiz, [biz, ...allBiz]);
-
     const itemNames = f.getAll('qm_name');
     const itemPrices = f.getAll('qm_price');
-    const itemDescs = f.getAll('qm_desc'); 
-    const itemFiles = f.getAll('qm_file'); 
-    
-    const newProducts = [];
-    for (let i = 0; i < itemNames.length; i++) {
-        if(!itemNames[i].trim()) continue;
-        let imgData = '';
-        if(itemFiles[i] && itemFiles[i].size > 0) {
-            try { imgData = await convertToBase64(itemFiles[i]); } catch(err) { console.error(err); }
-        }
-        newProducts.push({
-            id: uid(),
-            businessId: biz.id,
-            title: itemNames[i],
-            price: parseFloat(itemPrices[i]) || 0,
-            category: biz.category, 
-            condition: 'New',
-            description: itemDescs[i] || 'Menu Item', 
-            image: imgData, 
-            contact: biz.contact,
-            seller: 'You'
-        });
-    }
-
-    if(newProducts.length > 0) {
+    if(itemNames.length > 0) {
+        const newProducts = itemNames.map((name, index) => {
+            if(!name.trim()) return null;
+            return {
+                id: uid(),
+                businessId: biz.id,
+                title: name,
+                price: parseFloat(itemPrices[index]) || 0,
+                category: biz.category,
+                condition: 'New',
+                description: 'Listed from Quick Menu',
+                image: '', 
+                contact: biz.contact,
+                seller: 'You'
+            };
+        }).filter(Boolean);
         const allProds = LS.read(LS.keyProducts);
         LS.write(LS.keyProducts, [...newProducts, ...allProds]);
     }
-
     e.target.reset();
-    document.getElementById('menuBuilderGrid').style.display = 'none';
-    document.getElementById('toggleMenuBtn').innerHTML = '<i class="ri-layout-grid-line"></i> Create Menu';
-    document.getElementById('toggleMenuBtn').classList.remove('btn-outline');
+    document.getElementById('quickMenuContainer').innerHTML = '';
+    document.getElementById('quickMenuEmpty').style.display = 'block';
     toast('Business & Menu Launched!');
     route('my');
     document.querySelector('[data-tab="biz"]').click();
