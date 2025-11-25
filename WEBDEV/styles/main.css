@@ -27,7 +27,7 @@ body{
   font-family:"Poppins",sans-serif;
   color:var(--text);
   background: var(--bg);
-  padding-top: var(--header-height); /* Prevent content from hiding behind fixed nav */
+  padding-top: var(--header-height);
 }
 
 /* --- GLOBAL LAYOUT --- */
@@ -55,7 +55,7 @@ body{
 }
 .btn-outline:hover{ border-color: var(--text); background: rgba(255,255,255,0.05); }
 
-/* --- NAVIGATION (Centered & Fixed) --- */
+/* --- NAVIGATION --- */
 nav {
   position: fixed; top: 0; left: 0; right: 0;
   height: var(--header-height);
@@ -79,9 +79,6 @@ nav {
   display: flex; gap: 0.3rem; 
   background: var(--surface-2); padding: 4px; border-radius: 99px; 
   border: 1px solid var(--stroke);
-}
-@media (max-width: 768px) {
-    .nav__center { display: none; } /* Hide pills on mobile, realistically need a hamburger menu */
 }
 
 .nav-pill {
