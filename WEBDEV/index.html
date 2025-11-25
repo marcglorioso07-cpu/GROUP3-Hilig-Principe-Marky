@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- AUTH CHECK -->
     <script>
-        if(!localStorage.getItem('slsu_token')) { window.location.href = 'login.html'; }
+        if (!localStorage.getItem('slsu_token')) { window.location.href = 'login.html'; }
     </script>
     <title>SLSU Marketplace</title>
     <link rel="stylesheet" href="styles/main.css">
@@ -32,24 +32,11 @@
                     <i class="ri-shopping-cart-2-line"></i><span id="cartCount">0</span>
                 </button>
 
-                <!-- PROFILE DROPDOWN -->
+                <!-- PROFILE BUTTON (opens sidebar) -->
                 <div class="profile-dropdown">
-                    <button class="profile-btn" onclick="toggleProfileMenu()">
-                        <div class="avatar">U</div>
+                    <button class="profile-btn" id="openProfile">
+                        <div class="avatar" id="navAvatar">U</div>
                     </button>
-                    <!-- The Dropdown Menu -->
-                    <div class="dropdown-menu" id="profileMenu">
-                        <div class="menu-header">
-                            <span class="user-name">User Student</span>
-                            <span class="user-role">Student ID: 12345</span>
-                        </div>
-                        <hr style="border-color:var(--stroke); margin:0.5rem 0;">
-                        <a href="#my" onclick="route('my'); toggleProfileMenu();"><i class="ri-dashboard-line"></i> My Dashboard</a>
-                        <a href="#sell" onclick="route('sell'); toggleProfileMenu();"><i class="ri-add-circle-line"></i> Sell an Item</a>
-                        <a href="#business" onclick="route('business'); toggleProfileMenu();"><i class="ri-store-2-line"></i> Create a Business</a>
-                        <hr style="border-color:var(--stroke); margin:0.5rem 0;">
-                        <a href="#" onclick="logout()" style="color:#ef4444;"><i class="ri-logout-box-r-line"></i> Logout</a>
-                    </div>
                 </div>
             </div>
         </div>
@@ -218,6 +205,98 @@
         </div>
     </aside>
 
+    <!-- PROFILE SIDEBAR -->
+    <aside class="panel" id="profilePanel">
+        <div class="panel__header">
+            <div style="display:flex; align-items:center; gap:0.8rem;">
+                <div class="avatar avatar-lg" id="profileAvatar">U</div>
+                <div>
+                    <div id="profileName" style="font-weight:700;">SLSU Student</div>
+                    <div id="profileEmail" style="font-size:0.8rem; color:var(--muted);">Signed in</div>
+                </div>
+            </div>
+            <button class="btn btn-outline" id="closeProfile" style="padding:0.4rem 0.6rem;">
+                <i class="ri-close-line"></i>
+            </button>
+        </div>
+
+        <div class="panel__body">
+            <!-- Quick Links -->
+            <div class="profile-section">
+                <div class="profile-section-label">Quick links</div>
+                <div class="profile-link-list">
+                    <button class="profile-link" data-route="my">
+                        <i class="ri-dashboard-line"></i>
+                        <span>My Dashboard</span>
+                    </button>
+                    <button class="profile-link" data-route="sell">
+                        <i class="ri-add-circle-line"></i>
+                        <span>Sell an Item</span>
+                    </button>
+                    <button class="profile-link" data-route="business">
+                        <i class="ri-store-2-line"></i>
+                        <span>Create a Business</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Settings shortcuts -->
+            <div class="profile-section">
+                <div class="profile-section-label">Settings</div>
+                <div class="profile-link-list">
+                    <button class="profile-link" data-action="edit-profile">
+                        <i class="ri-user-settings-line"></i>
+                        <span>Edit profile</span>
+                    </button>
+                    <button class="profile-link" data-action="edit-username">
+                        <i class="ri-edit-2-line"></i>
+                        <span>Edit username</span>
+                    </button>
+                    <button class="profile-link" data-action="manage-google">
+                        <i class="ri-google-fill"></i>
+                        <span>Manage Google account</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Profile form -->
+            <div class="profile-section" id="profileEditSection">
+                <div class="profile-section-label">Profile details</div>
+                <form id="profileForm" class="profile-form">
+                    <div class="input">
+                        <label for="profileUsername">Display name / username</label>
+                        <input id="profileUsername" name="profileUsername" placeholder="e.g. juan.delacruz" />
+                    </div>
+
+                    <div class="input">
+                        <label>Profile picture</label>
+                        <div style="display:flex; align-items:center; gap:0.75rem;">
+                            <label for="profileAvatarFile" class="btn" style="padding:0.6rem 1rem; width:auto;">
+                                <i class="ri-camera-fill"></i> Upload photo
+                            </label>
+                            <span id="profileAvatarStatus" style="font-size:0.8rem; color:var(--muted); font-style:italic;">
+                                JPG/PNG, small file
+                            </span>
+                        </div>
+                        <input type="file" id="profileAvatarFile" accept="image/*" style="display:none;">
+                    </div>
+
+                    <div class="toolbar">
+                        <button class="btn" type="submit" style="width:100%;">
+                            <i class="ri-save-3-line"></i> Save profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="profile-section">
+                <button class="btn btn-outline" type="button" onclick="logout()" style="width:100%; color:#fca5a5; border-color:#b91c1c;">
+                    <i class="ri-logout-box-r-line"></i> Logout
+                </button>
+            </div>
+        </div>
+    </aside>
+
     <!-- OWNER PROFILE MODAL -->
     <dialog id="ownerModal" class="modal">
         <div class="modal__content">
@@ -231,21 +310,147 @@
 
     <div class="toast" id="toast"></div>
 
+    <!-- PROFILE + LOGOUT SCRIPT -->
     <script>
-        function toggleProfileMenu() {
-            const menu = document.getElementById('profileMenu');
-            menu.classList.toggle('show');
-        }
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.profile-dropdown')) {
-                document.getElementById('profileMenu').classList.remove('show');
+        const PROFILE_KEY = 'slsu_profile';
+        const TOKEN_KEY = 'slsu_token';
+
+        function getProfile() {
+            try {
+                return JSON.parse(localStorage.getItem(PROFILE_KEY)) || null;
+            } catch (e) {
+                return null;
             }
-        });
-        window.logout = () => {
-            localStorage.removeItem('slsu_token');
-            window.location.href = 'login.html';
         }
+
+        function saveProfile(profile) {
+            localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+        }
+
+        function applyProfileUI() {
+            let profile = getProfile();
+
+            if (!profile) {
+                profile = {
+                    username: 'SLSU Student',
+                    email: '',
+                    provider: 'local',
+                    avatar: ''
+                };
+                saveProfile(profile);
+            }
+
+            const avatarSmall = document.getElementById('navAvatar');
+            const avatarLarge = document.getElementById('profileAvatar');
+            const nameEl = document.getElementById('profileName');
+            const emailEl = document.getElementById('profileEmail');
+            const usernameInput = document.getElementById('profileUsername');
+
+            if (nameEl) nameEl.textContent = profile.username || 'SLSU Student';
+            if (emailEl) {
+                emailEl.textContent = profile.email
+                    ? profile.email
+                    : (profile.provider ? profile.provider.toUpperCase() + ' account' : 'Signed in');
+            }
+            if (usernameInput) usernameInput.value = profile.username || '';
+
+            [avatarSmall, avatarLarge].forEach(el => {
+                if (!el) return;
+                if (profile.avatar) {
+                    el.style.backgroundImage = `url(${profile.avatar})`;
+                    el.style.backgroundSize = 'cover';
+                    el.style.backgroundPosition = 'center';
+                    el.textContent = '';
+                } else {
+                    el.style.backgroundImage = '';
+                    const initial = (profile.username || 'S').charAt(0).toUpperCase();
+                    el.textContent = initial;
+                }
+            });
+
+            // First-time users: open the profile sidebar automatically
+            if ((!profile.username || profile.username === 'SLSU Student') &&
+                document.getElementById('profilePanel')) {
+                document.getElementById('profilePanel').classList.add('open');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const profilePanel = document.getElementById('profilePanel');
+
+            document.getElementById('openProfile')?.addEventListener('click', () => {
+                profilePanel?.classList.add('open');
+            });
+
+            document.getElementById('closeProfile')?.addEventListener('click', () => {
+                profilePanel?.classList.remove('open');
+            });
+
+            // Quick links (Dashboard / Sell / Create Biz)
+            document.querySelectorAll('.profile-link[data-route]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const r = btn.dataset.route;
+                    if (typeof route === 'function') route(r);
+                    profilePanel?.classList.remove('open');
+                });
+            });
+
+            // Settings shortcuts
+            document.querySelectorAll('.profile-link[data-action]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const action = btn.dataset.action;
+                    if (action === 'edit-profile' || action === 'edit-username') {
+                        document.getElementById('profileForm')
+                            ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                    if (action === 'manage-google') {
+                        window.open('https://myaccount.google.com', '_blank');
+                    }
+                });
+            });
+
+            // Save profile form
+            const profileForm = document.getElementById('profileForm');
+            if (profileForm) {
+                profileForm.addEventListener('submit', e => {
+                    e.preventDefault();
+                    const profile = getProfile() || {};
+                    const username = document.getElementById('profileUsername').value.trim();
+                    if (username) profile.username = username;
+                    saveProfile(profile);
+                    applyProfileUI();
+                    if (typeof toast === 'function') toast('Profile updated');
+                });
+            }
+
+            // Avatar upload
+            const avatarFile = document.getElementById('profileAvatarFile');
+            if (avatarFile) {
+                avatarFile.addEventListener('change', e => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    document.getElementById('profileAvatarStatus').textContent = file.name;
+
+                    const reader = new FileReader();
+                    reader.onload = ev => {
+                        const profile = getProfile() || {};
+                        profile.avatar = ev.target.result;
+                        saveProfile(profile);
+                        applyProfileUI();
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            applyProfileUI();
+        });
+
+        window.logout = () => {
+            localStorage.removeItem(TOKEN_KEY);
+            window.location.href = 'login.html';
+        };
     </script>
+
     <script src="scripts/boot.js" defer></script>
 </body>
 </html>
