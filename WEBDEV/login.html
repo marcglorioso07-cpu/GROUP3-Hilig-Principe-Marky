@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SLSU Marketplace</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/login.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
+</head>
+<body>
+
+    <!-- School Background -->
+    <!-- Make sure you have an image named 'school.jpg' in your assets folder -->
+    <div class="school-bg"></div>
+    <div class="gradient-overlay"></div>
+
+    <!-- Header: Logo Only (Fixed at top left) -->
+    <div style="position:fixed; top:20px; left:20px; z-index:10;">
+        <img src="assets/logo.png" style="width:50px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.5);" onerror="this.style.display='none'"/>
+    </div>
+
+    <div class="login-wrapper">
+        <!-- Glassmorphism Card -->
+        <div class="login-card">
+            <h1 style="text-align:center; margin-bottom:0.5rem;">Login</h1>
+            <p class="subtitle" style="text-align:center;">Welcome back to SLSU Marketplace</p>
+
+            <form id="loginForm">
+                <div class="input-group">
+                    <i class="ri-mail-line icon"></i>
+                    <input type="email" placeholder="Student Email" required />
+                </div>
+                
+                <div class="input-group">
+                    <i class="ri-lock-2-line icon"></i>
+                    <input type="password" placeholder="Password" required />
+                </div>
+
+                <div class="actions">
+                    <label class="remember">
+                        <input type="checkbox"> <span>Remember me</span>
+                    </label>
+                    <a href="#">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="btn-login">
+                    Login
+                </button>
+            </form>
+
+            <div class="footer-text">
+                Don't have an account? <a href="#">Register here</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/login.js"></script>
+</body>
+</html>
