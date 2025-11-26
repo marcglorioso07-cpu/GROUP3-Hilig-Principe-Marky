@@ -46,18 +46,87 @@ const setupFileUpload = (fileId, textId, statusId) => {
 setupFileUpload('sellFile', 'sellImageInput', 'sellFileStatus');
 setupFileUpload('bizFile', 'bizLogoInput', 'bizFileStatus');
 
-// ----- Menu Builder Slot Preview -----
-window.previewSlot = (input, imgId) => {
+// ----- Dynamic Menu Slot Logic & Base64 Encoder (HTTP 431 Fix) -----
+
+let menuSlotCount = 3; 
+
+window.previewSlot = async (input, imgId) => {
   if (!(input.files && input.files[0])) return;
+  
+  const file = input.files[0];
+  const img = document.getElementById(imgId);
+  // Target the hidden input by constructing its ID (e.g., ms_image_1_input)
+  const hiddenInputId = imgId.replace('ms_prev_', 'ms_image_') + '_input';
+  const hiddenInput = document.getElementById(hiddenInputId);
+
+  // 1. Show Preview
   const reader = new FileReader();
   reader.onload = e => {
-    const img = document.getElementById(imgId);
     if(img) {
       img.src = e.target.result;
       img.style.display = 'block';
     }
   };
-  reader.readAsDataURL(input.files[0]);
+  reader.readAsDataURL(file);
+
+  // 2. Convert to Base64 and store in the hidden input
+  if (hiddenInput) {
+      try {
+          hiddenInput.value = await convertToBase64(file);
+      } catch(err) {
+          console.error("Error converting to Base64:", err);
+          hiddenInput.value = ''; // Clear on error
+      }
+  }
+};
+
+window.addMenuItemSlot = () => {
+    menuSlotCount++;
+    const slotId = menuSlotCount;
+    const addButton = document.getElementById('addNewItemSlot');
+    
+    // 1. New Item Slot HTML
+    const newItemSlotHTML = `
+        <div class="menu-slot-card" id="ms_${slotId}">
+            <div class="menu-slot-img">
+                <label for="ms_file_${slotId}">
+                    <img id="ms_prev_${slotId}" src="" style="display:none;" />
+                    <div class="placeholder"><i class="ri-image-add-line"></i><span>Photo</span></div>
+                </label>
+                <input type="file" id="ms_file_${slotId}" accept="image/*" onchange="previewSlot(this, 'ms_prev_${slotId}')" hidden />
+                <input type="hidden" name="m_image_${slotId}" id="ms_image_${slotId}_input" value="" />
+            </div>
+            <div class="menu-slot-body">
+                <input class="slot-input title" name="m_title_${slotId}" placeholder="Item Name" />
+                <textarea class="slot-input desc" name="m_desc_${slotId}" rows="2" placeholder="Desc..."></textarea>
+                <div class="slot-price-box">
+                    <span>₱</span><input type="number" name="m_price_${slotId}" placeholder="0.00" />
+                </div>
+            </div>
+        </div>
+    `;
+
+    // 2. New Add Button HTML
+    const newAddButtonHTML = `
+        <div class="menu-slot-card add-button-slot" id="addNewItemSlot" onclick="addMenuItemSlot()" style="cursor:pointer; background:var(--surface-3); border-style:dashed; border-color:var(--muted);">
+            <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.5rem; padding:1rem; color:var(--muted);">
+                <i class="ri-add-circle-line" style="font-size: 2.5rem;"></i>
+                <span style="font-weight:600;">Add More Item</span>
+                <span style="font-size:0.75rem;">(No limit)</span>
+            </div>
+        </div>
+    `;
+
+    // 3. Replace existing Add Button with the new Item Slot
+    if (addButton) addButton.outerHTML = newItemSlotHTML;
+
+    // 4. Insert the new Add Button after the new Item Slot
+    const newItem = document.getElementById(`ms_${slotId}`);
+    if (newItem) {
+        newItem.insertAdjacentHTML('afterend', newAddButtonHTML);
+    }
+    
+    toast(`Menu slot ${slotId} added.`);
 };
 
 // ----- State & Routing -----
@@ -182,7 +251,53 @@ function renderActiveSidebar() {
   `).join('');
 }
 
-// ----- Listings -----
+// ----- Business Page Logic -----
+window.openBusiness = (businessId) => {
+    const biz = LS.read(LS.keyBiz).find(b => b.id === businessId);
+    if (!biz) {
+        toast("Business not found.");
+        return;
+    }
+
+    // Render Business Header/Details (MATCHING USER'S EXAMPLE IMAGE)
+    const headerEl = document.getElementById('bizHeader');
+    if(headerEl) {
+        headerEl.innerHTML = `
+            <div class="biz-header-card-alt">
+                <img class="biz-header-logo-alt" src="${biz.logo || 'https://dummyimage.com/100x100/0f1620/111827.png&text=L'}" alt="${escapeHtml(biz.name)} Logo" />
+                <div class="biz-header-info-alt">
+                    <div class="biz-category-alt">${escapeHtml(biz.type === 'Service' ? 'Service Provider' : biz.category)}</div>
+                    <h1 class="biz-title-alt">${escapeHtml(biz.name)}</h1>
+                    <p class="biz-description-alt">${escapeHtml(biz.description || 'No description provided.')}</p>
+                    <div class="biz-details-row-alt">
+                        <span><i class="ri-map-pin-line"></i> ${escapeHtml(biz.location || 'N/A')}</span>
+                        <span><i class="ri-phone-line"></i> ${escapeHtml(biz.contact)}</span>
+                        ${biz.website ? `<span><i class="ri-link"></i> <a href="${biz.website}" target="_blank">Website</a></span>` : ''}
+                    </div>
+                    <button class="btn btn-owner-alt"><i class="ri-user-star-line"></i> Meet the Owner</button>
+                </div>
+            </div>
+        `;
+    }
+
+    // Update the Section Title to be dynamic
+    const servicesTitleEl = document.querySelector('#businessPage h3.section__header');
+    if (servicesTitleEl) {
+        servicesTitleEl.textContent = biz.type === 'Service' ? 'Our Services' : 'Our Menu';
+    }
+
+    // Render only the products associated with this business
+    const itemsGridEl = document.getElementById('bizItemsGrid');
+    if(itemsGridEl) {
+        renderListings(biz.id, itemsGridEl);
+    }
+    
+    route('business-page');
+};
+window.openBusiness = openBusiness;
+
+
+// ----- Listings (Modified to support filtering) -----
 document.getElementById('runSearch')?.addEventListener('click', ()=>{
   state.q = document.getElementById('q')?.value.trim() || '';
   renderListings();
@@ -205,29 +320,200 @@ function itemTemplate(i){
   </article>`;
 }
 
-function renderListings(){
-  const listingsEl = document.getElementById('listings');
+// Function modified to accept businessId and an optional target container
+function renderListings(businessId = null, targetContainer = null){
+  const listingsEl = targetContainer || document.getElementById('listings');
   const empty = document.getElementById('emptyListings');
-  if(!listingsEl || !empty) return;
+  
+  // Guard against null elements for the main feed
+  if(!listingsEl || (listingsEl === document.getElementById('listings') && !empty)) return;
 
   listingsEl.innerHTML = '';
-  empty.style.display = 'none';
+  if (listingsEl === document.getElementById('listings')) empty.style.display = 'none';
 
   let items = LS.read(LS.keyProducts);
 
-  if(state.q) {
-    const q = state.q.toLowerCase();
-    items = items.filter(i => (i.title||'').toLowerCase().includes(q));
-  }
-  if(state.cat) {
-    items = items.filter(i => i.category === state.cat);
+  // 1. Filter by Business ID (if provided)
+  if(businessId) {
+    // Show only items linked to this business
+    items = items.filter(i => i.businessId === businessId);
+  } else {
+    // 2. Filter for the main Browse feed: only show items *without* a businessId
+    items = items.filter(i => !i.businessId);
+
+    if(state.q) {
+      const q = state.q.toLowerCase();
+      items = items.filter(i => (i.title||'').toLowerCase().includes(q)); 
+    }
+    if(state.cat) {
+      items = items.filter(i => i.category === state.cat);
+    }
   }
 
   if(items.length > 0) {
     listingsEl.innerHTML = items.map(itemTemplate).join('');
   } else {
-    empty.style.display = 'block';
+    // Show empty message only for the main Browse feed
+    if (listingsEl === document.getElementById('listings')) {
+        empty.style.display = 'block';
+    } else if (targetContainer) {
+        // Show a custom empty message for the business page
+        listingsEl.innerHTML = `<div class="empty-state" style="grid-column:1/-1; padding:2rem; border:1px dashed var(--stroke); border-radius:12px; margin-top:1rem;">
+                                  <i class="ri-menu-line" style="font-size: 2rem; margin-bottom: 0.5rem; color:var(--muted);"></i>
+                                  <p>This business hasn't listed any items yet.</p>
+                                </div>`;
+    }
   }
+}
+
+// ----- Sell Item Form Handler (NEW) -----
+const sellForm = document.getElementById('sellForm');
+if(sellForm) {
+    sellForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(e.target));
+        const products = LS.read(LS.keyProducts);
+        const profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null');
+
+        // 1. Construct the new product object
+        const newProduct = {
+            id: uid(),
+            // Important: businessId is deliberately excluded here,
+            // or set to null/undefined, so it appears in the Fresh Listings feed.
+            title: data.title,
+            price: parseFloat(data.price),
+            category: data.category,
+            condition: data.condition,
+            description: data.description || '',
+            image: data.image || '', // This contains the Base64/URL
+            contact: data.contact,
+            listedBy: profile ? profile.username : 'Anonymous User',
+            created: Date.now(),
+        };
+
+        // 2. Simple validation
+        if (!newProduct.title || newProduct.price <= 0 || !newProduct.contact) {
+            toast("Please fill in required fields.");
+            return;
+        }
+
+        // 3. Save to localStorage
+        LS.write(LS.keyProducts, [...products, newProduct]);
+
+        // 4. Provide feedback and redirect
+        toast(`✅ Item "${newProduct.title}" Published to Fresh Listings!`);
+        e.target.reset();
+        route('browse'); // Go back to browse to see the new listing
+    });
+}
+
+// ----- Business Form Handler -----
+const bizForm = document.getElementById('bizForm');
+if(bizForm) {
+  bizForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.target));
+    const businesses = LS.read(LS.keyBiz);
+    const products = LS.read(LS.keyProducts);
+    
+    // 1. Construct the business object
+    const newBiz = {
+        id: uid(),
+        name: data.name,
+        category: data.category,
+        type: data.type,
+        ownerName: data.ownerName,
+        ownerAge: data.ownerAge,
+        description: data.description,
+        logo: data.logo, // This is the Base64/URL from the hidden input
+        contact: data.contact,
+        location: data.location,
+        website: data.website,
+        created: Date.now(),
+    };
+
+    // 2. Construct initial menu items and add them to products list
+    const initialItems = [];
+    // Iterate up to the current total number of slots
+    for(let i = 1; i <= menuSlotCount; i++) { 
+        const title = data[`m_title_${i}`]?.trim();
+        const price = parseFloat(data[`m_price_${i}`]);
+        const image = data[`m_image_${i}`]?.trim();
+
+        // Only add items with a title and price
+        if (title && price > 0) {
+            const item = {
+                id: uid(),
+                businessId: newBiz.id, // CRITICAL: Link item to business ID
+                title: title,
+                price: price,
+                category: newBiz.category, // Inherit category from business
+                condition: newBiz.type === 'Service' ? 'Service' : 'New / Fresh',
+                description: data[`m_desc_${i}`] || '',
+                image: image || '',
+                contact: newBiz.contact,
+                listedBy: newBiz.ownerName,
+                created: Date.now(),
+            };
+            initialItems.push(item);
+        }
+    }
+    
+    // Basic validation: must have at least one menu item if Food/Retail
+    if (newBiz.type !== 'Service' && initialItems.length === 0) {
+        toast("Please add at least one item to your initial menu.");
+        return;
+    }
+
+    // 3. Save to localStorage
+    LS.write(LS.keyBiz, [...businesses, newBiz]);
+    LS.write(LS.keyProducts, [...products, ...initialItems]);
+
+    // 4. Provide feedback and redirect
+    toast(`🚀 Business "${newBiz.name}" Launched!`);
+    e.target.reset();
+    route('browse'); // Go back to browse to see the new listing
+  });
+}
+
+
+// ----- Profile Initialization -----
+const PROFILE_KEY = 'slsu_profile';
+
+function initializeProfile() {
+    const profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null');
+    const token = localStorage.getItem('slsu_token');
+    
+    if (!profile || token !== 'active') {
+        // Not logged in or profile is empty
+        return;
+    }
+
+    const initial = (profile.username || 'U').toUpperCase().charAt(0);
+    const displayName = profile.username || 'Student User';
+    const email = profile.email || 'N/A';
+    
+    // 1. Update main nav avatar
+    const avatarEl = document.getElementById('profileAvatarInitial');
+    if (avatarEl) {
+        avatarEl.textContent = initial;
+    }
+
+    // 2. Update profile sidebar details
+    const sidebarAvatarEl = document.querySelector('.profile-sidebar__user .profile-avatar-letter');
+    if (sidebarAvatarEl) sidebarAvatarEl.textContent = initial;
+
+    const displayNameEl = document.querySelector('.profile-display-name');
+    if (displayNameEl) displayNameEl.textContent = displayName;
+
+    const emailEl = document.querySelector('.profile-email');
+    if (emailEl) emailEl.textContent = email;
+    
+    // 3. Update settings input
+    const displayNameInput = document.getElementById('displayNameInput');
+    if(displayNameInput) {
+        displayNameInput.value = displayName;
+    }
 }
 
 // ----- Sidebar Toggles (Cart & Profile) -----
@@ -249,5 +535,19 @@ if(profileBtn && profileOverlay) {
     if(closeProfile) closeProfile.addEventListener('click', () => profileOverlay.classList.remove('open'));
 }
 
+// Save Profile Button Logic
+document.getElementById('saveProfileBtn')?.addEventListener('click', () => {
+    const profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null');
+    const newName = document.getElementById('displayNameInput')?.value.trim();
+    
+    if (profile && newName) {
+        profile.username = newName;
+        localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+        initializeProfile(); // Re-render profile with new name
+        toast('Profile updated successfully!');
+    }
+});
+
 // Init
+initializeProfile(); 
 renderListings();
