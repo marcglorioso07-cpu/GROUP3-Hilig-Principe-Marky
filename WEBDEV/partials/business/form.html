@@ -4,6 +4,7 @@
   </h2>
   <p style="color:var(--muted); margin-bottom:2rem;">Start your journey as a student entrepreneur.</p>
 
+  <!-- Step 1: Business Type -->
   <div class="input" style="margin-bottom:1.5rem; background:var(--surface-2); padding:1.2rem; border-radius:16px; border:1px solid var(--stroke);">
     <label style="color:var(--accent); font-weight:700; display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem;">
       <i class="ri-question-answer-line"></i> Step 1: What kind of business is this?
@@ -14,85 +15,84 @@
         <span><i class="ri-restaurant-line"></i> Food / Retail</span>
       </label>
       <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer; color:var(--text); font-weight:500;">
-        <input type="radio" name="type" value="Service" style="width:auto; transform:scale(1.2); accent-color:var(--accent);" /> 
-        <span><i class="ri-service-line"></i> Service Provider</span>
+        <input type="radio" name="type" value="Service" style="width:auto; transform:scale(1.2); accent-color:var(--accent);" />
+        <span><i class="ri-service-line"></i> Service (Printing, Cleaning, etc.)</span>
       </label>
     </div>
   </div>
 
   <div class="grid grid-2">
     <div class="input">
-      <label><i class="ri-building-line"></i> Business Name</label>
-      <input required name="name" placeholder="e.g., Green Table" />
+      <label>Business Name</label>
+      <input required name="name" placeholder="e.g. Marc's Burger Joint" />
     </div>
     <div class="input">
-      <label><i class="ri-price-tag-3-line"></i> Category</label>
-      <select name="category" required>
-        <option value="Food & Drinks">Food & Drinks</option>
-        <option value="Services">Services</option>
-        <option value="Merch & Printing">Merch & Printing</option>
-        <option value="Tech & Repairs">Tech & Repairs</option>
-        <option value="Clothes & Uniforms">Clothes & Uniforms</option>
-        <option value="Others">Others</option>
+      <label>Category</label>
+      <select name="category">
+        <option>Food & Drinks</option>
+        <option>Services</option>
+        <option>Books</option>
+        <option>Uniforms</option>
+        <option>Electronics</option>
+        <option>Others</option>
       </select>
     </div>
   </div>
 
-  <div class="grid grid-2">
-    <div class="input">
-      <label><i class="ri-user-star-line"></i> Owner Name</label>
-      <input required name="ownerName" placeholder="Your full name" />
-    </div>
-    <div class="input">
-      <label><i class="ri-calendar-line"></i> Owner Age</label>
-      <input required name="ownerAge" type="number" placeholder="e.g., 21" />
-    </div>
-  </div>
-
   <div class="input">
-    <label><i class="ri-file-text-line"></i> Description</label>
-    <textarea name="description" rows="3" placeholder="Tell us about your products, services, and story..."></textarea>
+    <label>Description / Tagline</label>
+    <textarea name="description" rows="3" placeholder="Tell students what makes your business special..."></textarea>
   </div>
 
   <div class="grid grid-2">
+    <!-- LOGO UPLOAD SECTION -->
     <div class="input">
-      <label><i class="ri-image-line"></i> Logo / Banner</label>
-      <div style="display:flex; align-items:center; gap:0.8rem; margin-bottom:0.5rem;">
-        <label for="bizFile" class="btn" style="padding:0.6rem 1rem; width:auto; font-size:0.9rem;">
-          <i class="ri-camera-fill"></i> Upload Logo
-        </label>
-        <span id="bizFileStatus" style="font-size:0.8rem; color:var(--muted); font-style:italic;">No file chosen</span>
+      <label style="font-weight:600; color:var(--muted); margin-bottom:0.5rem; display:block;">Business Logo / Banner</label>
+      
+      <div class="menu-slot-card">
+        <div class="menu-slot-img" style="height: 220px;">
+          <label for="bizFile">
+            <!-- Preview Image Tag -->
+            <img id="bizLogoPreview" src="" style="display:none; width:100%; height:100%; object-fit:cover; position:absolute; z-index:10;" />
+            
+            <div class="placeholder">
+              <i class="ri-image-add-line" style="font-size:3rem; margin-bottom:0.5rem;"></i>
+              <span>Click to Upload Banner</span>
+            </div>
+          </label>
+          <!-- Added onchange to trigger preview immediately -->
+          <input type="file" id="bizFile" accept="image/*" onchange="previewSlot(this, 'bizLogoPreview', 'bizFileStatus')" hidden />
+        </div>
       </div>
-      <input type="file" id="bizFile" accept="image/*" style="display:none;" />
-      <input name="logo" id="bizLogoInput" placeholder="Or paste image URL..." style="font-size:0.85rem;" />
+
+      <div style="display:flex; justify-content:space-between; margin-top:0.5rem;">
+        <span style="font-size:0.8rem; color:var(--muted);">Recommended: Landscape photo</span>
+        <span id="bizFileStatus" style="font-size:0.85rem; color:var(--muted);">No file chosen</span>
+      </div>
+      <input type="hidden" name="logo" id="bizLogoInput"> 
     </div>
 
     <div class="input">
-      <label><i class="ri-contacts-book-line"></i> Contact Info</label>
-      <input required name="contact" placeholder="e.g., 09xx or FB Messenger Link" />
+      <label>Contact Info</label>
+      <input required name="contact" placeholder="Phone or Social Media Link" />
+      <label style="margin-top:1rem;">Location / Room</label>
+      <input name="location" placeholder="e.g. Canteen 1 or Room 304" />
+      <label style="margin-top:1rem;">Website (Optional)</label>
+      <input name="website" placeholder="https://" />
     </div>
   </div>
 
-  <div class="grid grid-2">
-    <div class="input">
-      <label><i class="ri-map-pin-line"></i> Location</label>
-      <input name="location" placeholder="e.g., Gate 2, near Library" />
-    </div>
-    <div class="input">
-      <label><i class="ri-link"></i> Website / Link (Optional)</label>
-      <input name="website" placeholder="e.g., https://linktr.ee/..." />
-    </div>
-  </div>
+  <!-- Step 2: Menu Items -->
+  <div class="input" style="margin-top:2rem; padding-top:2rem; border-top:1px dashed var(--stroke);">
+    <label style="color:var(--accent); font-weight:700; font-size:1.1rem; margin-bottom:1rem; display:block;">
+      <i class="ri-list-check"></i> Step 2: Add Initial Menu / Services
+    </label>
+    <p style="color:var(--muted); font-size:0.9rem; margin-bottom:1.5rem;">
+      Add up to 4 items now to get started. You can add more later from your dashboard.
+    </p>
 
-  <div class="input" style="margin-top:2.5rem; padding-top:2rem; border-top:1px dashed var(--stroke);">
-    <div style="margin-bottom:1.5rem;">
-        <label style="font-size:1.2rem; color:white; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem;">
-          <i class="ri-layout-grid-fill" style="color:var(--accent);"></i> Initial Menu Setup
-        </label>
-        <p style="color:var(--muted); font-size:0.9rem;">Add your top 3 items to get started. Add more below.</p>
-    </div>
-    
-    <div class="grid grid-4" style="gap:1rem;" id="menuSlotsContainer">
+    <div class="grid grid-4" id="menuBuilderGrid">
+      <!-- Slot 1 -->
       <div class="menu-slot-card">
         <div class="menu-slot-img">
           <label for="ms_file_1">
@@ -100,16 +100,16 @@
             <div class="placeholder"><i class="ri-image-add-line"></i><span>Photo</span></div>
           </label>
           <input type="file" id="ms_file_1" accept="image/*" onchange="previewSlot(this, 'ms_prev_1')" hidden />
-          <input type="hidden" name="m_image_1" id="ms_image_1_input" value="" />
         </div>
         <div class="menu-slot-body">
-          <input class="slot-input title" name="m_title_1" placeholder="Item Name" required />
+          <input class="slot-input title" name="m_title_1" placeholder="Item Name" />
           <textarea class="slot-input desc" name="m_desc_1" rows="2" placeholder="Desc..."></textarea>
           <div class="slot-price-box">
             <span>₱</span><input type="number" name="m_price_1" placeholder="0.00" />
           </div>
         </div>
       </div>
+      <!-- Slot 2 -->
       <div class="menu-slot-card">
         <div class="menu-slot-img">
           <label for="ms_file_2">
@@ -117,7 +117,6 @@
             <div class="placeholder"><i class="ri-image-add-line"></i><span>Photo</span></div>
           </label>
           <input type="file" id="ms_file_2" accept="image/*" onchange="previewSlot(this, 'ms_prev_2')" hidden />
-          <input type="hidden" name="m_image_2" id="ms_image_2_input" value="" />
         </div>
         <div class="menu-slot-body">
           <input class="slot-input title" name="m_title_2" placeholder="Item Name" />
@@ -127,6 +126,7 @@
           </div>
         </div>
       </div>
+      <!-- Slot 3 -->
       <div class="menu-slot-card">
         <div class="menu-slot-img">
           <label for="ms_file_3">
@@ -134,7 +134,6 @@
             <div class="placeholder"><i class="ri-image-add-line"></i><span>Photo</span></div>
           </label>
           <input type="file" id="ms_file_3" accept="image/*" onchange="previewSlot(this, 'ms_prev_3')" hidden />
-          <input type="hidden" name="m_image_3" id="ms_image_3_input" value="" />
         </div>
         <div class="menu-slot-body">
           <input class="slot-input title" name="m_title_3" placeholder="Item Name" />
@@ -144,19 +143,29 @@
           </div>
         </div>
       </div>
-      
-      <div class="menu-slot-card add-button-slot" id="addNewItemSlot" onclick="addMenuItemSlot()" style="cursor:pointer; background:var(--surface-3); border-style:dashed; border-color:var(--muted);">
-        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.5rem; padding:1rem; color:var(--muted);">
-          <i class="ri-add-circle-line" style="font-size: 2.5rem;"></i>
-          <span style="font-weight:600;">Add More Item</span>
-          <span style="font-size:0.75rem;">(No limit)</span>
+      <!-- Slot 4 -->
+      <div class="menu-slot-card">
+        <div class="menu-slot-img">
+          <label for="ms_file_4">
+            <img id="ms_prev_4" src="" style="display:none;" />
+            <div class="placeholder"><i class="ri-image-add-line"></i><span>Photo</span></div>
+          </label>
+          <input type="file" id="ms_file_4" accept="image/*" onchange="previewSlot(this, 'ms_prev_4')" hidden />
+        </div>
+        <div class="menu-slot-body">
+          <input class="slot-input title" name="m_title_4" placeholder="Item Name" />
+          <textarea class="slot-input desc" name="m_desc_4" rows="2" placeholder="Desc..."></textarea>
+          <div class="slot-price-box">
+            <span>₱</span><input type="number" name="m_price_4" placeholder="0.00" />
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="toolbar" style="margin-top:2.5rem; display:flex; gap:1rem;">
-    <button class="btn" type="submit" style="flex:1;"><i class="ri-rocket-line"></i> Launch Business</button>
-    <button class="btn btn-outline" type="reset"><i class="ri-refresh-line"></i> Reset</button>
+  <div class="toolbar" style="margin-top:2rem; padding-top:1rem; border-top:1px solid var(--stroke); display:flex; justify-content:flex-end;">
+    <button class="btn" type="submit" style="font-size:1.1rem; padding:0.8rem 2rem;">
+      <i class="ri-rocket-line"></i> Launch Business
+    </button>
   </div>
 </form>

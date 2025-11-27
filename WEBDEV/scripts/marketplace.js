@@ -7,7 +7,17 @@ const LS = {
   keyOrders: 'slsu_orders',
   keyBiz: 'slsu_businesses',
   read(key){ return JSON.parse(localStorage.getItem(key)) || [] },
-  write(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+  write(key, val){ 
+    try {
+      localStorage.setItem(key, JSON.stringify(val)); 
+    } catch (e) {
+      if(e.name === 'QuotaExceededError') {
+        alert("Storage full! Your images are too large. Please try smaller photos.");
+      } else {
+        console.error("Storage Error:", e);
+      }
+    }
+  }
 };
 
 const fmt = new Intl.NumberFormat('en-PH', { style:'currency', currency:'PHP' });
@@ -23,125 +33,70 @@ const toast = (msg) => {
 
 // ----- Image Helper -----
 const convertToBase64 = (file) => new Promise((resolve, reject) => {
+  if (!file || !(file instanceof File)) {
+      resolve('');
+      return;
+  }
   const reader = new FileReader();
   reader.readAsDataURL(file);
   reader.onload = () => resolve(reader.result);
-  reader.onerror = error => reject(error);
+  reader.onerror = error => {
+      console.error("Image conversion error:", error);
+      resolve('');
+  };
 });
 
-const setupFileUpload = (fileId, textId, statusId) => {
-  const f = document.getElementById(fileId);
-  const t = document.getElementById(textId);
-  const s = document.getElementById(statusId);
-  if(!f || !t) return;
-
-  f.addEventListener('change', async (e) => {
-    if (!e.target.files[0]) return;
-    if (s) s.textContent = e.target.files[0].name;
-    try { t.value = await convertToBase64(e.target.files[0]); }
-    catch(err){ console.error(err); }
-  });
-};
-
-setupFileUpload('sellFile', 'sellImageInput', 'sellFileStatus');
-setupFileUpload('bizFile', 'bizLogoInput', 'bizFileStatus');
-
-// ----- Dynamic Menu Slot Logic & Base64 Encoder -----
-
-let menuSlotCount = 3; 
-
-window.previewSlot = async (input, imgId) => {
+// ----- UNIVERSAL PREVIEW FUNCTION -----
+// Used by both Logo and Menu items via onchange=""
+window.previewSlot = (input, imgId, statusId = null) => {
   if (!(input.files && input.files[0])) return;
   
   const file = input.files[0];
-  const img = document.getElementById(imgId);
-  const hiddenInputId = imgId.replace('ms_prev_', 'ms_image_') + '_input';
-  const hiddenInput = document.getElementById(hiddenInputId);
+  
+  // Update the Text Status (if provided, like for the Logo)
+  if(statusId) {
+      const statusEl = document.getElementById(statusId);
+      if(statusEl) {
+          statusEl.textContent = file.name;
+          statusEl.style.color = 'var(--accent)';
+      }
+  }
 
-  // 1. Show Preview
+  // Update the Image Preview
   const reader = new FileReader();
   reader.onload = e => {
+    const img = document.getElementById(imgId);
     if(img) {
       img.src = e.target.result;
       img.style.display = 'block';
     }
   };
   reader.readAsDataURL(file);
-
-  // 2. Convert to Base64 and store in the hidden input
-  if (hiddenInput) {
-      try {
-          hiddenInput.value = await convertToBase64(file);
-      } catch(err) {
-          console.error("Error converting to Base64:", err);
-          hiddenInput.value = ''; // Clear on error
-      }
-  }
 };
 
-window.addMenuItemSlot = () => {
-    menuSlotCount++;
-    const slotId = menuSlotCount;
-    const addButton = document.getElementById('addNewItemSlot');
-    
-    // 1. New Item Slot HTML
-    const newItemSlotHTML = `
-        <div class="menu-slot-card" id="ms_${slotId}">
-            <div class="menu-slot-img">
-                <label for="ms_file_${slotId}">
-                    <img id="ms_prev_${slotId}" src="" style="display:none;" />
-                    <div class="placeholder"><i class="ri-image-add-line"></i><span>Photo</span></div>
-                </label>
-                <input type="file" id="ms_file_${slotId}" accept="image/*" onchange="previewSlot(this, 'ms_prev_${slotId}')" hidden />
-                <input type="hidden" name="m_image_${slotId}" id="ms_image_${slotId}_input" value="" />
-            </div>
-            <div class="menu-slot-body">
-                <input class="slot-input title" name="m_title_${slotId}" placeholder="Item Name" />
-                <textarea class="slot-input desc" name="m_desc_${slotId}" rows="2" placeholder="Desc..."></textarea>
-                <div class="slot-price-box">
-                    <span>₱</span><input type="number" name="m_price_${slotId}" placeholder="0.00" />
-                </div>
-            </div>
-        </div>
-    `;
-
-    // 2. New Add Button HTML
-    const newAddButtonHTML = `
-        <div class="menu-slot-card add-button-slot" id="addNewItemSlot" onclick="addMenuItemSlot()" style="cursor:pointer; background:var(--surface-3); border-style:dashed; border-color:var(--muted);">
-            <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.5rem; padding:1rem; color:var(--muted);">
-                <i class="ri-add-circle-line" style="font-size: 2.5rem;"></i>
-                <span style="font-weight:600;">Add More Item</span>
-                <span style="font-size:0.75rem;">(No limit)</span>
-            </div>
-        </div>
-    `;
-
-    // 3. Replace existing Add Button with the new Item Slot
-    if (addButton) addButton.outerHTML = newItemSlotHTML;
-
-    // 4. Insert the new Add Button after the new Item Slot
-    const newItem = document.getElementById(`ms_${slotId}`);
-    if (newItem) {
-        newItem.insertAdjacentHTML('afterend', newAddButtonHTML);
+// ----- Sell Item Preview Handler -----
+// Since sell form is separate, we attach listener here
+document.addEventListener('change', (e) => {
+    if(e.target && e.target.id === 'sellFile' && e.target.files[0]) {
+        const status = document.getElementById('sellFileStatus');
+        if(status) {
+            status.textContent = e.target.files[0].name;
+            status.style.color = 'var(--accent)';
+        }
     }
-    
-    toast(`Menu slot ${slotId} added.`);
-};
+});
+
 
 // ----- State & Routing -----
 let state = { q:'', cat:'' };
 
 function route(r){
-  // update active nav link pills
   document.querySelectorAll('.nav-pill').forEach(a=> a.classList.remove('active'));
   document.querySelector(`.nav-pill[data-route="${r}"]`)?.classList.add('active');
 
-  // show/hide sections
   const show = (id, on) => { const el=document.getElementById(id); if(el) el.style.display = on ? 'block' : 'none'; };
 
-  // Hero only on browse
   show('heroHeader', r === 'browse');
-
   show('browseSection', r==='browse');
   show('businessPage', r==='business-page');
   show('sellSection', r==='sell');
@@ -150,12 +105,12 @@ function route(r){
 
   if(r==='browse') {
     renderCategoryIcons();
-    renderFeatured();
+    renderFeatured(false);
     renderActiveSidebar();
     renderListings();
   }
   if(r==='my') {
-    renderMyDashboard(); // RENDER DASHBOARD
+    renderMyDashboard();
   }
   if(r==='sell') {
     if(!window.isAddingToBiz) {
@@ -166,7 +121,6 @@ function route(r){
     }
     window.isAddingToBiz = false;
   }
-
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 window.route = route;
@@ -185,7 +139,6 @@ const CATEGORIES = [
 function renderCategoryIcons() {
   const container = document.getElementById('categoryIcons');
   if(!container) return;
-
   container.innerHTML = CATEGORIES.map(c => `
     <div class="cat-icon-item ${state.cat === (c.name==='All'?'':c.name) ? 'active' : ''}"
          onclick="filterCategory('${c.name === 'All' ? '' : c.name}')">
@@ -201,21 +154,24 @@ window.filterCategory = (catName) => {
   renderListings();
 };
 
-// ----- Featured Businesses -----
-function renderFeatured() {
-  // Filter out businesses that are manually turned off
-  const activeBiz = LS.read(LS.keyBiz).filter(b => b.status !== 'off'); 
-  
+// ----- Featured & Active Shops -----
+window.renderFeatured = (showAll = false) => {
+  const biz = LS.read(LS.keyBiz).filter(b => b.status !== 'off');
   const container = document.getElementById('featuredBizRow');
   if(!container) return;
 
-  const featured = activeBiz.slice(0, 3);
-  if(!featured.length) {
+  const existingBtn = document.getElementById('seeAllBtnContainer');
+  if(existingBtn) existingBtn.remove();
+
+  if(!biz.length) {
     container.innerHTML = `<div style="grid-column:1/-1; color:var(--muted); padding:1rem; border:1px dashed var(--stroke); border-radius:12px;">No businesses featured yet.</div>`;
     return;
   }
 
-  container.innerHTML = featured.map(b => `
+  const limit = 6;
+  const itemsToShow = showAll ? biz : biz.slice(0, limit);
+
+  container.innerHTML = itemsToShow.map(b => `
     <div class="biz-square-card" onclick="openBusiness('${b.id}')">
       <img class="biz-square-img" src="${b.logo || 'https://dummyimage.com/400x400/0f1620/111827.png&text=Biz'}" />
       <div class="biz-square-overlay">
@@ -224,22 +180,40 @@ function renderFeatured() {
       </div>
     </div>
   `).join('');
-}
 
-// ----- Active Shops Sidebar -----
+  if(biz.length > limit) {
+    const btnContainer = document.createElement('div');
+    btnContainer.id = 'seeAllBtnContainer';
+    btnContainer.className = 'see-all-container';
+    
+    if (showAll) {
+         btnContainer.innerHTML = `
+          <button class="btn-see-all" onclick="renderFeatured(false)">
+            Show Less <i class="ri-arrow-up-s-line"></i>
+          </button>
+        `;
+    } else {
+        btnContainer.innerHTML = `
+          <button class="btn-see-all" onclick="renderFeatured(true)">
+            Show All Shops (${biz.length}) <i class="ri-arrow-down-s-line"></i>
+          </button>
+        `;
+    }
+    container.parentNode.insertBefore(btnContainer, container.nextSibling);
+  }
+};
+
 function renderActiveSidebar() {
-  // Filter out businesses that are manually turned off
-  const activeBiz = LS.read(LS.keyBiz).filter(b => b.status !== 'off');
-  
+  const biz = LS.read(LS.keyBiz).filter(b => b.status !== 'off');
   const container = document.getElementById('activeBizList');
   if(!container) return;
 
-  if(!activeBiz.length) {
+  if(!biz.length) {
     container.innerHTML = `<div style="color:var(--muted);">No active shops.</div>`;
     return;
   }
 
-  container.innerHTML = activeBiz.map((b, idx) => `
+  container.innerHTML = biz.map((b, idx) => `
     <div class="ranked-item" onclick="openBusiness('${b.id}')">
       <div class="rank-num">${idx + 1}</div>
       <img class="rank-img" src="${b.logo || 'https://dummyimage.com/100x150/0f1620/111827.png&text=Biz'}" />
@@ -260,7 +234,6 @@ window.openBusiness = (businessId) => {
         return;
     }
 
-    // Render Business Header/Details (MATCHING USER'S EXAMPLE IMAGE)
     const headerEl = document.getElementById('bizHeader');
     if(headerEl) {
         headerEl.innerHTML = `
@@ -281,13 +254,11 @@ window.openBusiness = (businessId) => {
         `;
     }
 
-    // Update the Section Title to be dynamic
     const servicesTitleEl = document.querySelector('#businessPage h3.section__header');
     if (servicesTitleEl) {
         servicesTitleEl.textContent = biz.type === 'Service' ? 'Our Services' : 'Our Menu';
     }
 
-    // Render only the products associated with this business
     const itemsGridEl = document.getElementById('bizItemsGrid');
     if(itemsGridEl) {
         renderListings(biz.id, itemsGridEl);
@@ -297,17 +268,16 @@ window.openBusiness = (businessId) => {
 };
 window.openBusiness = openBusiness;
 
-
-// ----- Listings (Modified to support Sold Out status) -----
+// ----- Listings -----
 document.getElementById('runSearch')?.addEventListener('click', ()=>{
   state.q = document.getElementById('q')?.value.trim() || '';
   renderListings();
 });
 
 function itemTemplate(i){
-  // Check the business status to determine sold out overlay
   const biz = i.businessId ? LS.read(LS.keyBiz).find(b => b.id === i.businessId) : null;
-  const isSoldOut = (biz && biz.status === 'off');
+  // Check if the business is closed OR if the item itself is marked off (sold out)
+  const isSoldOut = (biz && biz.status === 'off') || (i.status === 'off');
 
   return `
   <article class="card ${isSoldOut ? 'sold-out' : ''}">
@@ -326,12 +296,10 @@ function itemTemplate(i){
   </article>`;
 }
 
-// Function modified to accept businessId and an optional target container
 function renderListings(businessId = null, targetContainer = null){
   const listingsEl = targetContainer || document.getElementById('listings');
   const empty = document.getElementById('emptyListings');
   
-  // Guard against null elements for the main feed
   if(!listingsEl || (listingsEl === document.getElementById('listings') && !empty)) return;
 
   listingsEl.innerHTML = '';
@@ -339,11 +307,9 @@ function renderListings(businessId = null, targetContainer = null){
 
   let items = LS.read(LS.keyProducts);
 
-  // 1. Filter by Business ID (if provided, for Business Page)
   if(businessId) {
     items = items.filter(i => i.businessId === businessId);
   } else {
-    // 2. Filter for the main Browse feed: only show items *without* a businessId
     items = items.filter(i => !i.businessId);
 
     if(state.q) {
@@ -358,11 +324,9 @@ function renderListings(businessId = null, targetContainer = null){
   if(items.length > 0) {
     listingsEl.innerHTML = items.map(itemTemplate).join('');
   } else {
-    // Show empty message only for the main Browse feed
     if (listingsEl === document.getElementById('listings')) {
         empty.style.display = 'block';
     } else if (targetContainer) {
-        // Show a custom empty message for the business page
         listingsEl.innerHTML = `<div class="empty-state" style="grid-column:1/-1; padding:2rem; border:1px dashed var(--stroke); border-radius:12px; margin-top:1rem;">
                                   <i class="ri-menu-line" style="font-size: 2rem; margin-bottom: 0.5rem; color:var(--muted);"></i>
                                   <p>This business hasn't listed any items yet.</p>
@@ -371,178 +335,95 @@ function renderListings(businessId = null, targetContainer = null){
   }
 }
 
-// ----- Sell Item Form Handler -----
-const sellForm = document.getElementById('sellForm');
-if(sellForm) {
-    sellForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const data = Object.fromEntries(new FormData(e.target));
-        const products = LS.read(LS.keyProducts);
-        const profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null');
-
-        // 1. Construct the new product object
-        const newProduct = {
-            id: uid(),
-            title: data.title,
-            price: parseFloat(data.price),
-            category: data.category,
-            condition: data.condition,
-            description: data.description || '',
-            image: data.image || '', // This contains the Base64/URL
-            contact: data.contact,
-            listedBy: profile ? profile.username : 'Anonymous User',
-            created: Date.now(),
-        };
-
-        // 2. Simple validation
-        if (!newProduct.title || newProduct.price <= 0 || !newProduct.contact) {
-            toast("Please fill in required fields.");
-            return;
-        }
-
-        // 3. Save to localStorage
-        LS.write(LS.keyProducts, [...products, newProduct]);
-
-        // 4. Provide feedback and redirect
-        toast(`✅ Item "${newProduct.title}" Published to Fresh Listings!`);
-        e.target.reset();
-        route('browse'); // Go back to browse to see the new listing
-    });
-}
-
-// ----- Business Form Handler -----
-const bizForm = document.getElementById('bizForm');
-if(bizForm) {
-  bizForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.target));
-    const businesses = LS.read(LS.keyBiz);
-    const products = LS.read(LS.keyProducts);
-    
-    const ownerName = getOwnerName();
-
-    // 1. Construct the business object
-    const newBiz = {
-        id: uid(),
-        name: data.name,
-        category: data.category,
-        type: data.type,
-        ownerName: ownerName, // Use ownerName from profile
-        ownerAge: data.ownerAge,
-        description: data.description,
-        logo: data.logo, // This is the Base64/URL from the hidden input
-        contact: data.contact,
-        location: data.location,
-        website: data.website,
-        created: Date.now(),
-        status: 'on', // New field: default to 'on'
-    };
-
-    // 2. Construct initial menu items and add them to products list
-    const initialItems = [];
-    // The user's form has 4 static slots (1-4).
-    const formSlots = 4; 
-    for(let i = 1; i <= formSlots; i++) { 
-        const title = data[`m_title_${i}`]?.trim();
-        const price = parseFloat(data[`m_price_${i}`]);
-        // NOTE: The hidden input for m_image_X is missing in form.html,
-        // but the value should be in data[`m_image_${i}`] if implemented correctly.
-        const image = data[`m_image_${i}`] || ''; 
-
-        // Only add items with a title and price
-        if (title && price > 0) {
-            const item = {
-                id: uid(),
-                businessId: newBiz.id, // CRITICAL: Link item to business ID
-                title: title,
-                price: price,
-                category: newBiz.category, // Inherit category from business
-                condition: newBiz.type === 'Service' ? 'Service' : 'New / Fresh',
-                description: data[`m_desc_${i}`] || '',
-                image: image || '',
-                contact: newBiz.contact,
-                listedBy: ownerName, // Use ownerName from profile
-                created: Date.now(),
-            };
-            initialItems.push(item);
-        }
-    }
-    
-    // Basic validation
-    if (newBiz.type !== 'Service' && initialItems.length === 0) {
-        toast("Please add at least one item to your initial menu.");
-        return;
-    }
-
-    // 3. Save to localStorage
-    LS.write(LS.keyBiz, [...businesses, newBiz]);
-    LS.write(LS.keyProducts, [...products, ...initialItems]);
-
-    // 4. Provide feedback and redirect
-    toast(`🚀 Business "${newBiz.name}" Launched!`);
-    e.target.reset();
-    route('browse');
-  });
-}
-
-// ----- Profile Initialization & Dashboard Logic -----
+// ----- DASHBOARD LOGIC -----
 const PROFILE_KEY = 'slsu_profile';
 
 function getOwnerName() {
     const profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null');
-    // Ensure we use the exact username saved during login (e.g., 'Marc' or 'baseName')
     return profile ? profile.username : 'Anonymous User';
 }
 
-// Function to handle the ON/OFF switch
 window.switchBusinessStatus = (businessId) => {
     const businesses = LS.read(LS.keyBiz);
     const index = businesses.findIndex(b => b.id === businessId);
 
     if (index > -1) {
         const currentStatus = businesses[index].status;
-        // Toggle status: 'on' or 'off'
         businesses[index].status = currentStatus === 'on' ? 'off' : 'on';
         LS.write(LS.keyBiz, businesses);
-
-        toast(`Business status switched to: ${businesses[index].status.toUpperCase()}`);
         
-        // Re-render dashboard and browse sections to reflect changes
+        // --- ADDED THIS LINE FOR CLEARER FEEDBACK ---
+        const statusText = businesses[index].status === 'on' ? 'Active' : 'Sold Out / Closed';
+        toast(`Business is now: ${statusText}`);
+        
         renderMyDashboard();
         renderFeatured();
         renderActiveSidebar();
-        renderListings();
+        renderListings(); 
+    }
+}
+
+// NEW FUNCTION: Toggle status for a single item
+window.switchItemStatus = (itemId) => {
+    const products = LS.read(LS.keyProducts);
+    const index = products.findIndex(i => i.id === itemId);
+
+    if (index > -1) {
+        // Ensure the status field exists, defaulting to 'on' if missing
+        const currentStatus = products[index].status || 'on'; 
+        products[index].status = currentStatus === 'on' ? 'off' : 'on';
+        LS.write(LS.keyProducts, products);
+        
+        const statusText = products[index].status === 'on' ? 'Available' : 'SOLD OUT';
+        toast(`Item is now: ${statusText}`);
+        
+        renderMyDashboard();
+        renderListings(); 
     }
 }
 
 
 function renderMyDashboard() {
     const ownerName = getOwnerName();
+    
     const myBusinesses = LS.read(LS.keyBiz).filter(b => b.ownerName === ownerName);
-    const myListings = LS.read(LS.keyProducts).filter(i => i.listedBy === ownerName && !i.businessId);
+    
+    // Ensure all existing items have a status, default to 'on' if missing
+    let myListings = LS.read(LS.keyProducts)
+        .filter(i => i.listedBy === ownerName && !i.businessId)
+        .map(i => ({ ...i, status: i.status || 'on' }));
+    // Save the possibly updated list back
+    LS.write(LS.keyProducts, myListings); 
 
     const businessBody = document.getElementById('myBizBody');
     const businessEmpty = document.getElementById('myBizEmpty');
     const listingsBody = document.getElementById('myListingsBody');
     const listingsEmpty = document.getElementById('myListingsEmpty');
     
-    // 1. Render Businesses (Business Tab)
     if (businessBody) {
-        businessBody.innerHTML = ''; // Clear previous content
-
+        businessBody.innerHTML = ''; 
         if (myBusinesses.length > 0) {
             const rows = myBusinesses.map(b => `
                 <tr>
-                    <td><img src="${b.logo || 'https://dummyimage.com/50x50/0f1620/111827.png&text=B'}" style="width:35px; height:35px; border-radius:8px; object-fit:cover;"></td>
-                    <td>
-                      <b style="color:white;">${escapeHtml(b.name)}</b><br>
+                    <td onclick="openBusiness('${b.id}')" style="cursor:pointer;">
+                        <img src="${b.logo || 'https://dummyimage.com/50x50/0f1620/111827.png&text=B'}" style="width:35px; height:35px; border-radius:8px; object-fit:cover;">
+                    </td>
+                    <td onclick="openBusiness('${b.id}')" style="cursor:pointer;">
+                      <b style="color:white; text-decoration:underline; text-decoration-color:var(--muted);">${escapeHtml(b.name)}</b><br>
                       <span style="font-size:0.8rem; color:var(--muted);">${escapeHtml(b.category)}</span>
                     </td>
                     <td>${b.type === 'Service' ? 'Service' : 'Retail'}</td>
                     <td>
-                        <div class="toggle-switch">
-                            <input type="checkbox" id="toggle-${b.id}" ${b.status === 'on' ? 'checked' : ''} onchange="switchBusinessStatus('${b.id}')">
-                            <label for="toggle-${b.id}"></label>
+                        <!-- BUSINESS TOGGLE SWITCH -->
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:0.2rem;">
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="toggle-${b.id}" ${b.status === 'on' ? 'checked' : ''} onchange="switchBusinessStatus('${b.id}')">
+                                <label for="toggle-${b.id}"></label>
+                            </div>
+                            <!-- Status Label below switch -->
+                            <span style="font-size:0.7rem; color:${b.status === 'on' ? 'var(--accent)' : 'red'}; font-weight:600;">
+                                ${b.status === 'on' ? 'ACTIVE' : 'CLOSED'}
+                            </span>
                         </div>
                     </td>
                     <td>
@@ -557,7 +438,6 @@ function renderMyDashboard() {
         }
     }
     
-    // 2. Render user's individual listings (Items Tab)
     if (listingsBody) {
         listingsBody.innerHTML = '';
         if (myListings.length > 0) {
@@ -567,6 +447,19 @@ function renderMyDashboard() {
                     <td><b>${escapeHtml(i.title)}</b></td>
                     <td style="color:var(--muted);">${fmt.format(i.price)}</td>
                     <td>${escapeHtml(i.category)}</td>
+                    <td>
+                        <!-- ITEM TOGGLE SWITCH -->
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:0.2rem;">
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="toggle-item-${i.id}" ${i.status === 'on' ? 'checked' : ''} onchange="switchItemStatus('${i.id}')">
+                                <label for="toggle-item-${i.id}"></label>
+                            </div>
+                            <!-- Status Label below switch -->
+                            <span style="font-size:0.7rem; color:${i.status === 'on' ? 'var(--accent)' : 'red'}; font-weight:600;">
+                                ${i.status === 'on' ? 'AVAILABLE' : 'SOLD OUT'}
+                            </span>
+                        </div>
+                    </td>
                     <td>${escapeHtml(i.condition)}</td>
                     <td><button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.8rem;">Edit</button></td>
                 </tr>
@@ -577,25 +470,21 @@ function renderMyDashboard() {
              if (listingsEmpty) listingsEmpty.style.display = 'block';
         }
     }
-
-
-    // 3. Initialize the default tab view
-    switchMyTab('biz'); // Default to Business Tab
+    
+    const activeTab = document.querySelector('#myTabs .tab.active')?.getAttribute('data-tab') || 'listings';
+    window.switchMyTab(activeTab);
 }
 
 window.switchMyTab = (tabId) => {
-    // Hide all tab content
     const tabsContent = ['myListings', 'myOrders', 'myBusinesses'];
     tabsContent.forEach(id => {
       const el = document.getElementById(id);
       if(el) el.style.display = 'none';
     });
 
-    // Show the selected tab content
     const selectedContent = document.getElementById(`my${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`);
     if (selectedContent) selectedContent.style.display = 'block';
 
-    // Update active tab styles
     document.querySelectorAll('#myTabs .tab').forEach(tab => {
         if (tab.getAttribute('data-tab') === tabId) {
             tab.classList.add('active');
@@ -606,73 +495,194 @@ window.switchMyTab = (tabId) => {
 };
 
 function setupDashboardTabs() {
-    // This is called once during Init
     document.querySelectorAll('#myTabs .tab').forEach(tab => {
         tab.addEventListener('click', (e) => {
             const tabId = e.target.getAttribute('data-tab');
-            if (tabId) {
-                window.switchMyTab(tabId);
-            }
+            if (tabId) window.switchMyTab(tabId);
         });
     });
 }
 
-
-function initializeProfile() {
-    const profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null');
-    const token = localStorage.getItem('slsu_token');
+// ----- Business Form Handler (FIXED) -----
+document.addEventListener('submit', async (e) => {
+  if (e.target && e.target.id === 'bizForm') {
+    e.preventDefault();
+    const form = e.target;
     
-    if (!profile || token !== 'active') {
-        return;
-    }
-
-    const initial = (profile.username || 'U').toUpperCase().charAt(0);
-    const displayName = profile.username || 'Student User';
-    const email = profile.email || 'N/A';
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if(submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Processing...'; }
     
-    // 1. Update main nav avatar
-    const avatarEl = document.getElementById('profileAvatarInitial');
-    if (avatarEl) {
-        avatarEl.textContent = initial;
+    toast("Processing images...");
+
+    try {
+        const data = Object.fromEntries(new FormData(form));
+        const businesses = LS.read(LS.keyBiz);
+        const products = LS.read(LS.keyProducts);
+        const ownerName = getOwnerName(); 
+
+        // --- FIXED: Find Logo Input Smartly ---
+        // Try ID "bizFile", fallback to looking for input[type=file] that ISN'T a menu file
+        let bizFileInput = document.getElementById('bizFile');
+        if (!bizFileInput) {
+             bizFileInput = form.querySelector('input[type="file"]:not([id^="ms_file_"])');
+        }
+        
+        let bizLogoData = '';
+        if(bizFileInput && bizFileInput.files[0]) {
+            bizLogoData = await convertToBase64(bizFileInput.files[0]);
+        }
+
+        const newBiz = {
+            id: uid(),
+            name: data.name,
+            category: data.category,
+            type: data.type,
+            ownerName: ownerName, 
+            ownerAge: data.ownerAge,
+            description: data.description,
+            logo: bizLogoData, 
+            contact: data.contact,
+            location: data.location,
+            website: data.website,
+            created: Date.now(),
+            status: 'on',
+        };
+
+        // --- FIXED: Loop Menu Items with CORRECT ID (ms_file_) ---
+        const initialItems = [];
+        let menuSlotCount = 4;
+        for(let i = 1; i <= menuSlotCount; i++) { 
+            const title = data[`m_title_${i}`]?.trim();
+            const price = parseFloat(data[`m_price_${i}`]);
+            
+            // !! THIS WAS THE BUG: CHANGED m_file_ TO ms_file_ !!
+            const menuFileInput = document.getElementById(`ms_file_${i}`);
+            
+            let menuImageData = '';
+            if(menuFileInput && menuFileInput.files[0]) {
+                menuImageData = await convertToBase64(menuFileInput.files[0]);
+            }
+            
+            if (title && price > 0) {
+                initialItems.push({
+                    id: uid(),
+                    businessId: newBiz.id, 
+                    title: title,
+                    price: price,
+                    category: newBiz.category, 
+                    condition: newBiz.type === 'Service' ? 'Service' : 'New / Fresh',
+                    description: data[`m_desc_${i}`] || '',
+                    image: menuImageData, 
+                    contact: newBiz.contact,
+                    listedBy: ownerName, 
+                    created: Date.now(),
+                    status: 'on' // Default status for new items
+                });
+            }
+        }
+        
+        if (!newBiz.name) { throw new Error("Please fill in business name."); }
+
+        LS.write(LS.keyBiz, [...businesses, newBiz]);
+        LS.write(LS.keyProducts, [...products, ...initialItems]);
+
+        toast(`🚀 Business "${newBiz.name}" Launched!`);
+        form.reset();
+        
+        // Reset Visual Status Text & Preview
+        const logoStatus = document.getElementById('bizFileStatus');
+        const logoPreview = document.getElementById('bizLogoPreview');
+        if(logoStatus) { logoStatus.textContent = "No file chosen"; logoStatus.style.color = 'var(--muted)'; }
+        if(logoPreview) { logoPreview.src = ''; logoPreview.style.display = 'none'; }
+        
+        // Reset Menu Previews
+        for(let i=1; i<=4; i++) {
+            const mp = document.getElementById(`ms_prev_${i}`);
+            if(mp) { mp.src = ''; mp.style.display = 'none'; }
+        }
+        
+        route('browse');
+
+    } catch (error) {
+        console.error(error);
+        toast(error.message || "Failed to create business.");
+    } finally {
+        if(submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = 'Launch Business'; }
     }
+  }
+});
 
-    // 2. Update profile sidebar details
-    const sidebarAvatarEl = document.querySelector('.profile-sidebar__user .profile-avatar-letter');
-    if (sidebarAvatarEl) sidebarAvatarEl.textContent = initial;
+// ----- Sell Item Handler -----
+document.addEventListener('submit', async (e) => {
+    if (e.target && e.target.id === 'sellForm') {
+        e.preventDefault();
+        const form = e.target;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if(submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Processing...'; }
+        
+        toast("Processing image...");
 
-    const displayNameEl = document.querySelector('.profile-display-name');
-    if (displayNameEl) displayNameEl.textContent = displayName;
+        try {
+            const data = Object.fromEntries(new FormData(form));
+            const products = LS.read(LS.keyProducts);
+            const profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null');
 
-    const emailEl = document.querySelector('.profile-email');
-    if (emailEl) emailEl.textContent = email;
-    
-    // 3. Update settings input
-    const displayNameInput = document.getElementById('displayNameInput');
-    if(displayNameInput) {
-        displayNameInput.value = displayName;
+            const sellFileInput = document.getElementById('sellFile');
+            let sellImageData = '';
+            if(sellFileInput && sellFileInput.files[0]) {
+                sellImageData = await convertToBase64(sellFileInput.files[0]);
+            }
+
+            const newProduct = {
+                id: uid(),
+                title: data.title,
+                price: parseFloat(data.price),
+                category: data.category,
+                condition: data.condition,
+                description: data.description || '',
+                image: sellImageData, 
+                contact: data.contact,
+                listedBy: profile ? profile.username : 'Anonymous User',
+                created: Date.now(),
+                status: 'on' // Default status for new items
+            };
+
+            if (!newProduct.title) { throw new Error("Please fill title."); }
+
+            LS.write(LS.keyProducts, [...products, newProduct]);
+            toast(`✅ Item "${newProduct.title}" Published!`);
+            form.reset();
+            
+            // Reset Visual Status Text
+            const sellStatus = document.getElementById('sellFileStatus');
+            if(sellStatus) { sellStatus.textContent = "No file chosen"; sellStatus.style.color = 'var(--muted)'; }
+
+            route('browse');
+        } catch (error) {
+            console.error(error);
+            toast(error.message || "Failed to list item.");
+        } finally {
+             if(submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="ri-upload-2-line"></i> Publish'; }
+        }
     }
-}
+});
 
-// ----- Sidebar Toggles (Cart & Profile) -----
+// ----- Init -----
 const cartBtn = document.getElementById('openCart');
 const cartPanel = document.getElementById('cartPanel');
 const closeCart = document.getElementById('closeCart');
-
 if(cartBtn && cartPanel) {
     cartBtn.addEventListener('click', () => cartPanel.classList.add('open'));
     if(closeCart) closeCart.addEventListener('click', () => cartPanel.classList.remove('open'));
 }
-
 const profileBtn = document.getElementById('openProfile');
 const profileOverlay = document.getElementById('profileOverlay');
 const closeProfile = document.getElementById('closeProfileSidebar');
-
 if(profileBtn && profileOverlay) {
     profileBtn.addEventListener('click', () => profileOverlay.classList.add('open'));
     if(closeProfile) closeProfile.addEventListener('click', () => profileOverlay.classList.remove('open'));
 }
 
-// Save Profile Button Logic
 document.getElementById('saveProfileBtn')?.addEventListener('click', () => {
     const profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null');
     const newName = document.getElementById('displayNameInput')?.value.trim();
@@ -680,12 +690,35 @@ document.getElementById('saveProfileBtn')?.addEventListener('click', () => {
     if (profile && newName) {
         profile.username = newName;
         localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
-        initializeProfile(); // Re-render profile with new name
+        const avatarEl = document.getElementById('profileAvatarInitial');
+        if (avatarEl) avatarEl.textContent = newName.charAt(0).toUpperCase();
         toast('Profile updated successfully!');
     }
 });
 
-// Init
-initializeProfile(); 
+function initializeProfile() {
+    const profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null');
+    const token = localStorage.getItem('slsu_token');
+    
+    if (!profile || token !== 'active') return;
+
+    const initial = (profile.username || 'U').toUpperCase().charAt(0);
+    const displayName = profile.username || 'Student User';
+    const email = profile.email || 'N/A';
+    
+    const avatarEl = document.getElementById('profileAvatarInitial');
+    if (avatarEl) avatarEl.textContent = initial;
+
+    const displayNameEl = document.querySelector('.profile-display-name');
+    if (displayNameEl) displayNameEl.textContent = displayName;
+
+    const emailEl = document.querySelector('.profile-email');
+    if (emailEl) emailEl.textContent = email;
+    
+    const displayNameInput = document.getElementById('displayNameInput');
+    if(displayNameInput) displayNameInput.value = displayName;
+}
+
+initializeProfile();
 setupDashboardTabs();
 renderListings();

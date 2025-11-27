@@ -184,7 +184,7 @@
     <div class="tabs" id="myTabs" style="margin-bottom:1rem;">
       <div class="tab" data-tab="listings">Items</div>
       <div class="tab" data-tab="orders">Orders</div>
-      <div class="tab active" data-tab="biz">Business</div>
+      <div class="tab active" data-tab="businesses">Business</div>
     </div>
     
     <div id="myListings" style="display:none;">
@@ -208,7 +208,12 @@
     </div>
     
     <div id="myOrders" style="display:none;">
-      <table class="data-table" style="width:100%; text-align:left;"><tbody id="myOrdersBody"></tbody></table>
+      <table class="data-table" style="width:100%; text-align:left;">
+        <thead>
+          <tr><th>Order ID</th><th>Customer</th><th>Total</th><th>Date</th><th>Status</th></tr>
+        </thead>
+        <tbody id="myOrdersBody"></tbody>
+      </table>
       <div class="empty" id="myOrdersEmpty" style="display:none; text-align:center; padding: 2rem; color:var(--muted);">
         <i class="ri-clipboard-line" style="font-size: 2rem;"></i>
         <p>No orders yet.</p>
@@ -222,7 +227,7 @@
             <th style="width: 50px;"></th>
             <th>Business Name</th>
             <th style="width: 100px;">Type</th>
-            <th style="width: 100px;">Status</th>
+            <th style="width: 120px;">Status</th>
             <th style="width: 80px;">Actions</th>
           </tr>
         </thead>
@@ -258,7 +263,7 @@
         </div>
         <div class="profile-sidebar__body">
             <div class="profile-sidebar__user">
-                <div class="profile-avatar-circle profile-avatar-letter">U</div>
+                <div class="profile-avatar-circle profile-avatar-letter" id="profileAvatarInitial">M</div>
                 <div>
                     <div class="profile-display-name">Marc</div>
                     <div class="profile-email">student@slsu.edu.ph</div>

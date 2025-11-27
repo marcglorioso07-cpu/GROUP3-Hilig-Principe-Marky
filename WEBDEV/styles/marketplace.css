@@ -1,3 +1,5 @@
+/* styles/marketplace.css */
+
 /* --- HERO SECTION --- */
 .hero-card {
   position: relative;
@@ -60,7 +62,7 @@
   .grid-2 { grid-template-columns: 1fr; }
 }
 
-/* --- MENU BUILDER SLOTS (New) --- */
+/* --- MENU BUILDER SLOTS --- */
 .menu-slot-card {
   background: var(--surface-2);
   border: 1px solid var(--stroke);
@@ -158,13 +160,31 @@
 .ranked-item:hover { background: var(--surface-3); }
 .rank-img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
 
-/* --- FEATURED BIZ --- */
-.featured-biz-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+/* --- FEATURED BIZ (UPDATED RESPONSIVE GRID) --- */
+.featured-biz-row { 
+  display: grid; 
+  /* This ensures items fill the space dynamically (fits 3 or 4 per row depending on screen) */
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); 
+  gap: 1rem; 
+  margin-bottom: 2rem; 
+}
 .biz-square-card { position: relative; aspect-ratio: 4/3; border-radius: var(--radius-md); overflow: hidden; cursor: pointer; border: 1px solid var(--stroke); }
 .biz-square-img { width: 100%; height: 100%; object-fit: cover; transition: 0.4s; }
 .biz-square-card:hover .biz-square-img { transform: scale(1.1); }
 .biz-square-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); display: flex; flex-direction: column; justify-content: flex-end; padding: 1rem; }
 .biz-square-name { font-weight: 700; color: white; }
+
+/* Show All Button (New) */
+.see-all-container {
+  grid-column: 1 / -1; /* Spans full width */
+  display: flex; justify-content: flex-end; margin-top: -1rem; margin-bottom: 2rem;
+}
+.btn-see-all {
+  background: transparent; color: var(--accent); border: 1px solid var(--stroke);
+  padding: 0.5rem 1rem; border-radius: 99px; cursor: pointer;
+  font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; transition: 0.2s;
+}
+.btn-see-all:hover { border-color: var(--accent); background: rgba(34,197,94,0.1); }
 
 /* --- PROFILE SIDEBAR --- */
 .profile-overlay {
@@ -214,8 +234,7 @@
 }
 .profile-logout-btn:hover { background: #dc2626; }
 
-/* --- BUSINESS PAGE HEADER (CUSTOM STYLING TO MATCH USER IMAGE) --- */
-
+/* --- BUSINESS PAGE HEADER (CUSTOM STYLING) --- */
 #businessPage .section__header {
   font-size: 1.5rem; 
   font-weight: 700;
@@ -266,7 +285,7 @@
     color: var(--muted);
     font-size: 0.95rem;
     margin-top: 0.2rem;
-    margin-bottom: 1rem; /* Space before details */
+    margin-bottom: 1rem;
 }
 
 .biz-details-row-alt {
@@ -275,7 +294,7 @@
     gap: 1.5rem;
     font-size: 0.9rem;
     color: var(--text);
-    margin-bottom: 1rem; /* Space before button */
+    margin-bottom: 1rem; 
 }
 
 .biz-details-row-alt span {
@@ -285,7 +304,7 @@
 }
 
 .biz-details-row-alt i {
-    color: var(--accent); /* Icons are green in the example */
+    color: var(--accent); 
 }
 
 .btn-owner-alt {
