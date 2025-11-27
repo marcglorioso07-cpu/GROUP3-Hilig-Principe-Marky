@@ -46,7 +46,7 @@ const setupFileUpload = (fileId, textId, statusId) => {
 setupFileUpload('sellFile', 'sellImageInput', 'sellFileStatus');
 setupFileUpload('bizFile', 'bizLogoInput', 'bizFileStatus');
 
-// ----- Dynamic Menu Slot Logic & Base64 Encoder (HTTP 431 Fix) -----
+// ----- Dynamic Menu Slot Logic & Base64 Encoder -----
 
 let menuSlotCount = 3; 
 
@@ -55,7 +55,6 @@ window.previewSlot = async (input, imgId) => {
   
   const file = input.files[0];
   const img = document.getElementById(imgId);
-  // Target the hidden input by constructing its ID (e.g., ms_image_1_input)
   const hiddenInputId = imgId.replace('ms_prev_', 'ms_image_') + '_input';
   const hiddenInput = document.getElementById(hiddenInputId);
 
@@ -156,9 +155,7 @@ function route(r){
     renderListings();
   }
   if(r==='my') {
-    // Basic dashboard render placeholders
-    const listBody = document.getElementById('myListingsBody');
-    if(listBody) listBody.innerHTML = '<tr><td style="padding:1rem; color:#94a3b8;">Loading items...</td></tr>';
+    renderMyDashboard(); // RENDER DASHBOARD
   }
   if(r==='sell') {
     if(!window.isAddingToBiz) {
@@ -206,11 +203,13 @@ window.filterCategory = (catName) => {
 
 // ----- Featured Businesses -----
 function renderFeatured() {
-  const biz = LS.read(LS.keyBiz);
+  // Filter out businesses that are manually turned off
+  const activeBiz = LS.read(LS.keyBiz).filter(b => b.status !== 'off'); 
+  
   const container = document.getElementById('featuredBizRow');
   if(!container) return;
 
-  const featured = biz.slice(0, 3);
+  const featured = activeBiz.slice(0, 3);
   if(!featured.length) {
     container.innerHTML = `<div style="grid-column:1/-1; color:var(--muted); padding:1rem; border:1px dashed var(--stroke); border-radius:12px;">No businesses featured yet.</div>`;
     return;
@@ -229,16 +228,18 @@ function renderFeatured() {
 
 // ----- Active Shops Sidebar -----
 function renderActiveSidebar() {
-  const biz = LS.read(LS.keyBiz);
+  // Filter out businesses that are manually turned off
+  const activeBiz = LS.read(LS.keyBiz).filter(b => b.status !== 'off');
+  
   const container = document.getElementById('activeBizList');
   if(!container) return;
 
-  if(!biz.length) {
+  if(!activeBiz.length) {
     container.innerHTML = `<div style="color:var(--muted);">No active shops.</div>`;
     return;
   }
 
-  container.innerHTML = biz.map((b, idx) => `
+  container.innerHTML = activeBiz.map((b, idx) => `
     <div class="ranked-item" onclick="openBusiness('${b.id}')">
       <div class="rank-num">${idx + 1}</div>
       <img class="rank-img" src="${b.logo || 'https://dummyimage.com/100x150/0f1620/111827.png&text=Biz'}" />
@@ -297,22 +298,27 @@ window.openBusiness = (businessId) => {
 window.openBusiness = openBusiness;
 
 
-// ----- Listings (Modified to support filtering) -----
+// ----- Listings (Modified to support Sold Out status) -----
 document.getElementById('runSearch')?.addEventListener('click', ()=>{
   state.q = document.getElementById('q')?.value.trim() || '';
   renderListings();
 });
 
 function itemTemplate(i){
+  // Check the business status to determine sold out overlay
+  const biz = i.businessId ? LS.read(LS.keyBiz).find(b => b.id === i.businessId) : null;
+  const isSoldOut = (biz && biz.status === 'off');
+
   return `
-  <article class="card">
+  <article class="card ${isSoldOut ? 'sold-out' : ''}">
     <img class="card__img" src="${i.image || 'https://dummyimage.com/800x600/0f1620/111827.png&text=Item'}" />
+    ${isSoldOut ? '<div class="sold-out-overlay">SOLD OUT</div>' : ''}
     <div class="card__body">
       <div class="badge">${escapeHtml(i.category)} • ${escapeHtml(i.condition || 'New')}</div>
       <h3>${escapeHtml(i.title)}</h3>
       <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
         <div class="price">${fmt.format(i.price)}</div>
-        <button class="btn" style="padding:0.4rem 0.8rem; font-size:0.9rem;" onclick="addToCart('${i.id}')">
+        <button class="btn" style="padding:0.4rem 0.8rem; font-size:0.9rem;" onclick="addToCart('${i.id}')" ${isSoldOut ? 'disabled' : ''}>
           <i class="ri-add-line"></i>
         </button>
       </div>
@@ -333,9 +339,8 @@ function renderListings(businessId = null, targetContainer = null){
 
   let items = LS.read(LS.keyProducts);
 
-  // 1. Filter by Business ID (if provided)
+  // 1. Filter by Business ID (if provided, for Business Page)
   if(businessId) {
-    // Show only items linked to this business
     items = items.filter(i => i.businessId === businessId);
   } else {
     // 2. Filter for the main Browse feed: only show items *without* a businessId
@@ -366,7 +371,7 @@ function renderListings(businessId = null, targetContainer = null){
   }
 }
 
-// ----- Sell Item Form Handler (NEW) -----
+// ----- Sell Item Form Handler -----
 const sellForm = document.getElementById('sellForm');
 if(sellForm) {
     sellForm.addEventListener('submit', async (e) => {
@@ -378,8 +383,6 @@ if(sellForm) {
         // 1. Construct the new product object
         const newProduct = {
             id: uid(),
-            // Important: businessId is deliberately excluded here,
-            // or set to null/undefined, so it appears in the Fresh Listings feed.
             title: data.title,
             price: parseFloat(data.price),
             category: data.category,
@@ -416,13 +419,15 @@ if(bizForm) {
     const businesses = LS.read(LS.keyBiz);
     const products = LS.read(LS.keyProducts);
     
+    const ownerName = getOwnerName();
+
     // 1. Construct the business object
     const newBiz = {
         id: uid(),
         name: data.name,
         category: data.category,
         type: data.type,
-        ownerName: data.ownerName,
+        ownerName: ownerName, // Use ownerName from profile
         ownerAge: data.ownerAge,
         description: data.description,
         logo: data.logo, // This is the Base64/URL from the hidden input
@@ -430,15 +435,19 @@ if(bizForm) {
         location: data.location,
         website: data.website,
         created: Date.now(),
+        status: 'on', // New field: default to 'on'
     };
 
     // 2. Construct initial menu items and add them to products list
     const initialItems = [];
-    // Iterate up to the current total number of slots
-    for(let i = 1; i <= menuSlotCount; i++) { 
+    // The user's form has 4 static slots (1-4).
+    const formSlots = 4; 
+    for(let i = 1; i <= formSlots; i++) { 
         const title = data[`m_title_${i}`]?.trim();
         const price = parseFloat(data[`m_price_${i}`]);
-        const image = data[`m_image_${i}`]?.trim();
+        // NOTE: The hidden input for m_image_X is missing in form.html,
+        // but the value should be in data[`m_image_${i}`] if implemented correctly.
+        const image = data[`m_image_${i}`] || ''; 
 
         // Only add items with a title and price
         if (title && price > 0) {
@@ -452,14 +461,14 @@ if(bizForm) {
                 description: data[`m_desc_${i}`] || '',
                 image: image || '',
                 contact: newBiz.contact,
-                listedBy: newBiz.ownerName,
+                listedBy: ownerName, // Use ownerName from profile
                 created: Date.now(),
             };
             initialItems.push(item);
         }
     }
     
-    // Basic validation: must have at least one menu item if Food/Retail
+    // Basic validation
     if (newBiz.type !== 'Service' && initialItems.length === 0) {
         toast("Please add at least one item to your initial menu.");
         return;
@@ -472,20 +481,148 @@ if(bizForm) {
     // 4. Provide feedback and redirect
     toast(`🚀 Business "${newBiz.name}" Launched!`);
     e.target.reset();
-    route('browse'); // Go back to browse to see the new listing
+    route('browse');
   });
 }
 
-
-// ----- Profile Initialization -----
+// ----- Profile Initialization & Dashboard Logic -----
 const PROFILE_KEY = 'slsu_profile';
+
+function getOwnerName() {
+    const profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null');
+    // Ensure we use the exact username saved during login (e.g., 'Marc' or 'baseName')
+    return profile ? profile.username : 'Anonymous User';
+}
+
+// Function to handle the ON/OFF switch
+window.switchBusinessStatus = (businessId) => {
+    const businesses = LS.read(LS.keyBiz);
+    const index = businesses.findIndex(b => b.id === businessId);
+
+    if (index > -1) {
+        const currentStatus = businesses[index].status;
+        // Toggle status: 'on' or 'off'
+        businesses[index].status = currentStatus === 'on' ? 'off' : 'on';
+        LS.write(LS.keyBiz, businesses);
+
+        toast(`Business status switched to: ${businesses[index].status.toUpperCase()}`);
+        
+        // Re-render dashboard and browse sections to reflect changes
+        renderMyDashboard();
+        renderFeatured();
+        renderActiveSidebar();
+        renderListings();
+    }
+}
+
+
+function renderMyDashboard() {
+    const ownerName = getOwnerName();
+    const myBusinesses = LS.read(LS.keyBiz).filter(b => b.ownerName === ownerName);
+    const myListings = LS.read(LS.keyProducts).filter(i => i.listedBy === ownerName && !i.businessId);
+
+    const businessBody = document.getElementById('myBizBody');
+    const businessEmpty = document.getElementById('myBizEmpty');
+    const listingsBody = document.getElementById('myListingsBody');
+    const listingsEmpty = document.getElementById('myListingsEmpty');
+    
+    // 1. Render Businesses (Business Tab)
+    if (businessBody) {
+        businessBody.innerHTML = ''; // Clear previous content
+
+        if (myBusinesses.length > 0) {
+            const rows = myBusinesses.map(b => `
+                <tr>
+                    <td><img src="${b.logo || 'https://dummyimage.com/50x50/0f1620/111827.png&text=B'}" style="width:35px; height:35px; border-radius:8px; object-fit:cover;"></td>
+                    <td>
+                      <b style="color:white;">${escapeHtml(b.name)}</b><br>
+                      <span style="font-size:0.8rem; color:var(--muted);">${escapeHtml(b.category)}</span>
+                    </td>
+                    <td>${b.type === 'Service' ? 'Service' : 'Retail'}</td>
+                    <td>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="toggle-${b.id}" ${b.status === 'on' ? 'checked' : ''} onchange="switchBusinessStatus('${b.id}')">
+                            <label for="toggle-${b.id}"></label>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.8rem;" onclick="openBusiness('${b.id}')">View</button>
+                    </td>
+                </tr>
+            `).join('');
+            businessBody.innerHTML = rows;
+            if (businessEmpty) businessEmpty.style.display = 'none';
+        } else {
+            if (businessEmpty) businessEmpty.style.display = 'block';
+        }
+    }
+    
+    // 2. Render user's individual listings (Items Tab)
+    if (listingsBody) {
+        listingsBody.innerHTML = '';
+        if (myListings.length > 0) {
+            const rows = myListings.map(i => `
+                <tr>
+                    <td><img src="${i.image || 'https://dummyimage.com/50x50/0f1620/111827.png&text=I'}" style="width:35px; height:35px; border-radius:8px; object-fit:cover;"></td>
+                    <td><b>${escapeHtml(i.title)}</b></td>
+                    <td style="color:var(--muted);">${fmt.format(i.price)}</td>
+                    <td>${escapeHtml(i.category)}</td>
+                    <td>${escapeHtml(i.condition)}</td>
+                    <td><button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.8rem;">Edit</button></td>
+                </tr>
+            `).join('');
+            listingsBody.innerHTML = rows;
+            if (listingsEmpty) listingsEmpty.style.display = 'none';
+        } else {
+             if (listingsEmpty) listingsEmpty.style.display = 'block';
+        }
+    }
+
+
+    // 3. Initialize the default tab view
+    switchMyTab('biz'); // Default to Business Tab
+}
+
+window.switchMyTab = (tabId) => {
+    // Hide all tab content
+    const tabsContent = ['myListings', 'myOrders', 'myBusinesses'];
+    tabsContent.forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.style.display = 'none';
+    });
+
+    // Show the selected tab content
+    const selectedContent = document.getElementById(`my${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`);
+    if (selectedContent) selectedContent.style.display = 'block';
+
+    // Update active tab styles
+    document.querySelectorAll('#myTabs .tab').forEach(tab => {
+        if (tab.getAttribute('data-tab') === tabId) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+};
+
+function setupDashboardTabs() {
+    // This is called once during Init
+    document.querySelectorAll('#myTabs .tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            const tabId = e.target.getAttribute('data-tab');
+            if (tabId) {
+                window.switchMyTab(tabId);
+            }
+        });
+    });
+}
+
 
 function initializeProfile() {
     const profile = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null');
     const token = localStorage.getItem('slsu_token');
     
     if (!profile || token !== 'active') {
-        // Not logged in or profile is empty
         return;
     }
 
@@ -550,4 +687,5 @@ document.getElementById('saveProfileBtn')?.addEventListener('click', () => {
 
 // Init
 initializeProfile(); 
+setupDashboardTabs();
 renderListings();

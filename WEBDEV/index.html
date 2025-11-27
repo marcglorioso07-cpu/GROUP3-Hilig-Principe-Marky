@@ -35,7 +35,7 @@
         </button>
 
         <button class="btn-icon profile-trigger" id="openProfile">
-          <div class="avatar profile-avatar-letter" id="profileAvatarInitial"></div>
+          <div class="avatar profile-avatar-letter" id="profileAvatarInitial">U</div>
         </button>
       </div>
     </div>
@@ -182,21 +182,57 @@
   <section class="section__container" id="mySection" style="display:none;">
     <h2 class="section__header">My Dashboard</h2>
     <div class="tabs" id="myTabs" style="margin-bottom:1rem;">
-      <div class="tab active" data-tab="listings">Items</div>
+      <div class="tab" data-tab="listings">Items</div>
       <div class="tab" data-tab="orders">Orders</div>
-      <div class="tab" data-tab="biz">Business</div>
+      <div class="tab active" data-tab="biz">Business</div>
     </div>
-    <div id="myListings">
-       <table class="data-table" style="width:100%; text-align:left;"><tbody id="myListingsBody"></tbody></table>
-       <div class="empty" id="myListingsEmpty" style="display:none;">No items yet.</div>
+    
+    <div id="myListings" style="display:none;">
+       <table class="data-table" style="width:100%; text-align:left;">
+         <thead>
+           <tr>
+             <th style="width: 50px;"></th>
+             <th>Item Name</th>
+             <th style="width: 100px;">Price</th>
+             <th style="width: 100px;">Category</th>
+             <th style="width: 100px;">Condition</th>
+             <th style="width: 80px;">Actions</th>
+           </tr>
+         </thead>
+         <tbody id="myListingsBody"></tbody>
+       </table>
+       <div class="empty" id="myListingsEmpty" style="display:none; text-align:center; padding: 2rem; color:var(--muted);">
+         <i class="ri-shopping-bag-line" style="font-size: 2rem;"></i>
+         <p>You haven't listed any individual items yet.</p>
+       </div>
     </div>
+    
     <div id="myOrders" style="display:none;">
       <table class="data-table" style="width:100%; text-align:left;"><tbody id="myOrdersBody"></tbody></table>
-      <div class="empty" id="myOrdersEmpty" style="display:none;">No orders yet.</div>
+      <div class="empty" id="myOrdersEmpty" style="display:none; text-align:center; padding: 2rem; color:var(--muted);">
+        <i class="ri-clipboard-line" style="font-size: 2rem;"></i>
+        <p>No orders yet.</p>
+      </div>
     </div>
-    <div id="myBusinesses" style="display:none;">
-      <table class="data-table" style="width:100%; text-align:left;"><tbody id="myBizBody"></tbody></table>
-      <div class="empty" id="myBizEmpty" style="display:none;">No businesses yet.</div>
+    
+    <div id="myBusinesses">
+      <table class="data-table" style="width:100%; text-align:left;">
+        <thead>
+          <tr>
+            <th style="width: 50px;"></th>
+            <th>Business Name</th>
+            <th style="width: 100px;">Type</th>
+            <th style="width: 100px;">Status</th>
+            <th style="width: 80px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="myBizBody"></tbody>
+      </table>
+      <div class="empty" id="myBizEmpty" style="display:none; text-align:center; padding: 2rem; color:var(--muted);">
+        <i class="ri-store-line" style="font-size: 2rem;"></i>
+        <p>You haven't launched any businesses yet.</p>
+        <button class="btn" onclick="route('business'); document.getElementById('profileOverlay').classList.remove('open')" style="margin-top: 1rem;">Create Business</button>
+      </div>
     </div>
   </section>
 
@@ -222,7 +258,7 @@
         </div>
         <div class="profile-sidebar__body">
             <div class="profile-sidebar__user">
-                <div class="profile-avatar-circle profile-avatar-letter">M</div>
+                <div class="profile-avatar-circle profile-avatar-letter">U</div>
                 <div>
                     <div class="profile-display-name">Marc</div>
                     <div class="profile-email">student@slsu.edu.ph</div>

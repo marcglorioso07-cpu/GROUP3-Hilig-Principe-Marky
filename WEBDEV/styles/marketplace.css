@@ -121,6 +121,7 @@
 
 /* --- CARDS & LISTINGS --- */
 .card {
+  position: relative; /* Needed for sold-out overlay */
   background: var(--surface-2); border: 1px solid var(--stroke); border-radius: var(--radius-md);
   overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column;
 }
@@ -128,6 +129,22 @@
 .card__img { width: 100%; height: 180px; object-fit: cover; background: var(--surface-3); }
 .card__body { padding: 1rem; flex: 1; display: flex; flex-direction: column; }
 .price { font-size: 1.1rem; font-weight: 700; color: white; margin-top: 0.8rem; }
+
+/* Sold Out Overlay */
+.card.sold-out { opacity: 0.6; pointer-events: none; }
+.sold-out-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(239, 68, 68, 0.8); /* Red tint */
+    color: white;
+    font-size: 1.8rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transform: rotate(-10deg);
+}
 
 /* --- SIDEBAR WIDGETS --- */
 .sidebar-box { background: var(--surface-2); border: 1px solid var(--stroke); border-radius: var(--radius-lg); padding: 1.5rem; }
@@ -300,4 +317,95 @@
     .biz-details-row-alt {
         justify-content: center;
     }
+}
+
+/* --- DASHBOARD & TABLE STYLES --- */
+.tabs {
+    display: flex;
+    border-bottom: 1px solid var(--stroke);
+}
+.tab {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    margin-right: 1.5rem;
+}
+.tab:hover {
+    color: var(--text);
+}
+.tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+.data-table {
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+.data-table th {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0.8rem 0.5rem;
+    border-bottom: 1px solid var(--stroke);
+    font-weight: 600;
+}
+.data-table td {
+    padding: 1rem 0.5rem;
+    border-bottom: 1px solid var(--stroke);
+    font-size: 0.95rem;
+}
+.data-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Toggle Switch (ON/OFF Button for Business Status) */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-switch label {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--surface-3);
+    border: 1px solid var(--muted);
+    transition: 0.4s;
+    border-radius: 34px;
+}
+
+.toggle-switch label:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 3px;
+    background-color: #f1f5f9;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+.toggle-switch input:checked + label {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+.toggle-switch input:checked + label:before {
+    transform: translateX(26px);
 }
