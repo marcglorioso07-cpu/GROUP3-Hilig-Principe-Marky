@@ -1,3 +1,54 @@
+<style>
+  /* --- Local Styles for the Business Form Only --- */
+  .grid { display: grid; gap: 1rem; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-4 { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+
+  .menu-slot-card {
+    background: var(--surface-2);
+    border: 1px solid var(--stroke);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+
+  .menu-slot-img {
+    position: relative; height: 140px; background: var(--surface-3); cursor: pointer;
+  }
+  .menu-slot-img label {
+    width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+  .menu-slot-img img {
+    width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;
+  }
+  .menu-slot-img .placeholder {
+    display: flex; flex-direction: column; align-items: center; color: var(--muted); font-size: 0.8rem;
+  }
+
+  .menu-slot-body {
+    padding: 0.8rem; flex: 1; display: flex; flex-direction: column; gap: 0.5rem;
+  }
+
+  .slot-input {
+    width: 100%; background: transparent; border: none; color: var(--text); font-family: inherit; outline: none;
+  }
+  .slot-input.title { font-weight: 600; font-size: 1rem; }
+  .slot-input.desc { font-size: 0.85rem; color: var(--muted); resize: none; }
+
+  .slot-price-box {
+    display: flex; align-items: center; background: var(--surface-1); border-radius: 6px;
+    padding: 0.4rem 0.6rem; border: 1px solid var(--stroke);
+  }
+  .slot-price-box span { color: var(--accent); font-weight: 600; margin-right: 0.3rem; }
+  .slot-price-box input { 
+    background: transparent; border: none; color: var(--text); font-weight: 700; width: 100%; outline: none;
+  }
+
+  @media (max-width: 768px) {
+    .grid-2, .grid-4 { grid-template-columns: 1fr; }
+  }
+</style>
+
 <form id="bizForm" class="form">
   <h2 class="section__header" style="display:flex; align-items:center; gap:0.5rem; font-size:1.5rem;">
     <i class="ri-store-3-fill" style="color:var(--accent);"></i> Create a Business

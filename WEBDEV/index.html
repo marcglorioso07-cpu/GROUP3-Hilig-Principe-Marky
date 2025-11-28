@@ -126,13 +126,13 @@
            <div class="input">
              <label>Category</label>
              <select name="category" required>
-                <option value="Food & Drinks">Food & Drinks</option>
-                <option value="Services">Services</option>
-                <option value="Merch & Printing">Merch & Printing</option>
-                <option value="Books">Books</option>
-                <option value="Uniforms">Uniforms</option>
-                <option value="Electronics">Electronics</option>
-                <option value="Others">Others</option>
+               <option value="Food & Drinks">Food & Drinks</option>
+               <option value="Services">Services</option>
+               <option value="Merch & Printing">Merch & Printing</option>
+               <option value="Books">Books</option>
+               <option value="Uniforms">Uniforms</option>
+               <option value="Electronics">Electronics</option>
+               <option value="Others">Others</option>
              </select>
            </div>
            <div class="input">
@@ -177,7 +177,7 @@
   </section>
 
   <section class="section__container" id="businessSection" style="display:none;">
-     </section>
+      </section>
 
   <section class="section__container" id="mySection" style="display:none;">
     <h2 class="section__header">My Dashboard</h2>
@@ -188,23 +188,12 @@
     </div>
     
     <div id="myListings" style="display:none;">
-       <table class="data-table" style="width:100%; text-align:left;">
-         <thead>
-           <tr>
-             <th style="width: 50px;"></th>
-             <th>Item Name</th>
-             <th style="width: 100px;">Price</th>
-             <th style="width: 100px;">Category</th>
-             <th style="width: 100px;">Condition</th>
-             <th style="width: 80px;">Actions</th>
-           </tr>
-         </thead>
-         <tbody id="myListingsBody"></tbody>
-       </table>
-       <div class="empty" id="myListingsEmpty" style="display:none; text-align:center; padding: 2rem; color:var(--muted);">
-         <i class="ri-shopping-bag-line" style="font-size: 2rem;"></i>
-         <p>You haven't listed any individual items yet.</p>
-       </div>
+      <!-- RENDER CARDS HERE -->
+      <div id="myListingsBody"></div> 
+      <div class="empty" id="myListingsEmpty" style="display:none; text-align:center; padding: 2rem; color:var(--muted);">
+        <i class="ri-shopping-bag-line" style="font-size: 2rem;"></i>
+        <p>You haven't listed any individual items yet.</p>
+      </div>
     </div>
     
     <div id="myOrders" style="display:none;">
@@ -221,18 +210,8 @@
     </div>
     
     <div id="myBusinesses">
-      <table class="data-table" style="width:100%; text-align:left;">
-        <thead>
-          <tr>
-            <th style="width: 50px;"></th>
-            <th>Business Name</th>
-            <th style="width: 100px;">Type</th>
-            <th style="width: 120px;">Status</th>
-            <th style="width: 80px;">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="myBizBody"></tbody>
-      </table>
+      <!-- RENDER CARDS HERE -->
+      <div id="myBizBody"></div> 
       <div class="empty" id="myBizEmpty" style="display:none; text-align:center; padding: 2rem; color:var(--muted);">
         <i class="ri-store-line" style="font-size: 2rem;"></i>
         <p>You haven't launched any businesses yet.</p>
@@ -258,44 +237,44 @@
   <div id="profileOverlay" class="profile-overlay">
     <aside class="profile-sidebar">
         <div class="profile-sidebar__header">
-            <h2>Profile</h2>
-            <button class="btn-icon" id="closeProfileSidebar"><i class="ri-close-line"></i></button>
+          <h2>Profile</h2>
+          <button class="btn-icon" id="closeProfileSidebar"><i class="ri-close-line"></i></button>
         </div>
         <div class="profile-sidebar__body">
-            <div class="profile-sidebar__user">
-                <div class="profile-avatar-circle profile-avatar-letter" id="profileAvatarInitial">M</div>
-                <div>
-                    <div class="profile-display-name">Marc</div>
-                    <div class="profile-email">student@slsu.edu.ph</div>
-                </div>
-            </div>
-            
-            <div class="profile-sidebar__section">
-                <div class="profile-sidebar__label">MENU</div>
-                <button class="profile-menu-link" onclick="route('my'); document.getElementById('profileOverlay').classList.remove('open')">
-                    <i class="ri-dashboard-line"></i><span>Dashboard</span>
-                </button>
-                <button class="profile-menu-link" onclick="route('sell'); document.getElementById('profileOverlay').classList.remove('open')">
-                    <i class="ri-add-circle-line"></i><span>Sell Item</span>
-                </button>
-                <button class="profile-menu-link" onclick="route('business'); document.getElementById('profileOverlay').classList.remove('open')">
-                    <i class="ri-store-2-line"></i><span>Create Business</span>
-                </button>
-            </div>
-            
-            <div class="profile-sidebar__section">
-                <div class="profile-sidebar__label">SETTINGS</div>
-                <div class="input">
-                    <label>Display Name</label>
-                    <input id="displayNameInput" value="Marc" style="background:var(--surface-2); border:1px solid var(--stroke); padding:0.6rem; color:white; width:100%; border-radius:8px;">
-                </div>
-                <button class="btn" id="saveProfileBtn" style="width:100%; margin-top:0.8rem;">Save</button>
-            </div>
+          <div class="profile-sidebar__user">
+              <div class="profile-avatar-circle profile-avatar-letter" id="profileAvatarInitial">M</div>
+              <div>
+                <div class="profile-display-name">Marc</div>
+                <div class="profile-email">student@slsu.edu.ph</div>
+              </div>
+          </div>
+          
+          <div class="profile-sidebar__section">
+              <div class="profile-sidebar__label">MENU</div>
+              <button class="profile-menu-link" onclick="route('my'); document.getElementById('profileOverlay').classList.remove('open')">
+                <i class="ri-dashboard-line"></i><span>Dashboard</span>
+              </button>
+              <button class="profile-menu-link" onclick="route('sell'); document.getElementById('profileOverlay').classList.remove('open')">
+                <i class="ri-add-circle-line"></i><span>Sell Item</span>
+              </button>
+              <button class="profile-menu-link" onclick="route('business'); document.getElementById('profileOverlay').classList.remove('open')">
+                <i class="ri-store-2-line"></i><span>Create Business</span>
+              </button>
+          </div>
+          
+          <div class="profile-sidebar__section">
+              <div class="profile-sidebar__label">SETTINGS</div>
+              <div class="input">
+                <label>Display Name</label>
+                <input id="displayNameInput" value="Marc" style="background:var(--surface-2); border:1px solid var(--stroke); padding:0.6rem; color:white; width:100%; border-radius:8px;">
+              </div>
+              <button class="btn" id="saveProfileBtn" style="width:100%; margin-top:0.8rem;">Save</button>
+          </div>
         </div>
         
         <div class="profile-sidebar__footer">
              <button class="btn profile-logout-btn" id="profileLogoutBtn" onclick="logout()">
-                <i class="ri-logout-box-r-line"></i> Logout
+               <i class="ri-logout-box-r-line"></i> Logout
             </button>
         </div>
     </aside>
