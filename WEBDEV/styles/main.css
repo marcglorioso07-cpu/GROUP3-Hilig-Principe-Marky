@@ -149,3 +149,91 @@ nav {
   transition: 0.3s; z-index: 3000;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(-10px); }
+/* Orders table hover delete button */
+.data-table .order-row .order-delete-btn {
+  margin-left: 0.5rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 999px;
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.data-table .order-row:hover .order-delete-btn {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-1px);
+}
+
+.data-table .order-row .order-delete-btn i {
+  font-size: 0.9rem;
+}
+/* --- My Orders: delete button on hover --- */
+.data-table td.order-status-cell {
+  white-space: nowrap;
+}
+
+.data-table .order-delete-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  margin-left: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.data-table tr:hover .order-delete-btn {
+  opacity: 1;
+}
+
+.data-table .order-delete-btn i {
+  font-size: 1rem;
+}
+/* Header profile avatar – make it fill the button circle */
+.avatar.profile-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: #022c22;
+  font-weight: 700;
+}
+
+/* Center the initial / image inside the circle */
+.profile-avatar-letter {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Sidebar profile picture fix – make it a perfect circle */
+.profile-picture {
+    width: 55px;       /* same width as header circle */
+    height: 55px;      /* enforce square */
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.profile-picture img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* fills circle */
+    border-radius: 50%;
+}
+

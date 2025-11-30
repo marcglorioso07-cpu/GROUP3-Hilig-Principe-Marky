@@ -1,76 +1,221 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - SLSU Marketplace</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/login.css">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - SLSU Marketplace</title>
+
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/login.css" />
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+
+  <!-- Firebase -->
+  <script type="module" src="scripts/firebase-init.js"></script>
+
+  <!-- Logic -->
+  <script src="scripts/login.js" defer></script>
+  <script src="scripts/register.js"></script>
+
+  <style>
+    .field-error {
+      color: #fca5a5;
+      font-size: 0.8rem;
+      margin-top: 4px;
+      min-height: 0.9rem;
+    }
+    .small-link {
+      color: var(--accent);
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 0.85rem;
+    }
+    .small-link:hover {
+      text-decoration: underline;
+    }
+
+    /* REGISTER CARD SCROLL FIX */
+    #registerCard {
+      max-height: 90vh;
+      overflow-y: auto;
+      padding-top: 1.5rem;
+      padding-bottom: 1.5rem;
+
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    #registerCard::-webkit-scrollbar {
+      width: 0 !important;
+      background: transparent !important;
+    }
+
+    /* CENTER REGISTER CARD */
+    #registerWrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    #registerCard {
+      pointer-events: auto;
+      transform: translateY(-20px);
+    }
+  </style>
 </head>
+
 <body>
+  <!-- Background -->
+  <div class="school-bg"></div>
+  <div class="gradient-overlay"></div>
 
-    <!-- School Background -->
-    <div class="school-bg"></div>
-    <div class="gradient-overlay"></div>
+  <!-- Logo -->
+  <div style="position:fixed; top:20px; left:20px; z-index:10;">
+    <img src="assets/logo.png"
+         style="width:50px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.5);"
+         onerror="this.style.display='none'" />
+  </div>
 
-    <!-- Header: Logo Only (Fixed at top left) -->
-    <div style="position:fixed; top:20px; left:20px; z-index:10;">
-        <img src="assets/logo.png" style="width:50px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.5);" onerror="this.style.display='none'"/>
-    </div>
+  <div class="login-wrapper">
 
-    <div class="login-wrapper">
-        <!-- Glassmorphism Card -->
-        <div class="login-card">
-            <h1 style="text-align:center; margin-bottom:0.5rem;">Login</h1>
-            <p class="subtitle" style="text-align:center;">Welcome back to SLSU Marketplace</p>
+    <!-- ================= LOGIN CARD ================= -->
+    <div class="login-card" id="loginCard">
+      <h1 style="text-align:center; margin-bottom:0.5rem;">Login</h1>
+      <p class="subtitle" style="text-align:center;">Welcome back to SLSU Marketplace</p>
 
-            <!-- Social login -->
-            <div class="social-login">
-                <button type="button" class="social-btn google" id="googleLogin">
-                    <i class="ri-google-fill"></i>
-                    <span>Continue with Google</span>
-                </button>
-                <button type="button" class="social-btn facebook" id="facebookLogin">
-                    <i class="ri-facebook-circle-fill"></i>
-                    <span>Continue with Facebook</span>
-                </button>
-            </div>
+      <!-- Google only -->
+      <div class="social-login">
+        <button type="button" class="social-btn google" id="googleLogin">
+          <i class="ri-google-fill"></i>
+          <span>Continue with Google</span>
+        </button>
+      </div>
 
-            <div class="divider">
-                <span>or use your student account</span>
-            </div>
+      <div class="divider">
+        <span>or use your student account</span>
+      </div>
 
-            <!-- Email / password login -->
-            <form id="loginForm">
-                <div class="input-group">
-                    <i class="ri-mail-line icon"></i>
-                    <input type="email" placeholder="Student Email" required />
-                </div>
-                
-                <div class="input-group">
-                    <i class="ri-lock-2-line icon"></i>
-                    <input type="password" placeholder="Password" required />
-                </div>
-
-                <div class="actions">
-                    <label class="remember">
-                        <input type="checkbox"> <span>Remember me</span>
-                    </label>
-                    <a href="#">Forgot Password?</a>
-                </div>
-
-                <button type="submit" class="btn-login">
-                    Login
-                </button>
-            </form>
-
-            <div class="footer-text">
-                Don't have an account? <a href="#">Register here</a>
-            </div>
+      <form id="loginForm">
+        <div class="input-group">
+          <i class="ri-mail-line icon"></i>
+          <input type="email" id="loginEmail" placeholder="Student Email" required />
         </div>
+
+        <div class="input-group">
+          <i class="ri-lock-2-line icon"></i>
+          <input type="password" id="loginPassword" placeholder="Password" required />
+        </div>
+
+        <div class="actions">
+          <label class="remember">
+            <input type="checkbox" id="loginRemember"> <span>Remember me</span>
+          </label>
+          <a href="#" class="small-link" id="showReset">Forgot Password?</a>
+        </div>
+
+        <div class="field-error" id="loginError"></div>
+
+        <button type="submit" class="btn-login">Login</button>
+      </form>
+
+      <div class="footer-text">
+        Don't have an account?
+        <a href="#" class="small-link" id="showRegister">Register here</a>
+      </div>
     </div>
 
-    <script src="scripts/login.js"></script>
+    <!-- ================= REGISTER CARD ================= -->
+    <div class="login-card" id="registerCard" style="display:none;">
+      <h1 style="text-align:center; margin-bottom:0.5rem;">Register</h1>
+      <p class="subtitle" style="text-align:center;">Create your SLSU Marketplace account</p>
+
+      <!-- Google only -->
+      <div class="social-login">
+        <button type="button" class="social-btn google" id="googleRegister">
+          <i class="ri-google-fill"></i>
+          <span>Continue with Google</span>
+        </button>
+      </div>
+
+      <div class="divider">
+        <span>or create student account</span>
+      </div>
+
+      <form id="registerForm">
+        <div class="input-group">
+          <i class="ri-user-line icon"></i>
+          <input type="text" id="regFullName" placeholder="Full Name" required />
+        </div>
+        <div class="field-error" id="regFullNameError"></div>
+
+        <div class="input-group">
+          <i class="ri-mail-line icon"></i>
+          <input type="email" id="regEmail" placeholder="Student Email" required />
+        </div>
+        <div class="field-error" id="regEmailError"></div>
+
+        <div class="input-group">
+          <i class="ri-id-card-line icon"></i>
+          <input type="text" id="regStudentId" placeholder="Student ID" required />
+        </div>
+        <div class="field-error" id="regStudentIdError"></div>
+
+        <div class="input-group">
+          <i class="ri-lock-2-line icon"></i>
+          <input type="password" id="regPassword" placeholder="Password (min 6 characters)" required />
+        </div>
+        <div class="field-error" id="regPasswordError"></div>
+
+        <div class="input-group">
+          <i class="ri-lock-password-line icon"></i>
+          <input type="password" id="regConfirmPassword" placeholder="Confirm Password" required />
+        </div>
+        <div class="field-error" id="regConfirmPasswordError"></div>
+
+        <label style="display:flex; align-items:flex-start; gap:0.45rem; font-size:0.8rem; color:var(--muted); margin:0.6rem 0 0.4rem;">
+          <input type="checkbox" id="regTerms" style="margin-top:0.15rem;">
+          <span>I agree to the <strong>Terms of Service</strong> and <strong>Privacy Policy</strong>.</span>
+        </label>
+        <div class="field-error" id="regTermsError"></div>
+
+        <div class="field-error" id="regGeneralError"></div>
+
+        <button type="submit" class="btn-login">Create Account</button>
+      </form>
+
+      <div class="footer-text">
+        Already have an account?
+        <a href="#" class="small-link" id="backToLoginFromRegister">Login here</a>
+      </div>
+    </div>
+
+    <!-- ================= RESET PASSWORD CARD ================= -->
+    <div class="login-card" id="resetCard" style="display:none;">
+      <h1 style="text-align:center; margin-bottom:0.5rem;">Reset Password</h1>
+      <p class="subtitle" style="text-align:center;">Enter your email to receive reset instructions.</p>
+
+      <form id="resetForm">
+        <div class="input-group">
+          <i class="ri-mail-line icon"></i>
+          <input type="email" id="resetEmail" placeholder="Student Email" required />
+        </div>
+
+        <div class="field-error" id="resetError"></div>
+        <div class="field-error" id="resetSuccess" style="color:#6ee7b7;"></div>
+
+        <button type="submit" class="btn-login" id="resetSubmitBtn">
+          Send Reset Instructions
+        </button>
+      </form>
+
+      <div class="footer-text">
+        <a href="#" class="small-link" id="backToLoginFromReset">← Back to Login</a>
+      </div>
+    </div>
+
+  </div>
 </body>
 </html>

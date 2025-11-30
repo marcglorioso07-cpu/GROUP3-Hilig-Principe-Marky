@@ -3,11 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script>
-    if (!localStorage.getItem('slsu_token')) {
-      window.location.href = 'login.html';
-    }
-  </script>
+  <script type="module" src="scripts/firebase-init.js"></script>
   <title>SLSU Marketplace</title>
   <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="styles/marketplace.css">
@@ -22,11 +18,16 @@
         <span class="site-title">SLSU <span class="accent">Marketplace</span></span>
       </div>
 
-      <div class="nav__center">
-        <button class="nav-pill active" onclick="route('browse')" data-route="browse">
-          Browse
-        </button>
-      </div>
+<div class="nav__center">
+
+  <button class="nav-pill active" onclick="route('browse')" data-route="browse">
+    <i class="ri-compass-3-line"></i>
+    <span>Browse</span>
+  </button>
+
+</div>
+
+
 
       <div class="nav__actions">
         <button class="btn-icon" id="openCart">
@@ -35,8 +36,14 @@
         </button>
 
         <button class="btn-icon profile-trigger" id="openProfile">
-          <div class="avatar profile-avatar-letter" id="profileAvatarInitial">U</div>
-        </button>
+  <div class="avatar profile-avatar" id="profileAvatarHeader" style="position:relative; overflow:hidden;">
+    <span class="profile-avatar-letter" id="profileAvatarInitialHeader">U</span>
+    <img id="profileAvatarImageHeader"
+         alt="Profile avatar"
+         style="display:none; width:100%; height:100%; object-fit:cover; border-radius:999px;" />
+  </div>
+</button>
+
       </div>
     </div>
   </nav>
@@ -101,106 +108,174 @@
     <div class="grid grid-3" id="bizItemsGrid"></div>
   </section>
 
-  <section class="section__container" id="sellSection" style="display:none;">
-    <div class="form-container-limit" style="max-width: 800px; margin: auto;">
-       <h2 class="section__header">List an Item</h2>
-       <form id="sellForm" class="form">
-         <input type="hidden" name="businessId" id="linkToBizId" value="" />
-         
-         <div id="bizLinkNotice" style="background:rgba(34,197,94,.1); color:#86efac; padding:0.8rem; border-radius:8px; display:none; margin-bottom:1rem;">
-           <i class="ri-link"></i> Adding to business: <b id="bizLinkName"></b>
-         </div>
+<section class="section__container" id="sellSection" style="display:none;">
+  <div class="form-container-limit" style="max-width: 800px; margin: auto;">
+     <h2 class="section__header">List an Item</h2>
+     <p style="color:var(--muted); margin-bottom:1.5rem; font-size:0.9rem;">
+       Fill in the details below to publish your item to the marketplace.
+     </p>
 
-         <div class="grid grid-2">
-           <div class="input">
-             <label>Item Title</label>
-             <input required name="title" placeholder="e.g., Cheese Burger" />
-           </div>
-           <div class="input">
-             <label>Price (PHP)</label>
-             <input required name="price" type="number" min="0" step="0.01" />
-           </div>
-         </div>
+     <form id="sellForm" class="form sell-form">
+       <input type="hidden" name="businessId" id="linkToBizId" value="" />
+       
+       <div id="bizLinkNotice" style="background:rgba(34,197,94,1); color:#022c22; padding:0.8rem 1rem; border-radius:10px; display:none; margin-bottom:1.25rem; border:1px solid rgba(22,163,74,0.6);">
+         <i class="ri-link"></i> Adding to business: <b id="bizLinkName"></b>
+       </div>
 
-         <div class="grid grid-2">
-           <div class="input">
-             <label>Category</label>
-             <select name="category" required>
-               <option value="Food & Drinks">Food & Drinks</option>
-               <option value="Services">Services</option>
-               <option value="Merch & Printing">Merch & Printing</option>
-               <option value="Books">Books</option>
-               <option value="Uniforms">Uniforms</option>
-               <option value="Electronics">Electronics</option>
-               <option value="Others">Others</option>
-             </select>
-           </div>
-           <div class="input">
-             <label>Condition</label>
-             <select name="condition" required>
-               <option>New / Fresh</option>
-               <option>Service</option>
-               <option>Like New</option>
-               <option>Good</option>
-             </select>
-           </div>
-         </div>
-
+       <div class="grid grid-2">
          <div class="input">
-           <label>Description</label>
-           <textarea name="description" rows="4"></textarea>
+           <label>Item Title</label>
+           <input required name="title" placeholder="e.g. Cheese Burger" />
          </div>
+         <div class="input">
+           <label>Price (PHP)</label>
+           <input required name="price" type="number" min="0" step="0.01" />
+         </div>
+       </div>
 
-         <div class="grid grid-2">
-            <div class="input">
-              <label>Photo</label>
-              <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.3rem;">
-                <label for="sellFile" class="btn" style="padding:0.6rem 1rem; width:auto;">
-                  <i class="ri-camera-fill"></i> Upload
-                </label>
-                <span id="sellFileStatus" style="font-size:0.8rem; color:var(--muted); font-style:italic;">No file</span>
-              </div>
-              <input type="file" id="sellFile" accept="image/*" style="display:none;" />
-              <input name="image" id="sellImageInput" placeholder="Or paste image URL..." />
-            </div>
-            <div class="input">
-              <label>Contact</label>
-              <input required name="contact" />
-            </div>
+       <div class="grid grid-2">
+         <div class="input">
+           <label>Category</label>
+           <select name="category" required>
+             <option value="Food & Drinks">Food & Drinks</option>
+             <option value="Services">Services</option>
+             <option value="Merch & Printing">Merch & Printing</option>
+             <option value="Books">Books</option>
+             <option value="Uniforms">Uniforms</option>
+             <option value="Electronics">Electronics</option>
+             <option value="Others">Others</option>
+           </select>
          </div>
+         <div class="input">
+           <label>Condition</label>
+           <select name="condition" required>
+             <option>New / Fresh</option>
+             <option>Service</option>
+             <option>Like New</option>
+             <option>Good</option>
+           </select>
+         </div>
+       </div>
 
-         <div class="toolbar" style="margin-top:1rem;">
-           <button class="btn" type="submit"><i class="ri-upload-2-line"></i> Publish</button>
-         </div>
-       </form>
-    </div>
-  </section>
+       <div class="input">
+         <label>Description</label>
+         <textarea name="description" rows="4" placeholder="Describe your item, size, flavor, or extra notes..."></textarea>
+       </div>
+
+       <div class="grid grid-2">
+          <div class="input">
+            <label>Photo</label>
+            <div class="sell-photo-row">
+              <label for="sellFile" class="sell-upload-btn">
+                <i class="ri-camera-fill"></i>
+                <span>Upload</span>
+              </label>
+              <span id="sellFileStatus">No file selected</span>
+            </div>
+            <input type="file" id="sellFile" accept="image/*" style="display:none;" />
+            <input name="image" id="sellImageInput" placeholder="Or paste image URL..." />
+          </div>
+          <div class="input">
+            <label>Contact</label>
+            <input required name="contact" placeholder="Phone or Messenger link" />
+          </div>
+       </div>
+
+       <div class="toolbar sell-toolbar">
+         <button class="btn" type="submit"><i class="ri-upload-2-line"></i> Publish</button>
+       </div>
+     </form>
+  </div>
+</section>
+
 
   <section class="section__container" id="businessSection" style="display:none;">
       </section>
 
-  <section class="section__container" id="mySection" style="display:none;">
-    <h2 class="section__header">My Dashboard</h2>
-    <div class="tabs" id="myTabs" style="margin-bottom:1rem;">
+<section class="section__container" id="mySection" style="display:none;">
+  <div class="dashboard-shell">
+    <div class="dashboard-top">
+      <div>
+        <h2 class="section__header" style="margin-bottom:0.25rem;">My Dashboard</h2>
+        <p class="dashboard-subtitle">
+          View your listed items, recent orders, and active businesses in one place.
+        </p>
+      </div>
+      <div class="dashboard-tags">
+    
+      </div>
+    </div>
+
+    <div class="tabs dashboard-tabs" id="myTabs">
       <div class="tab" data-tab="listings">Items</div>
       <div class="tab" data-tab="orders">Orders</div>
       <div class="tab active" data-tab="businesses">Business</div>
     </div>
-    
-    <div id="myListings" style="display:none;">
-      <!-- RENDER CARDS HERE -->
-      <div id="myListingsBody"></div> 
-      <div class="empty" id="myListingsEmpty" style="display:none; text-align:center; padding: 2rem; color:var(--muted);">
-        <i class="ri-shopping-bag-line" style="font-size: 2rem;"></i>
-        <p>You haven't listed any individual items yet.</p>
+
+    <div class="dashboard-content">
+      <!-- ITEMS TAB -->
+      <div id="myListings" style="display:none;">
+        <div id="myListingsBody"></div> 
+        <div class="empty empty-dashboard" id="myListingsEmpty">
+          <i class="ri-shopping-bag-line empty-icon"></i>
+          <p>You haven't listed any individual items yet.</p>
+        </div>
+      </div>
+
+      <!-- ORDERS TAB -->
+      <div id="myOrders" style="display:none;">
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Total</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="myOrdersBody"></tbody>
+          </table>
+        </div>
+        <div class="empty empty-dashboard" id="myOrdersEmpty">
+          <i class="ri-clipboard-line empty-icon"></i>
+          <p>No orders yet.</p>
+        </div>
+      </div>
+
+      <!-- BUSINESSES TAB -->
+      <div id="myBusinesses">
+        <div id="myBizBody"></div> 
+        <div class="empty empty-dashboard" id="myBizEmpty">
+          <i class="ri-store-line empty-icon"></i>
+          <p>You haven't launched any businesses yet.</p>
+          <button class="btn" onclick="route('business'); document.getElementById('profileOverlay').classList.remove('open')" style="margin-top: 1rem;">
+            <i class="ri-rocket-line"></i> Create Business
+          </button>
+        </div>
       </div>
     </div>
+  </div>
+</section>
+
     
     <div id="myOrders" style="display:none;">
       <table class="data-table" style="width:100%; text-align:left;">
         <thead>
-          <tr><th>Order ID</th><th>Customer</th><th>Total</th><th>Date</th><th>Status</th></tr>
-        </thead>
+  <tr>
+    <th>Order ID</th>
+    <th>Customer</th>
+    <th>Item</th>
+    <th>Category</th>
+    <th>Total</th>
+    <th>Date</th>
+    <th>Status</th>
+  </tr>
+</thead>
+
         <tbody id="myOrdersBody"></tbody>
       </table>
       <div class="empty" id="myOrdersEmpty" style="display:none; text-align:center; padding: 2rem; color:var(--muted);">
@@ -213,7 +288,7 @@
       <!-- RENDER CARDS HERE -->
       <div id="myBizBody"></div> 
       <div class="empty" id="myBizEmpty" style="display:none; text-align:center; padding: 2rem; color:var(--muted);">
-        <i class="ri-store-line" style="font-size: 2rem;"></i>
+        <i class="ri-store-line" style="font-size: 2 rem;"></i>
         <p>You haven't launched any businesses yet.</p>
         <button class="btn" onclick="route('business'); document.getElementById('profileOverlay').classList.remove('open')" style="margin-top: 1rem;">Create Business</button>
       </div>
@@ -241,13 +316,24 @@
           <button class="btn-icon" id="closeProfileSidebar"><i class="ri-close-line"></i></button>
         </div>
         <div class="profile-sidebar__body">
-          <div class="profile-sidebar__user">
-              <div class="profile-avatar-circle profile-avatar-letter" id="profileAvatarInitial">M</div>
-              <div>
-                <div class="profile-display-name">Marc</div>
-                <div class="profile-email">student@slsu.edu.ph</div>
-              </div>
-          </div>
+         <div class="profile-sidebar__user">
+  <div class="profile-avatar-circle" id="profileAvatarSidebar"
+       style="position:relative; overflow:hidden; cursor:pointer;">
+    <span class="profile-avatar-letter" id="profileAvatarInitialSidebar">M</span>
+    <img id="profileAvatarImageSidebar"
+         alt="Profile avatar"
+         style="display:none; width:100%; height:100%; object-fit:cover; border-radius:999px;" />
+  </div>
+  <div>
+    <div class="profile-display-name">Marc</div>
+    <div class="profile-email">student@slsu.edu.ph</div>
+  </div>
+</div>
+
+<!-- hidden file input for avatar upload -->
+<input type="file" id="profileAvatarFile" accept="image/*" style="display:none;">
+
+
           
           <div class="profile-sidebar__section">
               <div class="profile-sidebar__label">MENU</div>
@@ -280,14 +366,125 @@
     </aside>
   </div>
 
+  <!-- FOOTER -->
+<footer style="
+  margin-top:1.5rem;
+  border-top:1px solid var(--stroke);
+  background:var(--surface-2);
+  padding:1.2rem 0 1.6rem;
+  box-shadow:0 -2px 10px rgba(0,0,0,0.22);
+">
+  <div class="section__container"
+       style="
+         display:flex;
+         flex-direction:column;
+         align-items:center;
+         justify-content:center;
+         gap:0.9rem;
+         text-align:center;
+       ">
+    
+    <!-- LOGO + DESCRIPTION -->
+    <div style="
+      display:flex; 
+      align-items:center; 
+      gap:0.6rem; 
+      font-size:1.7rem;      /* BIG TITLE */
+      color:var(--muted);
+      font-weight:700;
+    ">
+      <i class="ri-store-3-line" style="font-size:1.9rem; color:var(--accent);"></i>
+      <span>SLSU Marketplace</span>
+    </div>
+
+    <!-- COPYRIGHT -->
+    <div style="
+      font-size:0.9rem; 
+      color:var(--muted); 
+      margin-top:0.3rem;
+    ">
+      © 2025 SLSU Marketplace. All rights reserved.
+    </div>
+
+    <!-- GLOW LINE -->
+    <div style="
+      width:100%;
+      max-width:260px;
+      height:2px;
+      margin-top:0.35rem;
+      background:linear-gradient(
+        90deg,
+        transparent,
+        var(--accent),
+        transparent
+      );
+      box-shadow:0 0 7px var(--accent);
+      border-radius:2px;
+    "></div>
+
+  </div>
+</footer>
+
+
+<!-- FOOTER HOVER EFFECTS -->
+<style>
+  .footer-btn {
+    background:transparent;
+    border:none;
+    color:var(--muted);
+    cursor:pointer;
+    font-size:1.1rem;     /* LARGER */
+    padding:0.25rem 0.4rem;
+    transition:0.25s ease;
+  }
+
+  .footer-btn:hover {
+    color:var(--accent);
+    text-shadow:0 0 6px var(--accent);
+    transform:translateY(-2px);
+  }
+</style>
+
+
+
   <div class="toast" id="toast"></div>
 
   <script>
-    function logout() {
-        localStorage.removeItem('slsu_token');
+    // Guard: if no Firebase user, kick back to login
+    document.addEventListener('DOMContentLoaded', () => {
+      const ns = window.firebaseNS || {};
+      const { auth, onAuthStateChanged } = ns;
+      if (!auth || !onAuthStateChanged) return;
+
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          window.location.href = 'login.html';
+        } else {
+          // Load Firestore profile and update UI
+          try {
+            await window.getCurrentUserProfile?.();
+          } catch (e) {
+            console.error('Profile load error', e);
+          }
+        }
+      });
+    });
+
+    async function logout() {
+      const ns = window.firebaseNS || {};
+      const { auth, signOut } = ns;
+      if (!auth || !signOut) {
         window.location.href = 'login.html';
+        return;
+      }
+      try {
+        await signOut(auth);
+      } finally {
+        window.location.href = 'login.html';
+      }
     }
   </script>
+
   <script src="scripts/boot.js" defer></script>
 </body>
 </html>

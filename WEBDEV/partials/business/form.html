@@ -9,214 +9,332 @@
     border: 1px solid var(--stroke);
     border-radius: 12px;
     overflow: hidden;
-    display: flex; flex-direction: column;
+    display: flex;
+    flex-direction: column;
   }
 
   .menu-slot-img {
-    position: relative; height: 140px; background: var(--surface-3); cursor: pointer;
+    position: relative;
+    height: 140px;
+    background: var(--surface-3);
+    cursor: pointer;
   }
   .menu-slot-img label {
-    width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
   }
   .menu-slot-img img {
-    width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
   }
   .menu-slot-img .placeholder {
-    display: flex; flex-direction: column; align-items: center; color: var(--muted); font-size: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--muted);
+    font-size: 0.8rem;
   }
 
   .menu-slot-body {
-    padding: 0.8rem; flex: 1; display: flex; flex-direction: column; gap: 0.5rem;
+    padding: 0.8rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
   .slot-input {
-    width: 100%; background: transparent; border: none; color: var(--text); font-family: inherit; outline: none;
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: inherit;
+    outline: none;
   }
   .slot-input.title { font-weight: 600; font-size: 1rem; }
   .slot-input.desc { font-size: 0.85rem; color: var(--muted); resize: none; }
 
   .slot-price-box {
-    display: flex; align-items: center; background: var(--surface-1); border-radius: 6px;
-    padding: 0.4rem 0.6rem; border: 1px solid var(--stroke);
+    display: flex;
+    align-items: center;
+    background: var(--surface-1);
+    border-radius: 6px;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--stroke);
   }
-  .slot-price-box span { color: var(--accent); font-weight: 600; margin-right: 0.3rem; }
-  .slot-price-box input { 
-    background: transparent; border: none; color: var(--text); font-weight: 700; width: 100%; outline: none;
+  .slot-price-box span {
+    color: var(--accent);
+    font-weight: 600;
+    margin-right: 0.3rem;
+  }
+  .slot-price-box input {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-weight: 700;
+    width: 100%;
+    outline: none;
+  }
+
+  /* New wrapper for nicer highlight & alignment */
+  .biz-form-shell {
+    max-width: 880px;
+    margin: 0 auto 3rem;
+    padding: 1.8rem 1.8rem 2.3rem;
+    background: var(--surface-1);
+    border-radius: 18px;
+    border: 1px solid var(--stroke);
+    box-shadow: 0 22px 60px rgba(15, 23, 42, 0.85);
+  }
+  .biz-form-shell h2.section__header {
+    margin-bottom: 0.25rem;
+  }
+  .biz-form-shell > p {
+    margin-bottom: 1.6rem !important;
   }
 
   @media (max-width: 768px) {
-    .grid-2, .grid-4 { grid-template-columns: 1fr; }
+    .grid-2,
+    .grid-4 { grid-template-columns: 1fr; }
+    .biz-form-shell { padding: 1.3rem 1.1rem 1.9rem; }
   }
 </style>
 
-<form id="bizForm" class="form">
-  <h2 class="section__header" style="display:flex; align-items:center; gap:0.5rem; font-size:1.5rem;">
-    <i class="ri-store-3-fill" style="color:var(--accent);"></i> Create a Business
-  </h2>
-  <p style="color:var(--muted); margin-bottom:2rem;">Start your journey as a student entrepreneur.</p>
-
-  <!-- Step 1: Business Type -->
-  <div class="input" style="margin-bottom:1.5rem; background:var(--surface-2); padding:1.2rem; border-radius:16px; border:1px solid var(--stroke);">
-    <label style="color:var(--accent); font-weight:700; display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem;">
-      <i class="ri-question-answer-line"></i> Step 1: What kind of business is this?
-    </label>
-    <div style="display:flex; gap:2rem; flex-wrap:wrap;">
-      <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer; color:var(--text); font-weight:500;">
-        <input type="radio" name="type" value="Menu" checked style="width:auto; transform:scale(1.2); accent-color:var(--accent);" /> 
-        <span><i class="ri-restaurant-line"></i> Food / Retail</span>
-      </label>
-      <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer; color:var(--text); font-weight:500;">
-        <input type="radio" name="type" value="Service" style="width:auto; transform:scale(1.2); accent-color:var(--accent);" />
-        <span><i class="ri-service-line"></i> Service (Printing, Cleaning, etc.)</span>
-      </label>
-    </div>
-  </div>
-
-  <div class="grid grid-2">
-    <div class="input">
-      <label>Business Name</label>
-      <input required name="name" placeholder="e.g. Marc's Burger Joint" />
-    </div>
-    <div class="input">
-      <label>Category</label>
-      <select name="category">
-        <option>Food & Drinks</option>
-        <option>Services</option>
-        <option>Books</option>
-        <option>Uniforms</option>
-        <option>Electronics</option>
-        <option>Others</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="input">
-    <label>Description / Tagline</label>
-    <textarea name="description" rows="3" placeholder="Tell students what makes your business special..."></textarea>
-  </div>
-
-  <div class="grid grid-2">
-    <!-- LOGO UPLOAD SECTION -->
-    <div class="input">
-      <label style="font-weight:600; color:var(--muted); margin-bottom:0.5rem; display:block;">Business Logo / Banner</label>
-      
-      <div class="menu-slot-card">
-        <div class="menu-slot-img" style="height: 220px;">
-          <label for="bizFile">
-            <!-- Preview Image Tag -->
-            <img id="bizLogoPreview" src="" style="display:none; width:100%; height:100%; object-fit:cover; position:absolute; z-index:10;" />
-            
-            <div class="placeholder">
-              <i class="ri-image-add-line" style="font-size:3rem; margin-bottom:0.5rem;"></i>
-              <span>Click to Upload Banner</span>
-            </div>
-          </label>
-          <!-- Added onchange to trigger preview immediately -->
-          <input type="file" id="bizFile" accept="image/*" onchange="previewSlot(this, 'bizLogoPreview', 'bizFileStatus')" hidden />
-        </div>
-      </div>
-
-      <div style="display:flex; justify-content:space-between; margin-top:0.5rem;">
-        <span style="font-size:0.8rem; color:var(--muted);">Recommended: Landscape photo</span>
-        <span id="bizFileStatus" style="font-size:0.85rem; color:var(--muted);">No file chosen</span>
-      </div>
-      <input type="hidden" name="logo" id="bizLogoInput"> 
-    </div>
-
-    <div class="input">
-      <label>Contact Info</label>
-      <input required name="contact" placeholder="Phone or Social Media Link" />
-      <label style="margin-top:1rem;">Location / Room</label>
-      <input name="location" placeholder="e.g. Canteen 1 or Room 304" />
-      <label style="margin-top:1rem;">Website (Optional)</label>
-      <input name="website" placeholder="https://" />
-    </div>
-  </div>
-
-  <!-- Step 2: Menu Items -->
-  <div class="input" style="margin-top:2rem; padding-top:2rem; border-top:1px dashed var(--stroke);">
-    <label style="color:var(--accent); font-weight:700; font-size:1.1rem; margin-bottom:1rem; display:block;">
-      <i class="ri-list-check"></i> Step 2: Add Initial Menu / Services
-    </label>
-    <p style="color:var(--muted); font-size:0.9rem; margin-bottom:1.5rem;">
-      Add up to 4 items now to get started. You can add more later from your dashboard.
+<div class="biz-form-shell">
+  <form id="bizForm" class="form">
+    <h2 class="section__header" style="display:flex; align-items:center; gap:0.5rem; font-size:1.5rem;">
+      <i class="ri-store-3-fill" style="color:var(--accent);"></i> Create a Business
+    </h2>
+    <p style="color:var(--muted);">
+      Start your journey as a student entrepreneur.
     </p>
 
-    <div class="grid grid-4" id="menuBuilderGrid">
+    <!-- Step 1: Business Type -->
+    <div class="input" style="margin-bottom:1.5rem; background:var(--surface-2); padding:1.2rem; border-radius:16px; border:1px solid var(--stroke);">
+      <label style="color:var(--accent); font-weight:700; display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem;">
+        <i class="ri-question-answer-line"></i> Step 1: What kind of business is this?
+      </label>
+      <div style="display:flex; gap:2rem; flex-wrap:wrap;">
+        <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer; color:var(--text); font-weight:500;">
+          <input type="radio" name="type" value="Menu" checked style="width:auto; transform:scale(1.2); accent-color:var(--accent);" />
+          <span><i class="ri-restaurant-line"></i> Food / Retail</span>
+        </label>
+        <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer; color:var(--text); font-weight:500;">
+          <input type="radio" name="type" value="Service" style="width:auto; transform:scale(1.2); accent-color:var(--accent);" />
+          <span><i class="ri-service-line"></i> Service (Printing, Cleaning, etc.)</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Step 2: Basic Info -->
+    <div class="grid grid-2">
+      <div class="input">
+        <label>Business Name</label>
+        <input required name="name" placeholder="e.g. Marc's Burger Joint" />
+      </div>
+      <div class="input">
+        <label>Category</label>
+        <select name="category">
+          <option>Food & Drinks</option>
+          <option>Services</option>
+          <option>Books</option>
+          <option>Uniforms</option>
+          <option>Electronics</option>
+          <option>Others</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="input" style="margin-top:1rem;">
+      <label>Description / Tagline</label>
+      <textarea name="description" rows="3" placeholder="Tell students what makes your business special."></textarea>
+    </div>
+
+    <!-- Logo + Contact & Owner info -->
+    <div class="grid grid-2" style="margin-top:2rem;">
+      <!-- Logo side -->
+      <div class="input">
+        <label style="display:flex; align-items:center; gap:0.4rem;">
+          <i class="ri-image-line" style="color:var(--accent);"></i> Business Logo
+        </label>
+        <p style="color:var(--muted); font-size:0.85rem; margin-bottom:0.75rem;">
+          Upload a clear logo or photo so students can easily recognize your shop.
+        </p>
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.75rem;">
+          <label for="bizFile" class="btn btn-outline" style="cursor:pointer; padding:0.45rem 0.9rem; font-size:0.85rem;">
+            <i class="ri-upload-2-line"></i> Upload Logo
+          </label>
+          <span id="bizFileStatus" style="font-size:0.8rem; color:var(--muted);">No file chosen</span>
+        </div>
+        <div style="
+  width:400px;
+  height:250px;
+  border-radius:20px;
+  overflow:hidden;
+  background:var(--surface-3);
+  border:1px dashed var(--stroke);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+">
+  <img id="bizLogoPreview" alt="Logo preview"
+       style="width:100%; height:100%; object-fit:contain; display:none;" />
+  <span id="bizLogoPlaceholder"
+        style="font-size:0.9rem; color:var(--muted); position:absolute;">
+    Preview
+  </span>
+</div>
+
+
+        <input type="file" id="bizFile" name="bizFile" accept="image/*" onchange="previewLogo(this)" hidden />
+      </div>
+
+      <!-- Contact / location / owner -->
+      <div class="input">
+        <label style="display:flex; align-items:center; gap:0.4rem;">
+          <i class="ri-user-3-line" style="color:var(--accent);"></i> Owner & Contact
+        </label>
+        <div style="display:flex; gap:0.75rem; margin-bottom:0.75rem; flex-wrap:wrap;">
+          <div style="flex:1 1 120px;">
+            <label style="font-size:0.8rem;">Owner Age (optional)</label>
+            <input name="ownerAge" type="number" min="10" max="99" placeholder="e.g. 20" />
+          </div>
+        </div>
+
+        <div class="input" style="margin-bottom:0.75rem;">
+          <label>Contact Info</label>
+          <input name="contact" placeholder="Mobile number or messenger link" />
+        </div>
+
+        <div class="input" style="margin-bottom:0.75rem;">
+          <label>Location</label>
+          <input name="location" placeholder="e.g. SLSU Main Campus, Canteen Area" />
+        </div>
+
+        <div class="input">
+          <label>Website / Page (optional)</label>
+          <input name="website" placeholder="Facebook page, IG handle or website" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Menu / Services preview slots -->
+    <div style="margin-top:2.5rem; margin-bottom:0.75rem;">
+      <label style="color:var(--accent); font-weight:700; display:flex; align-items:center; gap:0.5rem;">
+        <i class="ri-list-check-2"></i> Step 2: Add up to 4 menu items or services
+      </label>
+      <p style="color:var(--muted); font-size:0.85rem;">
+        These will automatically appear on your business page. You can still edit items later in your dashboard.
+      </p>
+    </div>
+
+    <div class="grid grid-4">
       <!-- Slot 1 -->
       <div class="menu-slot-card">
         <div class="menu-slot-img">
           <label for="ms_file_1">
-            <img id="ms_prev_1" src="" style="display:none;" />
-            <div class="placeholder"><i class="ri-image-add-line"></i><span>Photo</span></div>
+            <div class="placeholder">
+              <i class="ri-image-add-line" style="font-size:1.5rem;"></i>
+              <span>Upload photo</span>
+            </div>
+            <img id="ms_prev_1" alt="Item 1 preview" style="display:none;" />
           </label>
-          <input type="file" id="ms_file_1" accept="image/*" onchange="previewSlot(this, 'ms_prev_1')" hidden />
+          <input type="file" id="ms_file_1" name="ms_file_1" accept="image/*"
+                 onchange="previewSlot(this,'ms_prev_1')" hidden />
         </div>
         <div class="menu-slot-body">
-          <input class="slot-input title" name="m_title_1" placeholder="Item Name" />
-          <textarea class="slot-input desc" name="m_desc_1" rows="2" placeholder="Desc..."></textarea>
+          <input class="slot-input title" name="m_title_1" placeholder="Item / Service name" />
+          <textarea class="slot-input desc" name="m_desc_1" rows="2" placeholder="Short description (optional)"></textarea>
           <div class="slot-price-box">
-            <span>₱</span><input type="number" name="m_price_1" placeholder="0.00" />
+            <span>₱</span>
+            <input type="number" name="m_price_1" min="0" step="0.01" placeholder="0.00" />
           </div>
         </div>
       </div>
+
       <!-- Slot 2 -->
       <div class="menu-slot-card">
         <div class="menu-slot-img">
           <label for="ms_file_2">
-            <img id="ms_prev_2" src="" style="display:none;" />
-            <div class="placeholder"><i class="ri-image-add-line"></i><span>Photo</span></div>
+            <div class="placeholder">
+              <i class="ri-image-add-line" style="font-size:1.5rem;"></i>
+              <span>Upload photo</span>
+            </div>
+            <img id="ms_prev_2" alt="Item 2 preview" style="display:none;" />
           </label>
-          <input type="file" id="ms_file_2" accept="image/*" onchange="previewSlot(this, 'ms_prev_2')" hidden />
+          <input type="file" id="ms_file_2" name="ms_file_2" accept="image/*"
+                 onchange="previewSlot(this,'ms_prev_2')" hidden />
         </div>
         <div class="menu-slot-body">
-          <input class="slot-input title" name="m_title_2" placeholder="Item Name" />
-          <textarea class="slot-input desc" name="m_desc_2" rows="2" placeholder="Desc..."></textarea>
+          <input class="slot-input title" name="m_title_2" placeholder="Item / Service name" />
+          <textarea class="slot-input desc" name="m_desc_2" rows="2" placeholder="Short description (optional)"></textarea>
           <div class="slot-price-box">
-            <span>₱</span><input type="number" name="m_price_2" placeholder="0.00" />
+            <span>₱</span>
+            <input type="number" name="m_price_2" min="0" step="0.01" placeholder="0.00" />
           </div>
         </div>
       </div>
+
       <!-- Slot 3 -->
       <div class="menu-slot-card">
         <div class="menu-slot-img">
           <label for="ms_file_3">
-            <img id="ms_prev_3" src="" style="display:none;" />
-            <div class="placeholder"><i class="ri-image-add-line"></i><span>Photo</span></div>
+            <div class="placeholder">
+              <i class="ri-image-add-line" style="font-size:1.5rem;"></i>
+              <span>Upload photo</span>
+            </div>
+            <img id="ms_prev_3" alt="Item 3 preview" style="display:none;" />
           </label>
-          <input type="file" id="ms_file_3" accept="image/*" onchange="previewSlot(this, 'ms_prev_3')" hidden />
+          <input type="file" id="ms_file_3" name="ms_file_3" accept="image/*"
+                 onchange="previewSlot(this,'ms_prev_3')" hidden />
         </div>
         <div class="menu-slot-body">
-          <input class="slot-input title" name="m_title_3" placeholder="Item Name" />
-          <textarea class="slot-input desc" name="m_desc_3" rows="2" placeholder="Desc..."></textarea>
+          <input class="slot-input title" name="m_title_3" placeholder="Item / Service name" />
+          <textarea class="slot-input desc" name="m_desc_3" rows="2" placeholder="Short description (optional)"></textarea>
           <div class="slot-price-box">
-            <span>₱</span><input type="number" name="m_price_3" placeholder="0.00" />
+            <span>₱</span>
+            <input type="number" name="m_price_3" min="0" step="0.01" placeholder="0.00" />
           </div>
         </div>
       </div>
+
       <!-- Slot 4 -->
       <div class="menu-slot-card">
         <div class="menu-slot-img">
           <label for="ms_file_4">
-            <img id="ms_prev_4" src="" style="display:none;" />
-            <div class="placeholder"><i class="ri-image-add-line"></i><span>Photo</span></div>
+            <div class="placeholder">
+              <i class="ri-image-add-line" style="font-size:1.5rem;"></i>
+              <span>Upload photo</span>
+            </div>
+            <img id="ms_prev_4" alt="Item 4 preview" style="display:none;" />
           </label>
-          <input type="file" id="ms_file_4" accept="image/*" onchange="previewSlot(this, 'ms_prev_4')" hidden />
+          <input type="file" id="ms_file_4" name="ms_file_4" accept="image/*"
+                 onchange="previewSlot(this,'ms_prev_4')" hidden />
         </div>
         <div class="menu-slot-body">
-          <input class="slot-input title" name="m_title_4" placeholder="Item Name" />
-          <textarea class="slot-input desc" name="m_desc_4" rows="2" placeholder="Desc..."></textarea>
+          <input class="slot-input title" name="m_title_4" placeholder="Item / Service name" />
+          <textarea class="slot-input desc" name="m_desc_4" rows="2" placeholder="Short description (optional)"></textarea>
           <div class="slot-price-box">
-            <span>₱</span><input type="number" name="m_price_4" placeholder="0.00" />
+            <span>₱</span>
+            <input type="number" name="m_price_4" min="0" step="0.01" placeholder="0.00" />
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="toolbar" style="margin-top:2rem; padding-top:1rem; border-top:1px solid var(--stroke); display:flex; justify-content:flex-end;">
-    <button class="btn" type="submit" style="font-size:1.1rem; padding:0.8rem 2rem;">
-      <i class="ri-rocket-line"></i> Launch Business
-    </button>
-  </div>
-</form>
+    <div style="margin-top:2rem; display:flex; justify-content:flex-end;">
+      <button type="submit" class="btn">
+        <i class="ri-rocket-2-line"></i> Launch Business
+      </button>
+    </div>
+  </form>
+</div>
